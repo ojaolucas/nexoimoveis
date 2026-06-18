@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notificações - NexoMoveis</title>
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- CSS stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/tables.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <style>
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-não-lida { background: #FEF08A; color: #854D0E; }
+    .badge-lida { background: #DEF7EC; color: #03543F; }
+    .badge-arquivada { background: #E5E7EB; color: #4B5563; }
+
+    /* Priority Badges */
+    .priority-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .priority-Baixa { background: #E0F2FE; color: #0369A1; }
+    .priority-Média { background: #FEF08A; color: #854D0E; }
+    .priority-Alta { background: #FFEDD5; color: #C2410C; }
+    .priority-Crítica { background: #FDE8E8; color: #9B1C1C; }
+
+    .stats-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 768px) {
+      .stats-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .stats-grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filter-card {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .filter-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+    .filter-row-2 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+    }
+    @media (max-width: 1024px) {
+      .filter-row, .filter-row-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .filter-buttons {
+        grid-column: span 2;
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+    @media (max-width: 640px) {
+      .filter-row, .filter-row-2 {
+        grid-template-columns: 1fr;
+      }
+      .filter-buttons {
+        grid-column: span 1;
+      }
+    }
+
+    .notif-info-row {
+      display: flex;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 10px;
+    }
+    .notif-info-label {
+      width: 140px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      font-size: 13px;
+    }
+    .notif-info-value {
+      flex-grow: 1;
+      color: var(--color-text-main);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/proprietarios" class="nav-item">
+              <i class="fi fi-rr-portrait"></i>
+              <span>Proprietários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/locatarios" class="nav-item">
+              <i class="fi fi-rr-users"></i>
+              <span>Locatários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/contratos" class="nav-item">
+              <i class="fi fi-rr-document-signed"></i>
+              <span>Contratos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recebimentos" class="nav-item">
+              <i class="fi fi-rr-money-bill-wave"></i>
+              <span>Recebimentos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/despesas" class="nav-item">
+              <i class="fi fi-rr-wallet"></i>
+              <span>Despesas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/manutencoes" class="nav-item">
+              <i class="fi fi-rr-settings"></i>
+              <span>Manutenções</span>
+            </a>
+          </li>
+          <li>
+            <a href="/vistorias" class="nav-item">
+              <i class="fi fi-rr-eye"></i>
+              <span>Vistorias</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, contratos, locatários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <button class="navbar-btn" id="theme-toggle" title="Alterar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        
+        <!-- Header -->
+        <div class="view-header">
+          <div>
+            <h1>Painel de Notificações</h1>
+            <p>Gerencie alertas de vencimento, pendências e avisos de sistema.</p>
+          </div>
+          <div>
+            <button class="btn btn-primary" id="btn-marcar-todas-lidas">
+              <i class="fi fi-rr-check-double"></i> Marcar todas lidas
+            </button>
+          </div>
+        </div>
+
+        <!-- Cards resumo -->
+        <div class="stats-grid-4">
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+              <i class="fi fi-rr-bell"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Total Recebidas</span>
+              <h3 class="card-value" id="card-total">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: #FEF08A; color: #854D0E;">
+              <i class="fi fi-rr-envelope"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Não Lidas</span>
+              <h3 class="card-value" id="card-nao-lidas">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: #FDE8E8; color: #9B1C1C;">
+              <i class="fi fi-rr-warning"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Não Lidas Críticas</span>
+              <h3 class="card-value" id="card-criticas">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: #E0F2FE; color: #0369A1;">
+              <i class="fi fi-rr-calendar"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Recebidas Hoje</span>
+              <h3 class="card-value" id="card-hoje">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="card glass filter-card">
+          <div class="filter-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-categoria">Categoria</label>
+              <select id="filtro-categoria" class="form-control">
+                <option value="">Todas</option>
+                <option value="Contratos">Contratos</option>
+                <option value="Recebimentos">Recebimentos</option>
+                <option value="Despesas">Despesas</option>
+                <option value="IPTU">IPTU</option>
+                <option value="Alvarás">Alvarás</option>
+                <option value="AVCB">AVCB</option>
+                <option value="Seguros">Seguros</option>
+                <option value="Manutenções">Manutenções</option>
+                <option value="Vistorias">Vistorias</option>
+                <option value="Sistema">Sistema</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-prioridade">Prioridade</label>
+              <select id="filtro-prioridade" class="form-control">
+                <option value="">Todas</option>
+                <option value="Baixa">Baixa</option>
+                <option value="Média">Média</option>
+                <option value="Alta">Alta</option>
+                <option value="Crítica">Crítica</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-status">Status</label>
+              <select id="filtro-status" class="form-control">
+                <option value="">Todos (Exeto Arquivados)</option>
+                <option value="Não Lida" selected>Não Lida</option>
+                <option value="Lida">Lida</option>
+                <option value="Arquivada">Arquivada</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-busca">Pesquisa Rápida</label>
+              <input type="text" id="filtro-busca" class="form-control" placeholder="Título ou descrição...">
+            </div>
+          </div>
+
+          <div class="filter-row-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-data-inicial">Data Inicial</label>
+              <input type="date" id="filtro-data-inicial" class="form-control">
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-data-final">Data Final</label>
+              <input type="date" id="filtro-data-final" class="form-control">
+            </div>
+
+            <div></div>
+
+            <div class="filter-buttons">
+              <button class="btn btn-secondary" id="btn-limpar-filtros" style="margin-right:8px;">Limpar</button>
+              <button class="btn btn-primary" id="btn-aplicar-filtros">Aplicar Filtros</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card glass">
+          <div class="table-responsive">
+            <table class="app-table">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Categoria</th>
+                  <th>Título</th>
+                  <th>Prioridade</th>
+                  <th>Status</th>
+                  <th style="text-align: right; padding-right: 24px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="notificacoes-list-body">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 40px;">Carregando notificações...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 10px;">
+            <span class="pagination-info" id="pagination-info">Mostrando 0 a 0 de 0 registros</span>
+            <div class="pagination-buttons" style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-prev-page" disabled>Anterior</button>
+              <button class="btn btn-secondary btn-sm" id="btn-next-page" disabled>Próxima</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION DETAIL MODAL -->
+  <div class="modal" id="notif-detail-modal">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3>🔍 Detalhes da Notificação</h3>
+        <span class="modal-close" id="btn-close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        
+        <div class="notif-info-row">
+          <div class="notif-info-label">Título:</div>
+          <div class="notif-info-value" id="det-titulo" style="font-weight:700;">-</div>
+        </div>
+
+        <div class="notif-info-row">
+          <div class="notif-info-label">Descrição:</div>
+          <div class="notif-info-value" id="det-descricao">-</div>
+        </div>
+
+        <div class="notif-info-row">
+          <div class="notif-info-label">Categoria:</div>
+          <div class="notif-info-value" id="det-categoria">-</div>
+        </div>
+
+        <div class="notif-info-row">
+          <div class="notif-info-label">Prioridade:</div>
+          <div class="notif-info-value" id="det-prioridade">-</div>
+        </div>
+
+        <div class="notif-info-row">
+          <div class="notif-info-label">Status:</div>
+          <div class="notif-info-value" id="det-status">-</div>
+        </div>
+
+        <div class="notif-info-row">
+          <div class="notif-info-label">Data/Hora:</div>
+          <div class="notif-info-value" id="det-data-hora">-</div>
+        </div>
+
+        <div class="notif-info-row" id="row-lida-em" style="display:none;">
+          <div class="notif-info-label">Lida em:</div>
+          <div class="notif-info-value" id="det-lida-em">-</div>
+        </div>
+
+        <div class="notif-info-row" id="row-usuario" style="display:none;">
+          <div class="notif-info-label">Destinatário:</div>
+          <div class="notif-info-value" id="det-usuario">-</div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btn-ir-registro-relacionado">
+          <i class="fi fi-rr-arrow-right"></i> Abrir Registro Relacionado
+        </button>
+        <button class="btn btn-secondary" id="btn-fechar-modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/api.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/modules/notificacoes.js"></script>
+  <script src="/js/app.js"></script>
+
+</body>
+</html>

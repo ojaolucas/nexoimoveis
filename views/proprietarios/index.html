@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proprietários - NexoMoveis</title>
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- CSS stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/tables.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <style>
+    /* Premium visual helpers and custom timeline stylesheet */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 760px; /* Wider layout for 2-column forms */
+      padding: 30px;
+      border-radius: var(--border-radius-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeIn var(--transition-normal) forwards;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 12px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--color-text-muted);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+      border-top: 1px solid var(--color-border);
+      padding-top: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-pf { background: var(--color-primary-light); color: var(--color-primary); }
+    .badge-pj { background: var(--color-info-light); color: var(--color-info); }
+    .badge-ativo { background: var(--color-success-light); color: var(--color-success); }
+    .badge-inativo { background: var(--color-error-light); color: var(--color-error); }
+
+    /* Form column structure */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* Filters card */
+    .filter-card {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+    }
+
+    @media (max-width: 1024px) {
+      .filter-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .filter-buttons {
+        grid-column: span 2;
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+      .filter-buttons {
+        grid-column: span 1;
+      }
+    }
+
+    /* Details Panel Tab styling */
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+
+    .tab-btn {
+      padding: 10px 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn var(--transition-fast) forwards;
+    }
+
+    /* Timeline style */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      margin-left: 10px;
+      border-left: 2px solid var(--color-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -31px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid var(--color-bg-card);
+    }
+
+    .timeline-time {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-main);
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    /* Document upload area */
+    .upload-zone {
+      border: 2px dashed var(--color-border);
+      padding: 24px;
+      border-radius: var(--border-radius-md);
+      text-align: center;
+      background: var(--color-bg-base);
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+      margin-bottom: 20px;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--color-primary);
+    }
+
+    .document-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      background: var(--color-bg-base);
+    }
+
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .document-icon {
+      font-size: 20px;
+      color: var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/proprietarios" class="nav-item active">
+              <i class="fi fi-rr-portrait"></i>
+              <span>Proprietários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/locatarios" class="nav-item">
+              <i class="fi fi-rr-users"></i>
+              <span>Locatários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/contratos" class="nav-item">
+              <i class="fi fi-rr-document-signed"></i>
+              <span>Contratos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recebimentos" class="nav-item">
+              <i class="fi fi-rr-money-bill-wave"></i>
+              <span>Recebimentos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/despesas" class="nav-item">
+              <i class="fi fi-rr-wallet"></i>
+              <span>Despesas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/manutencoes" class="nav-item">
+              <i class="fi fi-rr-settings"></i>
+              <span>Manutenções</span>
+            </a>
+          </li>
+          <li>
+            <a href="/vistorias" class="nav-item">
+              <i class="fi fi-rr-eye"></i>
+              <span>Vistorias</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <!-- Global Search -->
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, contratos, locatários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <button class="navbar-btn" id="theme-toggle" title="Alterar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        
+        <!-- Header -->
+        <div class="view-header">
+          <div>
+            <h1>Módulo Proprietários</h1>
+            <p>Gerencie as fichas cadastrais, documentos e imóveis vinculados aos locadores.</p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" id="btn-export-excel" title="Exportar para Excel">
+              <i class="fi fi-rr-file-excel"></i> Excel
+            </button>
+            <button class="btn btn-secondary" id="btn-export-pdf" title="Exportar para PDF">
+              <i class="fi fi-rr-file-pdf"></i> PDF
+            </button>
+            <button class="btn btn-primary" id="btn-novo-proprietario" style="display: none;">
+              <i class="fi fi-rr-add"></i> Novo Proprietário
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="card glass filter-card">
+          <div class="filter-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-busca">Nome ou CPF/CNPJ</label>
+              <input type="text" id="filtro-busca" class="form-control" placeholder="Buscar...">
+            </div>
+            
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-tipo">Tipo de Pessoa</label>
+              <select id="filtro-tipo" class="form-control">
+                <option value="">Todos</option>
+                <option value="PF">Pessoa Física (PF)</option>
+                <option value="PJ">Pessoa Jurídica (PJ)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="filtro-status">Status</label>
+              <select id="filtro-status" class="form-control">
+                <option value="">Todos</option>
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </div>
+
+            <div class="filter-buttons" style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" id="btn-aplicar-filtros" style="height: 44px; padding: 0 20px;">
+                Filtrar
+              </button>
+              <button class="btn btn-secondary" id="btn-limpar-filtros" style="height: 44px; padding: 0 20px; background: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">
+                Limpar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- List Table Card -->
+        <div class="card glass" style="padding: 0; overflow: hidden;">
+          <div class="table-responsive">
+            <table class="app-table" id="tabela-proprietarios">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nome / Razão Social</th>
+                  <th>CPF / CNPJ</th>
+                  <th>Telefone</th>
+                  <th>E-mail</th>
+                  <th>Qtd. Imóveis</th>
+                  <th>Status</th>
+                  <th class="actions-header" style="text-align: right; padding-right: 24px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="proprietarios-list-body">
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:30px;">Carregando proprietários...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid var(--color-border);">
+            <span style="color: var(--color-text-muted); font-size:13px;" id="pagination-info">Mostrando 0 de 0 registros</span>
+            <div class="pagination-buttons" style="display: flex; gap: 8px;">
+              <button class="btn" id="btn-prev-page" style="height: 36px; padding: 0 16px; font-size:12px;">Anterior</button>
+              <button class="btn" id="btn-next-page" style="height: 36px; padding: 0 16px; font-size:12px;">Próximo</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR PROPRIETÁRIO -->
+  <div class="modal" id="modal-proprietario">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 id="modal-title">Novo Proprietário</h3>
+        <span class="modal-close" id="btn-close-modal">&times;</span>
+      </div>
+      <form id="form-proprietario">
+        <input type="hidden" id="prop-id">
+        
+        <!-- Tabs in Form -->
+        <div class="tab-nav">
+          <button type="button" class="tab-btn active" data-form-tab="dados-gerais">Dados Gerais</button>
+          <button type="button" class="tab-btn" data-form-tab="observacoes-tab">Observações</button>
+        </div>
+
+        <!-- Form Tab Content: Dados Gerais -->
+        <div class="tab-pane active" id="form-dados-gerais">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="codigo">Código (Gerado Automaticamente)</label>
+              <input type="text" id="codigo" class="form-control" placeholder="PROP-0000" disabled>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="tipo_pessoa">Tipo de Pessoa</label>
+              <select id="tipo_pessoa" class="form-control" required>
+                <option value="PF" selected>Pessoa Física (PF)</option>
+                <option value="PJ">Pessoa Jurídica (PJ)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- Dynamic input based on PF/PJ type -->
+            <div class="form-group" id="group-nome">
+              <label class="form-label" for="nome_razao_social" id="label-nome">Nome Completo</label>
+              <input type="text" id="nome_razao_social" class="form-control" placeholder="Insira o nome completo" required>
+            </div>
+            
+            <div class="form-group" id="group-fantasia" style="display:none;">
+              <label class="form-label" for="nome_fantasia">Nome Fantasia</label>
+              <input type="text" id="nome_fantasia" class="form-control" placeholder="Insira o nome fantasia">
+            </div>
+
+            <div class="form-group" id="group-documento">
+              <label class="form-label" for="cpf_cnpj" id="label-documento">CPF</label>
+              <input type="text" id="cpf_cnpj" class="form-control" placeholder="000.000.000-00" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- Dynamic field PF: RG -->
+            <div class="form-group" id="group-rg">
+              <label class="form-label" for="rg">RG</label>
+              <input type="text" id="rg" class="form-control" placeholder="RG do proprietário">
+            </div>
+
+            <!-- Dynamic fields PJ: IE and Responsavel -->
+            <div class="form-group" id="group-ie" style="display:none;">
+              <label class="form-label" for="inscricao_estadual">Inscrição Estadual</label>
+              <input type="text" id="inscricao_estadual" class="form-control" placeholder="Inscrição Estadual">
+            </div>
+            
+            <div class="form-group" id="group-responsavel" style="display:none;">
+              <label class="form-label" for="responsavel">Responsável PJ</label>
+              <input type="text" id="responsavel" class="form-control" placeholder="Responsável da empresa">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="telefone">Telefone</label>
+              <input type="text" id="telefone" class="form-control" placeholder="(00) 00000-0000" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="email">E-mail</label>
+              <input type="email" id="email" class="form-control" placeholder="exemplo@nexo.com" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="endereco">Endereço</label>
+              <input type="text" id="endereco" class="form-control" placeholder="Rua, número, complemento, bairro, cidade/UF">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="status">Status</label>
+              <select id="status" class="form-control" required>
+                <option value="ativo" selected>Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Tab Content: Observações -->
+        <div class="tab-pane" id="form-observacoes-tab">
+          <div class="form-group">
+            <label class="form-label" for="observacoes">Observações Internas</label>
+            <textarea id="observacoes" class="form-control" style="height: 150px; resize: vertical;" placeholder="Outras informações relevantes..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-modal" style="background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-proprietario">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHES DO PROPRIETÁRIO -->
+  <div class="modal" id="modal-detalhes">
+    <div class="modal-content glass" style="max-width: 860px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h3 id="detalhe-titulo">Ficha do Proprietário</h3>
+          <span class="badge badge-pf" id="detalhe-badge-tipo">PF</span>
+          <span class="badge badge-ativo" id="detalhe-badge-status">Ativo</span>
+        </div>
+        <span class="modal-close" id="btn-close-detalhes">&times;</span>
+      </div>
+
+      <!-- Detail Navigation Tabs -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="det-gerais">Dados Gerais</button>
+        <button class="tab-btn" data-tab="det-documentos">Documentos (<span id="det-doc-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-imoveis">Imóveis Vinculados (<span id="det-imovel-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-timeline">Timeline / Histórico</button>
+      </div>
+
+      <!-- Tab: Dados Gerais -->
+      <div class="tab-pane active" id="tab-det-gerais">
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Código</span>
+            <span id="det-codigo" style="font-size:15px; font-weight:700; color:var(--color-text-main);">PROP-0000</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;" id="det-label-doc">CPF</span>
+            <span id="det-documento" style="font-size:15px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div id="det-container-rg">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">RG</span>
+            <span id="det-rg" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div id="det-container-ie" style="display:none;">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Inscrição Estadual</span>
+            <span id="det-ie" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div id="det-container-responsavel" style="display:none;">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Responsável PJ</span>
+            <span id="det-responsavel" style="font-size:14px; color:var(--color-text-main); font-weight:600;">-</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Telefone</span>
+            <span id="det-telefone" style="font-size:14px; color:var(--color-text-main); font-weight:600;">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">E-mail</span>
+            <span id="det-email" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Endereço</span>
+          <span id="det-endereco" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Observações</span>
+          <p id="det-observacoes" style="font-size:13px; color:var(--color-text-muted); margin:4px 0 0 0; white-space: pre-line; line-height: 1.5;">-</p>
+        </div>
+      </div>
+
+      <!-- Tab: Documentos -->
+      <div class="tab-pane" id="tab-det-documentos">
+        <!-- Add Document Inline Form (only for oper/admin) -->
+        <div id="document-upload-container" style="display: none; border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+          <form id="form-upload-documento" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:16px; align-items:end;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="doc-tipo">Tipo de Documento</label>
+              <select id="doc-tipo" class="form-control" required>
+                <option value="CPF">CPF</option>
+                <option value="RG">RG</option>
+                <option value="Contrato Social">Contrato Social</option>
+                <option value="Comprovante de Endereço">Comprovante de Endereço</option>
+                <option value="Escritura">Escritura</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="doc-arquivo">Arquivo</label>
+              <input type="file" id="doc-arquivo" class="form-control" style="padding-top: 10px;" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="height:44px;"><i class="fi fi-rr-upload"></i> Anexar</button>
+          </form>
+        </div>
+
+        <div class="document-list" id="det-documentos-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum documento anexado.</div>
+        </div>
+      </div>
+
+      <!-- Tab: Imóveis Vinculados -->
+      <div class="tab-pane" id="tab-det-imoveis">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Valor Locação</th>
+              </tr>
+            </thead>
+            <tbody id="det-imoveis-list-body">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:20px;">Nenhum imóvel vinculado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Timeline / Histórico -->
+      <div class="tab-pane" id="tab-det-timeline">
+        <div class="timeline" id="det-timeline-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum histórico registrado.</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-fechar-detalhes">Fechar Ficha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/modules/proprietarios.js"></script>
+</body>
+</html>

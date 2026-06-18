@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - NexoMoveis</title>
+  
+  <!-- Flaticon UIcons and Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Application CSS Stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Layout Container -->
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item active">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/proprietarios" class="nav-item">
+              <i class="fi fi-rr-portrait"></i>
+              <span>Proprietários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/locatarios" class="nav-item">
+              <i class="fi fi-rr-users"></i>
+              <span>Locatários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/contratos" class="nav-item">
+              <i class="fi fi-rr-document-signed"></i>
+              <span>Contratos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recebimentos" class="nav-item">
+              <i class="fi fi-rr-money-bill-wave"></i>
+              <span>Recebimentos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/despesas" class="nav-item">
+              <i class="fi fi-rr-wallet"></i>
+              <span>Despesas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/manutencoes" class="nav-item">
+              <i class="fi fi-rr-settings"></i>
+              <span>Manutenções</span>
+            </a>
+          </li>
+          <li>
+            <a href="/vistorias" class="nav-item">
+              <i class="fi fi-rr-eye"></i>
+              <span>Vistorias</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <!-- Global Search -->
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, contratos, locatários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;">
+              <!-- Dynamic search results render here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Notification Bell -->
+          <div class="navbar-bell-container">
+            <button class="navbar-btn" id="notification-btn" title="Notificações">
+              <i class="fi fi-rr-bell"></i>
+              <span class="bell-badge" id="notification-badge" style="display: none;">0</span>
+            </button>
+            <div class="notifications-dropdown glass" id="notifications-dropdown" style="display: none;">
+              <div class="dropdown-header">
+                <h3>Notificações</h3>
+                <button class="mark-all-read-btn" id="mark-all-read">Marcar todas como lidas</button>
+              </div>
+              <div class="dropdown-list" id="notifications-list">
+                <div class="dropdown-empty">Nenhuma notificação pendente.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Button -->
+          <button class="navbar-btn" id="theme-toggle" title="Alterar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <!-- User Profiling -->
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        
+        <!-- Dashboard Content Header -->
+        <div class="view-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Seja bem-vindo de volta! Aqui está o resumo patrimonial e financeiro.</p>
+          </div>
+        </div>
+
+        <!-- FIRST SECTION: CARDS RESUMO (General) -->
+        <section class="dashboard-grid grid-4">
+          <div class="card glass card-indicator">
+            <div class="card-icon bg-primary-light">
+              <i class="fi fi-rr-home text-primary"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Total de Imóveis</span>
+              <h3 class="card-value" id="val-total-imoveis">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass card-indicator">
+            <div class="card-icon bg-success-light">
+              <i class="fi fi-rr-house-chimney-user text-success"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Imóveis Alugados</span>
+              <h3 class="card-value" id="val-alugados">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass card-indicator">
+            <div class="card-icon bg-info-light">
+              <i class="fi fi-rr-sign-post text-info"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Imóveis Disponíveis</span>
+              <h3 class="card-value" id="val-disponiveis">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass card-indicator">
+            <div class="card-icon bg-warning-light">
+              <i class="fi fi-rr-document-signed text-warning"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Contratos Ativos</span>
+              <h3 class="card-value" id="val-contratos-ativos">0</h3>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECOND SECTION: CARDS FINANCEIROS -->
+        <section class="dashboard-grid grid-4" style="margin-top: 20px;">
+          <div class="card glass card-indicator border-left-info">
+            <div class="card-details">
+              <span class="card-label">Receita Prevista</span>
+              <h3 class="card-value font-numeric" id="val-receita-prevista">R$ 0,00</h3>
+            </div>
+          </div>
+
+          <div class="card glass card-indicator border-left-success">
+            <div class="card-details">
+              <span class="card-label">Receita Recebida</span>
+              <h3 class="card-value font-numeric" id="val-receita-recebida">R$ 0,00</h3>
+            </div>
+          </div>
+
+          <div class="card glass card-indicator border-left-danger">
+            <div class="card-details">
+              <span class="card-label">Inadimplência</span>
+              <h3 class="card-value font-numeric" id="val-inadimplencia">R$ 0,00</h3>
+            </div>
+          </div>
+
+          <div class="card glass card-indicator border-left-warning">
+            <div class="card-details">
+              <span class="card-label">Despesas do Mês</span>
+              <h3 class="card-value font-numeric" id="val-despesas-mes">R$ 0,00</h3>
+            </div>
+          </div>
+        </section>
+
+        <!-- THIRD SECTION: CHART REGION -->
+        <section class="dashboard-grid grid-2" style="margin-top: 20px;">
+          
+          <!-- Receitas x Despesas -->
+          <div class="card glass chart-card">
+            <div class="chart-header">
+              <h3>Receitas x Despesas</h3>
+            </div>
+            <div class="chart-body">
+              <canvas id="chart-receitas-despesas"></canvas>
+            </div>
+          </div>
+
+          <!-- Ocupação dos Imóveis -->
+          <div class="card glass chart-card">
+            <div class="chart-header">
+              <h3>Ocupação dos Imóveis</h3>
+            </div>
+            <div class="chart-body">
+              <canvas id="chart-ocupacao"></canvas>
+            </div>
+          </div>
+
+          <!-- Inadimplência -->
+          <div class="card glass chart-card">
+            <div class="chart-header">
+              <h3>Inadimplência</h3>
+            </div>
+            <div class="chart-body">
+              <canvas id="chart-inadimplencia"></canvas>
+            </div>
+          </div>
+
+          <!-- Contratos -->
+          <div class="card glass chart-card">
+            <div class="chart-header">
+              <h3>Distribuição de Contratos</h3>
+            </div>
+            <div class="chart-body">
+              <canvas id="chart-contratos"></canvas>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- FOURTH SECTION: ALERTS -->
+        <section class="alert-section" style="margin-top: 20px;">
+          <div class="card glass alert-card">
+            <div class="alert-header">
+              <h3>Alertas e Avisos do Sistema</h3>
+            </div>
+            <div class="alert-list" id="dashboard-alerts">
+              <!-- Dynamically rendered alerts -->
+              <div class="alert-item empty">Sem novos alertas no momento.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- FIFTH SECTION: RECENT MOVEMENTS -->
+        <section class="movement-section" style="margin-top: 20px;">
+          <div class="card glass alert-card">
+            <div class="alert-header">
+              <h3>Últimas Movimentações</h3>
+            </div>
+            <div class="alert-list" id="dashboard-movements">
+              <!-- Dynamically rendered movements -->
+              <div class="alert-item empty">Nenhuma movimentação registrada no momento.</div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Application JS Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/notificacoes.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+/* NexoMoveis - Dashboard Specific Styles */
+
+/* Grids */
+.dashboard-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Card Indicator Layouts */
+.card-indicator {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+/* Helper background colors for indicators */
+.bg-primary-light { background-color: var(--color-primary-light); }
+.bg-success-light { background-color: var(--color-success-light); }
+.bg-warning-light { background-color: var(--color-warning-light); }
+.bg-error-light { background-color: var(--color-error-light); }
+.bg-info-light { background-color: var(--color-info-light); }
+
+.text-primary { color: var(--color-primary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-error { color: var(--color-error); }
+.text-info { color: var(--color-info); }
+
+/* Left border accents for financial cards */
+.border-left-primary { border-left: 4px solid var(--color-primary); }
+.border-left-success { border-left: 4px solid var(--color-success); }
+.border-left-warning { border-left: 4px solid var(--color-warning); }
+.border-left-danger { border-left: 4px solid var(--color-error); }
+.border-left-info { border-left: 4px solid var(--color-info); }
+
+.font-numeric {
+  font-family: var(--font-primary);
+  font-weight: 700;
+}
+
+/* Charts styling */
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  min-height: 320px;
+}
+
+.chart-header {
+  margin-bottom: 20px;
+}
+
+.chart-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chart-body {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Alerts section */
+.alert-card {
+  padding: 24px;
+}
+
+.alert-header {
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 12px;
+}
+
+.alert-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-base);
+  transition: all var(--transition-fast);
+}
+
+.alert-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-item.empty {
+  justify-content: center;
+  color: var(--color-text-muted);
+  border-style: dashed;
+  background: none;
+}

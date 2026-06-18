@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - NexoMoveis</title>
+  
+  <!-- Flaticon UIcons and Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Application CSS Stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 10% 20%, rgba(71, 140, 39, 0.08) 0%, rgba(0, 23, 49, 0.05) 90%), var(--color-bg-base);
+      overflow-x: hidden;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      animation: fadeIn var(--transition-normal) forwards;
+    }
+
+    .login-card {
+      padding: 40px;
+      border-radius: var(--border-radius-lg);
+      text-align: center;
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .login-logo i {
+      font-size: 32px;
+      color: var(--color-primary);
+    }
+
+    .login-logo span {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--color-secondary);
+      letter-spacing: -0.5px;
+    }
+
+    [data-theme="dark"] .login-logo span {
+      color: var(--color-text-main);
+    }
+
+    .login-header {
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .login-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .login-header p {
+      font-size: 14px;
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .forgot-password {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .forgot-password:hover {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+
+    .login-footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .theme-switch-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .theme-switch-btn {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .theme-switch-btn:hover {
+      background: var(--color-border);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Theme toggle -->
+  <div class="theme-switch-container">
+    <button class="theme-switch-btn" id="theme-toggle" title="Alterar Tema">
+      <i class="fi fi-rr-moon" id="theme-icon"></i>
+    </button>
+  </div>
+
+  <div class="login-container">
+    <div class="login-card glass">
+      
+      <!-- Brand Logo -->
+      <div class="login-logo">
+        <i class="fi fi-rr-key"></i>
+        <span>NexoMoveis</span>
+      </div>
+
+      <!-- Header Title -->
+      <div class="login-header">
+        <h2>Entrar no sistema</h2>
+        <p>Insira suas credenciais de acesso para prosseguir.</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label" for="login">Usuário</label>
+          <input 
+            type="text" 
+            id="login" 
+            name="login" 
+            class="form-control" 
+            placeholder="Digite CPF ou E-mail" 
+            required 
+            autocomplete="username"
+          >
+        </div>
+
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label" for="senha">Senha</label>
+          <input 
+            type="password" 
+            id="senha" 
+            name="senha" 
+            class="form-control" 
+            placeholder="Digite sua senha" 
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <div class="form-options">
+          <label class="form-checkbox-container">
+            <input type="checkbox" id="lembrar" class="form-checkbox">
+            <span style="color: var(--color-text-muted);">Lembrar-me</span>
+          </label>
+          <a href="#" class="forgot-password" onclick="showToast('Entre em contato com o administrador para resetar sua senha.', 'info')">Esqueceu a senha?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fi fi-rr-sign-in-alt"></i>
+          Acessar Painel
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p>NexoMoveis ERP &copy; 2026 - Versão 1.0</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Application JS Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

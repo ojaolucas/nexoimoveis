@@ -1,0 +1,63 @@
+/* NexoMoveis - Responsive Breakpoints */
+
+/* Tablet (768px to 1199px) */
+@media (max-width: 1199px) {
+  .app-layout {
+    grid-template-columns: 1fr; /* Sidebar becomes absolute or overlay */
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Hide sidebar off-screen */
+    width: 280px;
+    height: 100vh;
+    box-shadow: var(--shadow-lg);
+    transition: left var(--transition-normal);
+  }
+
+  .app-layout.sidebar-active .app-sidebar {
+    left: 0; /* Show overlay sidebar */
+  }
+
+  .view-content {
+    padding: 20px;
+  }
+
+  .dashboard-grid.grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid.grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile (up to 767px) */
+@media (max-width: 767px) {
+  .app-navbar {
+    padding: 0 16px;
+  }
+
+  .search-bar-container {
+    display: none; /* Hide global search in small screens navbar or compress */
+  }
+
+  .navbar-user-name {
+    display: none; /* Hide username for spacing */
+  }
+
+  .dashboard-grid.grid-4 {
+    grid-template-columns: 1fr; /* Single column layout for mobile */
+  }
+
+  .view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .view-header h1 {
+    font-size: 26px;
+  }
+}

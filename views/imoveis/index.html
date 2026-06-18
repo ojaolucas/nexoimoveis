@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imóveis - NexoMoveis</title>
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- CSS stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/tables.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <style>
+    /* CSS overrides for modals, cards and lists alignment */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 780px;
+      padding: 30px;
+      border-radius: 12px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeIn var(--transition-normal) forwards;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    .modal-content::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+    }
+
+    /* Estilo de Dropzone de Imagem Minimalista (Estilo MovixFrota) */
+    .file-dropzone {
+      width: 100%;
+      min-height: 120px;
+      border: 2px dashed var(--color-border);
+      border-radius: 8px;
+      background-color: var(--color-bg-base);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: center;
+      position: relative;
+    }
+
+    .file-dropzone:hover {
+      border-color: var(--color-primary);
+      background-color: var(--color-primary-light);
+    }
+
+    .dropzone-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .dropzone-placeholder i {
+      font-size: 28px;
+      color: var(--color-text-muted);
+      transition: color var(--transition-fast);
+    }
+
+    .file-dropzone:hover .dropzone-placeholder i {
+      color: var(--color-primary);
+    }
+
+    .file-dropzone.has-preview .dropzone-placeholder {
+      display: none;
+    }
+
+    .file-dropzone.has-preview {
+      padding: 0;
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      min-height: 120px;
+    }
+
+    .change-photo-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 12px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--color-text-muted);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+      border-top: 1px solid var(--color-border);
+      padding-top: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-disponivel { background: var(--color-success-light); color: var(--color-success); }
+    .badge-alugado { background: var(--color-primary-light); color: var(--color-primary); }
+    .badge-reservado { background: var(--color-warning-light); color: var(--color-warning); }
+    .badge-manutencao { background: var(--color-error-light); color: var(--color-error); }
+    .badge-inativo { background: var(--color-bg-base); color: var(--color-text-muted); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* Filters card */
+    .filter-card {
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .filter-row-single {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1.5fr auto;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .filter-row-single .form-group {
+      margin-bottom: 0;
+    }
+
+    .filter-row-single .filter-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-row-single .filter-buttons .btn {
+      height: 44px;
+      padding: 0 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .filter-row-single {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .filter-row-single .filter-buttons {
+        grid-column: span 2;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .filter-row-single {
+        grid-template-columns: 1fr;
+      }
+      .filter-row-single .filter-buttons {
+        grid-column: span 1;
+        width: 100%;
+      }
+      .filter-row-single .filter-buttons .btn {
+        flex: 1;
+      }
+    }
+
+    /* Tab controls in modals */
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 20px;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      padding: 10px 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn var(--transition-fast) forwards;
+    }
+
+    /* Timeline and audit history panels */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      margin-left: 10px;
+      border-left: 2px solid var(--color-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -31px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid var(--color-bg-card);
+    }
+
+    .timeline-time {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-main);
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .document-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      background: var(--color-bg-base);
+    }
+
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .document-icon {
+      font-size: 20px;
+      color: var(--color-primary);
+    }
+
+    /* Foto Principal Premium Layout in details */
+    .premium-photo-banner {
+      width: 100%;
+      height: 220px;
+      border-radius: var(--border-radius-md);
+      background-size: cover;
+      background-position: center;
+      background-color: var(--color-bg-base);
+      margin-bottom: 20px;
+      border: 1px solid var(--color-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-photo-banner-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(180deg, rgba(0,23,49,0) 0%, rgba(0,23,49,0.8) 100%);
+      padding: 20px;
+      color: #ffffff;
+    }
+
+    /* Photo gallery grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .gallery-photo-item {
+      position: relative;
+      aspect-ratio: 4/3;
+      border-radius: var(--border-radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    .gallery-photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-normal);
+    }
+
+    .gallery-photo-item:hover .gallery-photo-img {
+      transform: scale(1.05);
+    }
+
+    .gallery-photo-delete {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(220, 38, 38, 0.9);
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .gallery-photo-item:hover .gallery-photo-delete {
+      opacity: 1;
+    }
+
+    .stats-card-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .stats-card-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 580px) {
+      .stats-card-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-main-photo {
+      width: 100%;
+      height: 140px;
+      border-radius: var(--border-radius-sm);
+      object-fit: cover;
+      border: 1px solid var(--color-border);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item active">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/proprietarios" class="nav-item">
+              <i class="fi fi-rr-portrait"></i>
+              <span>Proprietários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/locatarios" class="nav-item">
+              <i class="fi fi-rr-users"></i>
+              <span>Locatários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/contratos" class="nav-item">
+              <i class="fi fi-rr-document-signed"></i>
+              <span>Contratos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recebimentos" class="nav-item">
+              <i class="fi fi-rr-money-bill-wave"></i>
+              <span>Recebimentos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/despesas" class="nav-item">
+              <i class="fi fi-rr-wallet"></i>
+              <span>Despesas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/manutencoes" class="nav-item">
+              <i class="fi fi-rr-settings"></i>
+              <span>Manutenções</span>
+            </a>
+          </li>
+          <li>
+            <a href="/vistorias" class="nav-item">
+              <i class="fi fi-rr-eye"></i>
+              <span>Vistorias</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <!-- Global Search -->
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, contratos, locatários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <button class="navbar-btn" id="theme-toggle" title="Alterar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        
+        <!-- Header -->
+        <div class="view-header">
+          <div>
+            <h1>Módulo Imóveis</h1>
+            <p>Gerencie toda a carteira de imóveis, galeria de fotos, especificações técnicas e vincule proprietários.</p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" id="btn-export-excel" title="Exportar para Excel">
+              <i class="fi fi-rr-file-excel"></i> Excel
+            </button>
+            <button class="btn btn-secondary" id="btn-export-pdf" title="Exportar para PDF">
+              <i class="fi fi-rr-file-pdf"></i> PDF
+            </button>
+            <button class="btn btn-primary" id="btn-novo-imovel" style="display: none;">
+              <i class="fi fi-rr-add"></i> Novo Imóvel
+            </button>
+          </div>
+        </div>
+
+        <!-- Upper Stat Cards -->
+        <div class="stats-card-container">
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+              <i class="fi fi-rr-home"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Total de Imóveis</span>
+              <h3 class="card-value" id="card-total">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-success-light); color: var(--color-success);">
+              <i class="fi fi-rr-checkbox"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Disponíveis</span>
+              <h3 class="card-value" id="card-disponiveis">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-info-light); color: var(--color-info);">
+              <i class="fi fi-rr-document-signed"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Alugados</span>
+              <h3 class="card-value" id="card-alugados">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-warning-light); color: var(--color-warning);">
+              <i class="fi fi-rr-bookmark"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Reservados</span>
+              <h3 class="card-value" id="card-reservados">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-error-light); color: var(--color-error);">
+              <i class="fi fi-rr-settings"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Em Manutenção</span>
+              <h3 class="card-value" id="card-manutencao">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="card glass filter-card">
+          <div class="filter-row-single">
+            <div class="form-group">
+              <label class="form-label" for="filtro-busca">Nome ou Código</label>
+              <input type="text" id="filtro-busca" class="form-control" placeholder="IMO-0001...">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="filtro-tipo">Tipo de Imóvel</label>
+              <select id="filtro-tipo" class="form-control">
+                <option value="">Todos</option>
+                <option value="Galpão">Galpão</option>
+                <option value="Casa">Casa</option>
+                <option value="Apartamento">Apartamento</option>
+                <option value="Sala Comercial">Sala Comercial</option>
+                <option value="Loja">Loja</option>
+                <option value="Terreno">Terreno</option>
+                <option value="Galeria Comercial">Galeria Comercial</option>
+                <option value="Prédio Comercial">Prédio Comercial</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="filtro-status">Status</label>
+              <select id="filtro-status" class="form-control">
+                <option value="">Todos (Ativos)</option>
+                <option value="Disponível">Disponível</option>
+                <option value="Alugado">Alugado</option>
+                <option value="Reservado">Reservado</option>
+                <option value="Manutenção">Manutenção</option>
+                <option value="Inativo">Inativo (Desativados)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="filtro-proprietario">Proprietário</label>
+              <select id="filtro-proprietario" class="form-control">
+                <option value="">Todos</option>
+                <!-- populated dynamically -->
+              </select>
+            </div>
+
+            <div class="filter-buttons">
+              <button class="btn btn-primary" id="btn-aplicar-filtros">
+                Filtrar
+              </button>
+              <button class="btn btn-secondary" id="btn-limpar-filtros" style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">
+                Limpar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- List Table Card -->
+        <div class="card glass" style="padding: 0; overflow: hidden;">
+          <div class="table-responsive">
+            <table class="app-table" id="tabela-imoveis">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nome</th>
+                  <th>Tipo</th>
+                  <th>Proprietário</th>
+                  <th>Valor Locação</th>
+                  <th>Status</th>
+                  <th style="text-align: center;">Contratos Ativos</th>
+                  <th class="actions-header" style="text-align: right; padding-right: 24px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="imoveis-list-body">
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:30px;">Carregando imóveis...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid var(--color-border);">
+            <span style="color: var(--color-text-muted); font-size:13px;" id="pagination-info">Mostrando 0 de 0 registros</span>
+            <div class="pagination-buttons" style="display: flex; gap: 8px;">
+              <button class="btn" id="btn-prev-page" style="height: 36px; padding: 0 16px; font-size:12px;">Anterior</button>
+              <button class="btn" id="btn-next-page" style="height: 36px; padding: 0 16px; font-size:12px;">Próximo</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR IMÓVEL -->
+  <div class="modal" id="modal-imovel">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 id="modal-title">Novo Imóvel</h3>
+        <span class="modal-close" id="btn-close-modal">&times;</span>
+      </div>
+      <form id="form-imovel">
+        <input type="hidden" id="imovel-id">
+        
+        <!-- Tabs in Form -->
+        <div class="tab-nav">
+          <button type="button" class="tab-btn active" data-form-tab="dados-gerais">Dados Gerais</button>
+          <button type="button" class="tab-btn" data-form-tab="observacoes-tab">Observações</button>
+        </div>
+
+        <!-- Form Tab Content: Dados Gerais -->
+        <div class="tab-pane active" id="form-dados-gerais">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="codigo">Código (Gerado Automaticamente)</label>
+              <input type="text" id="codigo" class="form-control" placeholder="IMO-0000" disabled>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="tipo">Tipo de Imóvel</label>
+              <select id="tipo" class="form-control" required>
+                <option value="Galpão" selected>Galpão</option>
+                <option value="Casa">Casa</option>
+                <option value="Apartamento">Apartamento</option>
+                <option value="Sala Comercial">Sala Comercial</option>
+                <option value="Loja">Loja</option>
+                <option value="Terreno">Terreno</option>
+                <option value="Galeria Comercial">Galeria Comercial</option>
+                <option value="Prédio Comercial">Prédio Comercial</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="nome">Nome / Identificação</label>
+              <input type="text" id="nome" class="form-control" placeholder="Ex: Apartamento 302 Bloco B" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="proprietario_id">Proprietário</label>
+              <select id="proprietario_id" class="form-control" required>
+                <!-- populated dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="area_total">Área Total (m²)</label>
+              <input type="number" id="area_total" class="form-control" placeholder="Ex: 120" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="valor_locacao">Valor da Locação (R$)</label>
+              <input type="number" id="valor_locacao" class="form-control" placeholder="Ex: 2500" step="0.01" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="status">Status</label>
+              <select id="status" class="form-control" required>
+                <option value="Disponível" selected>Disponível</option>
+                <option value="Alugado">Alugado</option>
+                <option value="Reservado">Reservado</option>
+                <option value="Manutenção">Manutenção</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="display: block; margin-bottom: 8px;">Foto Principal</label>
+              <div class="file-dropzone" id="foto-principal-dropzone">
+                <input type="file" id="foto_principal" name="foto_principal" style="display: none;" accept="image/*">
+                <div class="dropzone-placeholder" id="foto-dropzone-placeholder">
+                  <i class="fi fi-rr-picture" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
+                  <span>Arraste ou clique para anexar a Foto Principal</span>
+                </div>
+                <div id="preview-container" style="display: none; width: 100%; position: relative;">
+                  <img id="img-preview" class="preview-main-photo" src="" alt="Main photo preview" style="margin-top: 0; width: 100%; height: 120px; object-fit: cover; border-radius: 6px;">
+                  <div class="change-photo-badge">
+                    <i class="fi fi-rr-edit"></i> Alterar Imagem
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="endereco">Endereço Completo</label>
+            <input type="text" id="endereco" class="form-control" placeholder="Rua, número, complemento, bairro, cidade/UF" required>
+          </div>
+        </div>
+
+        <!-- Form Tab Content: Observações -->
+        <div class="tab-pane" id="form-observacoes-tab">
+          <div class="form-group">
+            <label class="form-label" for="observacoes">Observações Internas</label>
+            <textarea id="observacoes" class="form-control" style="height: 150px; resize: vertical;" placeholder="Informações estruturais, taxas condominiais ou especificações..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-modal" style="background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-imovel">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FICHA COMPLETA DO IMÓVEL -->
+  <div class="modal" id="modal-detalhes">
+    <div class="modal-content glass" style="max-width: 920px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h3 id="detalhe-header-nome">Ficha do Imóvel</h3>
+          <span class="badge badge-disponivel" id="detalhe-badge-status">Disponível</span>
+        </div>
+        <span class="modal-close" id="btn-close-detalhes">&times;</span>
+      </div>
+
+      <!-- Banner photo header -->
+      <div class="premium-photo-banner" id="det-banner-foto" style="background-image: url('/img/avatar-default.png');">
+        <div class="premium-photo-banner-overlay">
+          <div style="font-size: 13px; font-weight:600; opacity:0.9;" id="det-banner-codigo">IMO-0001</div>
+          <h2 style="font-size: 22px; font-weight:700; margin:4px 0 8px 0; color:#ffffff;" id="det-banner-nome">Galpão Alpha</h2>
+          <div style="font-size: 15px; font-weight:600; color: #478C27;" id="det-banner-preco">R$ 15.000,00 / mês</div>
+        </div>
+      </div>
+
+      <!-- Detail Navigation Tabs -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="det-gerais">Dados Gerais</button>
+        <button class="tab-btn" data-tab="det-documentos">Documentos (<span id="det-doc-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-contratos">Contratos (<span id="det-contrato-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-recebimentos">Recebimentos (<span id="det-recebimento-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-despesas">Despesas (<span id="det-despesa-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-manutencoes">Manutenções (<span id="det-manutencao-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-vistorias">Vistorias (<span id="det-vistoria-count">0</span>)</button>
+        <button class="tab-btn" data-tab="det-timeline">Timeline</button>
+      </div>
+
+      <!-- Tab: Dados Gerais (cadastrais + photo gallery) -->
+      <div class="tab-pane active" id="tab-det-gerais">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Código</span>
+            <span id="det-codigo" style="font-size:14px; font-weight:700; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Tipo</span>
+            <span id="det-tipo" style="font-size:14px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Área Total</span>
+            <span id="det-area" style="font-size:14px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Proprietário</span>
+            <span id="det-proprietario" style="font-size:14px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Endereço Completo</span>
+            <span id="det-endereco" style="font-size:13px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; border-bottom: 1px solid var(--color-border); padding-bottom: 16px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Observações</span>
+          <p id="det-observacoes" style="font-size:13px; color:var(--color-text-muted); margin:4px 0 0 0; white-space: pre-line; line-height: 1.5;">-</p>
+        </div>
+
+        <!-- Section: Galeria de Fotos -->
+        <div style="margin-bottom: 10px;">
+          <h4 style="font-size: 15px; font-weight:700; color:var(--color-text-main); margin-bottom:12px;">Galeria de Fotos</h4>
+          
+          <!-- Upload Inline to Gallery -->
+          <div id="gallery-upload-container" style="display: none; background:var(--color-bg-base); padding:16px; border-radius:var(--border-radius-md); border:1px solid var(--color-border); margin-bottom:16px;">
+            <form id="form-upload-galeria" style="display:flex; justify-content:space-between; align-items:end; gap:16px;">
+              <div class="form-group" style="margin:0; flex-grow:1;">
+                <label class="form-label" for="foto-arquivo">Escolha imagem para Galeria</label>
+                <input type="file" id="foto-arquivo" class="form-control" style="padding-top:10px;" accept="image/*" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="height:44px;"><i class="fi fi-rr-upload"></i> Adicionar Foto</button>
+            </form>
+          </div>
+
+          <div class="gallery-grid" id="det-galeria-grid">
+            <div style="text-align:center; color:var(--color-text-muted); grid-column:span 4; padding:20px;">Nenhuma foto na galeria.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Documentos -->
+      <div class="tab-pane" id="tab-det-documentos">
+        <!-- Add Document Inline Form (only for oper/admin) -->
+        <div id="document-upload-container" style="display: none; border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+          <form id="form-upload-documento" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; align-items:end;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="doc-tipo">Tipo de Documento</label>
+              <select id="doc-tipo" class="form-control" required>
+                <option value="Escritura" selected>Escritura</option>
+                <option value="IPTU">IPTU</option>
+                <option value="Alvará">Alvará</option>
+                <option value="AVCB">AVCB</option>
+                <option value="Planta">Planta</option>
+                <option value="Seguro">Seguro</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="doc-arquivo">Arquivo</label>
+              <input type="file" id="doc-arquivo" class="form-control" style="padding-top: 10px;" accept="image/*,application/pdf" required>
+            </div>
+
+            <!-- Conditional vencimento dates -->
+            <div class="form-group" id="group-data-emissao" style="display:none; margin:0;">
+              <label class="form-label" for="doc-emissao">Data de Emissão</label>
+              <input type="date" id="doc-emissao" class="form-control">
+            </div>
+
+            <div class="form-group" id="group-data-vencimento" style="display:none; margin:0;">
+              <label class="form-label" for="doc-vencimento">Data de Vencimento</label>
+              <input type="date" id="doc-vencimento" class="form-control">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="height:44px; grid-column:span 2;"><i class="fi fi-rr-upload"></i> Anexar Documento</button>
+          </form>
+        </div>
+
+        <div class="document-list" id="det-documentos-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum documento anexado.</div>
+        </div>
+      </div>
+
+      <!-- Tab: Contratos -->
+      <div class="tab-pane" id="tab-det-contratos">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Locatário</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Valor Mensal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="det-contratos-list-body">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">Nenhum contrato ativo ou encerrado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Recebimentos -->
+      <div class="tab-pane" id="tab-det-recebimentos">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Contrato</th>
+                <th>Competência</th>
+                <th>Vencimento</th>
+                <th>Previsto</th>
+                <th>Recebido</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="det-recebimentos-list-body">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">Nenhum recebimento registrado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Despesas -->
+      <div class="tab-pane" id="tab-det-despesas">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th>Responsável</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="det-despesas-list-body">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:20px;">Nenhuma despesa cadastrada.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Manutenções -->
+      <div class="tab-pane" id="tab-det-manutencoes">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Tipo</th>
+                <th>Título</th>
+                <th>Data Prevista</th>
+                <th>Valor Real</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="det-manutencoes-list-body">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">Nenhuma manutenção registrada.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Vistorias -->
+      <div class="tab-pane" id="tab-det-vistorias">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Responsável</th>
+              </tr>
+            </thead>
+            <tbody id="det-vistorias-list-body">
+              <tr>
+                <td colspan="4" style="text-align:center; padding:20px;">Nenhuma vistoria registrada.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Timeline -->
+      <div class="tab-pane" id="tab-det-timeline">
+        <div class="timeline" id="det-timeline-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum histórico estrutural.</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-fechar-detalhes">Fechar Ficha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/modules/imoveis.js"></script>
+</body>
+</html>

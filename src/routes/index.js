@@ -1,0 +1,58 @@
+const express = require('express');
+const path = require('path');
+const { requireAuth, redirectIfAuth } = require('../middlewares/auth.middleware');
+
+const router = express.Router();
+
+// --- 1. HTML View Routes ---
+
+// Home page redirect
+router.get('/', (req, res) => {
+  res.redirect('/dashboard');
+});
+
+// Login Page
+router.get('/login', redirectIfAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../views/auth/login.html'));
+});
+
+// Dashboard Page
+router.get('/dashboard', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../views/dashboard/index.html'));
+});
+
+// Other HTML pages (they will be served similarly)
+const modules = [
+  'usuarios', 'proprietarios', 'locatarios', 'imoveis', 
+  'contratos', 'recebimentos', 'despesas', 'manutencoes', 
+  'vistorias', 'relatorios', 'auditoria', 'calendario', 'notificacoes'
+];
+
+modules.forEach(mod => {
+  router.get(`/${mod}`, requireAuth, (req, res) => {
+    // Views are structured in folders, e.g. views/usuarios/index.html
+    res.sendFile(path.join(__dirname, `../../views/${mod}/index.html`));
+  });
+});
+
+// --- 2. API Routes ---
+
+// Register modular API routes
+router.use('/api/auth', require('./auth.routes'));
+router.use('/api/usuarios', require('./usuarios.routes'));
+router.use('/api/proprietarios', require('./proprietarios.routes'));
+router.use('/api/locatarios', require('./locatarios.routes'));
+router.use('/api/imoveis', require('./imoveis.routes'));
+router.use('/api/contratos', require('./contratos.routes'));
+router.use('/api/recebimentos', require('./recebimentos.routes'));
+router.use('/api/despesas', require('./despesas.routes'));
+router.use('/api/manutencoes', require('./manutencoes.routes'));
+router.use('/api/vistorias', require('./vistorias.routes'));
+router.use('/api/dashboard', require('./dashboard.routes'));
+router.use('/api/calendario', require('./calendario.routes'));
+router.use('/api/notificacoes', require('./notificacoes.routes'));
+router.use('/api/relatorios', require('./relatorios.routes'));
+router.use('/api/auditoria', require('./auditoria.routes'));
+router.use('/api/busca-global', require('./buscaGlobal.routes'));
+
+module.exports = router;

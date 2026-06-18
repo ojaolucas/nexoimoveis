@@ -1,0 +1,14 @@
+/* NexoMoveis - Dark Theme Overrides */
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+[data-theme="dark"] select.form-control option {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-main);
+}

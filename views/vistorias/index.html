@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vistorias - NexoMoveis</title>
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- CSS stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/tables.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+ 
+    .modal-content {
+      width: 100%;
+      max-width: 860px;
+      padding: 30px;
+      border-radius: var(--border-radius-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeIn var(--transition-normal) forwards;
+    }
+ 
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 12px;
+    }
+ 
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+ 
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--color-text-muted);
+    }
+ 
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+      border-top: 1px solid var(--color-border);
+      padding-top: 16px;
+    }
+ 
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+ 
+    .badge-pendente { background: #FEF08A; color: #854D0E; }
+    .badge-em-andamento { background: #DEF7EC; color: #03543F; }
+    .badge-concluida { background: var(--color-success-light); color: var(--color-success); }
+    .badge-cancelada { background: var(--color-error-light); color: var(--color-error); }
+
+    .cond-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .cond-Excelente { background: #DEF7EC; color: #03543F; }
+    .cond-Bom { background: var(--color-primary-light); color: var(--color-primary); }
+    .cond-Regular { background: #FEF08A; color: #854D0E; }
+    .cond-Ruim { background: #FDE8E8; color: #9B1C1C; }
+    .cond-Necessita-Reparo { background: var(--color-error-light); color: var(--color-error); }
+ 
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+ 
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+ 
+    .filter-card {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+ 
+    .filter-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+ 
+    .filter-row-2 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+    }
+ 
+    @media (max-width: 1024px) {
+      .filter-row, .filter-row-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .filter-buttons {
+        grid-column: span 2;
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+ 
+    @media (max-width: 640px) {
+      .filter-row, .filter-row-2 {
+        grid-template-columns: 1fr;
+      }
+      .filter-buttons {
+        grid-column: span 1;
+      }
+    }
+ 
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 20px;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+ 
+    .tab-btn {
+      padding: 10px 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+ 
+    .tab-btn:hover {
+      color: var(--color-text-main);
+    }
+ 
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+ 
+    .tab-pane {
+      display: none;
+    }
+ 
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn var(--transition-fast) forwards;
+    }
+ 
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      margin-left: 10px;
+      border-left: 2px solid var(--color-border);
+    }
+ 
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+ 
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -31px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid var(--color-bg-card);
+    }
+ 
+    .timeline-time {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+ 
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-main);
+      margin-bottom: 4px;
+    }
+ 
+    .timeline-desc {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+ 
+    .stats-card-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+ 
+    @media (max-width: 1200px) {
+      .stats-card-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .stats-card-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .stats-card-container {
+        grid-template-columns: 1fr;
+      }
+    }
+ 
+    .info-box {
+      background: var(--color-bg-base);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+ 
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+ 
+    .chart-box {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 24px;
+      min-height: 340px;
+    }
+ 
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+ 
+    .action-btn-group {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+ 
+    .modal-tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 16px;
+      gap: 12px;
+      overflow-x: auto;
+    }
+ 
+    .modal-tab-btn {
+      padding: 8px 2px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      background: none;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+ 
+    .modal-tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+ 
+    .modal-tab-pane {
+      display: none;
+    }
+ 
+    .modal-tab-pane.active {
+      display: block;
+    }
+ 
+    .document-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+ 
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      background: var(--color-bg-base);
+    }
+ 
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+ 
+    .document-icon {
+      font-size: 20px;
+      color: var(--color-primary);
+    }
+
+    /* Checklist row elements style */
+    .checklist-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .checklist-row {
+      border-bottom: 1px solid var(--color-border);
+      padding: 16px 0;
+    }
+    .checklist-item-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--color-text-main);
+    }
+    .checklist-img-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .checklist-img-item {
+      position: relative;
+      height: 70px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .checklist-img-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .checklist-img-delete {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(220, 38, 38, 0.8);
+      color: white;
+      border: none;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .image-zoom-overlay {
+      display: none;
+      position: fixed;
+      top:0; left:0; width:100vw; height:100vh;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-zoom-overlay.active {
+      display: flex;
+    }
+    .image-zoom-content img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--box-shadow-lg);
+    }
+    .image-zoom-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/proprietarios" class="nav-item">
+              <i class="fi fi-rr-portrait"></i>
+              <span>Proprietários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/locatarios" class="nav-item">
+              <i class="fi fi-rr-users"></i>
+              <span>Locatários</span>
+            </a>
+          </li>
+          <li>
+            <a href="/contratos" class="nav-item">
+              <i class="fi fi-rr-document-signed"></i>
+              <span>Contratos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/recebimentos" class="nav-item">
+              <i class="fi fi-rr-money-bill-wave"></i>
+              <span>Recebimentos</span>
+            </a>
+          </li>
+          <li>
+            <a href="/despesas" class="nav-item">
+              <i class="fi fi-rr-wallet"></i>
+              <span>Despesas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/manutencoes" class="nav-item">
+              <i class="fi fi-rr-settings"></i>
+              <span>Manutenções</span>
+            </a>
+          </li>
+          <li>
+            <a href="/vistorias" class="nav-item active">
+              <i class="fi fi-rr-eye"></i>
+              <span>Vistorias</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, vistorias, proprietários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <button class="navbar-btn" id="theme-toggle" title="Alterar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        
+        <!-- Header -->
+        <div class="view-header">
+          <div>
+            <h1>Módulo Vistorias</h1>
+            <p>Monitore, registre e gerencie o checklist físico dos imóveis no ciclo de locação.</p>
+          </div>
+          <div style="display: flex; gap: 12px;" id="header-actions">
+            <!-- Exports and creation -->
+            <button class="btn btn-secondary" id="btn-exportar-csv" title="Exportar dados atuais para CSV">
+              <i class="fi fi-rr-file-excel"></i> Exportar CSV
+            </button>
+            <button class="btn btn-secondary" id="btn-exportar-pdf" title="Imprimir Relatório HTML/PDF">
+              <i class="fi fi-rr-file-pdf"></i> Exportar PDF
+            </button>
+            <button class="btn btn-primary" id="btn-nova-vistoria" style="display: none;">
+              <i class="fi fi-rr-add"></i> Nova Vistoria
+            </button>
+          </div>
+        </div>
+
+        <!-- Upper Stat Cards (5 Cards) -->
+        <div class="stats-card-container">
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+              <i class="fi fi-rr-eye"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Total Ativas</span>
+              <h3 class="card-value" id="card-total-vistorias">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+              <i class="fi fi-rr-sign-in-alt"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Vistorias de Entrada</span>
+              <h3 class="card-value" id="card-entradas">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: var(--color-primary-light); color: var(--color-primary);">
+              <i class="fi fi-rr-sign-out-alt"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Vistorias de Saída</span>
+              <h3 class="card-value" id="card-saidas">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: #FEF08A; color: #854D0E;">
+              <i class="fi fi-rr-calendar"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Pendentes</span>
+              <h3 class="card-value" id="card-pendentes">0</h3>
+            </div>
+          </div>
+
+          <div class="card glass stats-card">
+            <div class="card-icon" style="background-color: #DEF7EC; color: #03543F;">
+              <i class="fi fi-rr-checkbox"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label">Concluídas</span>
+              <h3 class="card-value" id="card-concluidas">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upper Tab Navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" id="tab-btn-lista" data-tab="painel-lista">
+            <i class="fi fi-rr-list-check"></i> Lista de Vistorias
+          </button>
+          <button class="tab-btn" id="tab-btn-graficos" data-tab="painel-graficos">
+            <i class="fi fi-rr-stats"></i> Gráficos & Condições
+          </button>
+        </div>
+
+        <!-- TAB CONTENT 1: LISTA -->
+        <div class="tab-pane active" id="painel-lista">
+          
+          <!-- Filters Section -->
+          <div class="card glass filter-card">
+            <div class="filter-row">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-imovel">Imóvel</label>
+                <select id="filtro-imovel" class="form-control">
+                  <option value="">Todos os Imóveis</option>
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-tipo">Tipo</label>
+                <select id="filtro-tipo" class="form-control">
+                  <option value="">Todos os Tipos</option>
+                  <option value="Entrada">Entrada</option>
+                  <option value="Saída">Saída</option>
+                  <option value="Periódica">Periódica</option>
+                  <option value="Extraordinária">Extraordinária</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-status">Status</label>
+                <select id="filtro-status" class="form-control">
+                  <option value="">Todos os Status</option>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Em Andamento">Em Andamento</option>
+                  <option value="Concluída">Concluída</option>
+                  <option value="Cancelada">Cancelada</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-busca">Pesquisa Rápida</label>
+                <input type="text" id="filtro-busca" class="form-control" placeholder="Código ou Responsável...">
+              </div>
+            </div>
+
+            <div class="filter-row-2">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-data-inicial">Data Inicial</label>
+                <input type="date" id="filtro-data-inicial" class="form-control">
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-data-final">Data Final</label>
+                <input type="date" id="filtro-data-final" class="form-control">
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-tipo-relatorio">Tipo de Relatório (Exportação)</label>
+                <select id="filtro-tipo-relatorio" class="form-control">
+                  <option value="periodo">Geral por Período</option>
+                  <option value="imovel">Por Imóvel</option>
+                  <option value="pendentes">Vistorias Pendentes</option>
+                  <option value="concluidas">Vistorias Concluídas</option>
+                </select>
+              </div>
+
+              <div class="filter-buttons">
+                <button class="btn btn-secondary" id="btn-limpar-filtros" style="margin-right:8px;">Limpar</button>
+                <button class="btn btn-primary" id="btn-aplicar-filtros">Aplicar Filtros</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Table Card -->
+          <div class="card glass">
+            <div class="table-responsive">
+              <table class="app-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Imóvel</th>
+                    <th>Tipo</th>
+                    <th>Data</th>
+                    <th>Responsável</th>
+                    <th>Status</th>
+                    <th style="text-align: right; padding-right: 24px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="vistorias-list-body">
+                  <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px;">Carregando vistorias...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 10px;">
+              <span class="pagination-info" id="pagination-info">Mostrando 0 a 0 de 0 registros</span>
+              <div class="pagination-buttons" style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" id="btn-prev-page" disabled>Anterior</button>
+                <button class="btn btn-secondary btn-sm" id="btn-next-page" disabled>Próxima</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB CONTENT 2: GRAPHICS -->
+        <div class="tab-pane" id="painel-graficos">
+          <div class="charts-grid">
+            <div class="chart-box card glass">
+              <h4 style="font-weight:700; margin-bottom:16px; font-size:14px; text-transform:uppercase; color:var(--color-text-main);">Vistorias por Tipo</h4>
+              <div style="height: 250px; position: relative;">
+                <canvas id="chart-tipos"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-box card glass">
+              <h4 style="font-weight:700; margin-bottom:16px; font-size:14px; text-transform:uppercase; color:var(--color-text-main);">Vistorias Executadas/Mês (Concluídas)</h4>
+              <div style="height: 250px; position: relative;">
+                <canvas id="chart-meses"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-grid" style="grid-template-columns: 1fr;">
+            <div class="chart-box card glass" style="min-height: 280px;">
+              <h4 style="font-weight:700; margin-bottom:16px; font-size:14px; text-transform:uppercase; color:var(--color-text-main);">Distribuição Geral de Condições do Imóvel</h4>
+              <div style="height: 220px; position: relative;">
+                <canvas id="chart-condicoes"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR VISTORIA -->
+  <div class="modal" id="modal-vistoria">
+    <div class="modal-content card glass animate-scale-up">
+      <div class="modal-header">
+        <h3 id="modal-title">Nova Vistoria</h3>
+        <span class="modal-close" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></span>
+      </div>
+      
+      <form id="form-vistoria">
+        <input type="hidden" id="vistoria-id">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="imovel_id">Imóvel *</label>
+            <select id="imovel_id" name="imovel_id" class="form-control" required>
+              <option value="" disabled selected>Selecione um imóvel</option>
+              <!-- Loaded by JS -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="contrato_id">Contrato Associado (Opcional)</label>
+            <select id="contrato_id" name="contrato_id" class="form-control">
+              <option value="">Nenhum Contrato</option>
+              <!-- Populated dynamically when Imovel changes -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="tipo">Tipo de Vistoria *</label>
+            <select id="tipo" name="tipo" class="form-control" required>
+              <option value="" disabled selected>Selecione o tipo</option>
+              <option value="Entrada">Entrada</option>
+              <option value="Saída">Saída</option>
+              <option value="Periódica">Periódica</option>
+              <option value="Extraordinária">Extraordinária</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="data_vistoria">Data da Vistoria *</label>
+            <input type="date" id="data_vistoria" name="data_vistoria" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="responsavel">Responsável Interno (Vistoriador) *</label>
+            <input type="text" id="responsavel" name="responsavel" class="form-control" placeholder="Ex: Inspetor Padrao" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="status">Status *</label>
+            <select id="status" name="status" class="form-control" required>
+              <option value="Pendente">Pendente</option>
+              <option value="Em Andamento">Em Andamento</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="observacoes_gerais">Observações Gerais</label>
+          <textarea id="observacoes_gerais" name="observacoes_gerais" class="form-control" rows="3" placeholder="Descreva observações gerais ou metas do laudo..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-vistoria">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FICHA COMPLETA / DETALHES DA VISTORIA -->
+  <div class="modal" id="modal-detalhes">
+    <div class="modal-content card glass animate-scale-up">
+      <div class="modal-header">
+        <div>
+          <h3 id="detalhes-header-codigo" style="margin: 0; color:var(--color-primary); font-weight:700;">VIS-000000</h3>
+          <span id="detalhes-header-tipo-titulo" style="font-size: 13px; color: var(--color-text-muted);">Vistoria Geral</span>
+        </div>
+        <div style="display: flex; align-items: center; gap:12px;">
+          <span class="badge" id="detalhes-badge-status">Pendente</span>
+          <span class="modal-close" id="btn-close-detalhes"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+      </div>
+
+      <div class="modal-tab-nav">
+        <button class="modal-tab-btn active" data-tab="det-gerais">Dados Gerais</button>
+        <button class="modal-tab-btn" data-tab="det-checklist">Checklist Condições</button>
+        <button class="modal-tab-btn" data-tab="det-fotos">Galeria de Fotos</button>
+        <button class="modal-tab-btn" data-tab="det-timeline">Histórico / Timeline</button>
+      </div>
+
+      <!-- TAB 1: DADOS GERAIS -->
+      <div class="modal-tab-pane active" id="tab-det-gerais">
+        <div class="info-box">
+          <h4 style="margin:0 0 12px 0; font-size:13px; font-weight:700; text-transform:uppercase; color:var(--color-primary);">Ficha de Vistoria</h4>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div>
+              <span style="font-size:10px; text-transform:uppercase; color:var(--color-text-muted); display:block;">Imóvel</span>
+              <strong id="det-imovel" style="font-size:13px; color:var(--color-text-main);">-</strong>
+            </div>
+            <div>
+              <span style="font-size:10px; text-transform:uppercase; color:var(--color-text-muted); display:block;">Tipo de Vistoria</span>
+              <strong id="det-tipo" style="font-size:13px; color:var(--color-text-main);">-</strong>
+            </div>
+            <div>
+              <span style="font-size:10px; text-transform:uppercase; color:var(--color-text-muted); display:block;">Responsável (Vistoriador)</span>
+              <strong id="det-responsavel" style="font-size:13px; color:var(--color-text-main);">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <span style="font-size:10px; text-transform:uppercase; color:var(--color-text-muted); display:block;">Data da Vistoria</span>
+              <strong id="det-data" style="font-size:13px; color:var(--color-text-main);">-</strong>
+            </div>
+            <div>
+              <span style="font-size:10px; text-transform:uppercase; color:var(--color-text-muted); display:block;">Contrato Vinculado</span>
+              <strong id="det-contrato" style="font-size:13px; color:var(--color-text-main);">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h4 style="margin:0 0 12px 0; font-size:13px; font-weight:700; text-transform:uppercase; color:var(--color-primary);">Observações Gerais</h4>
+          <p id="det-observacoes" style="font-size:13px; line-height:1.6; margin:0; white-space: pre-wrap; color:var(--color-text-main);">-</p>
+        </div>
+
+        <div id="conclusao-actions-pane" style="display: none; background: var(--color-bg-base); padding: 16px; border: 1px dashed var(--color-border); border-radius: var(--border-radius-md); margin-top:20px;">
+          <h4 style="margin:0 0 8px 0; font-size:12px; font-weight:700; text-transform:uppercase; color:var(--color-primary);">Conclusão Operacional</h4>
+          <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 12px;">Certifique-se de preencher e salvar as condições do checklist na aba "Checklist Condições" antes de concluir.</p>
+          <button class="btn btn-success" id="btn-concluir-vistoria-direta">Concluir Laudo de Vistoria</button>
+        </div>
+      </div>
+
+      <!-- TAB 2: CHECKLIST -->
+      <div class="modal-tab-pane" id="tab-det-checklist">
+        <p style="font-size:12px; color:var(--color-text-muted); margin-bottom: 16px;">
+          Avalie e salve individualmente cada item do checklist padrão de vistoria.
+        </p>
+
+        <div id="checklist-rows-container">
+          <!-- Dynamically populated checklist rows -->
+        </div>
+      </div>
+
+      <!-- TAB 3: GALERIA -->
+      <div class="modal-tab-pane" id="tab-det-fotos">
+        
+        <!-- Form to add file (only operational or admin) -->
+        <div id="foto-upload-container" style="display:none; background: var(--color-bg-base); padding: 16px; border: 1px dashed var(--color-border); border-radius: var(--border-radius-md); margin-bottom: 20px;">
+          <h4 style="margin:0 0 12px 0; font-size:12px; font-weight:700; text-transform:uppercase; color:var(--color-primary);">Enviar Imagem Geral ou Principal</h4>
+          
+          <form id="form-upload-foto" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:12px; align-items: end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="foto-tipo" style="font-size:11px;">Tipo de Imagem *</label>
+              <select id="foto-tipo" name="tipo_foto" class="form-control form-control-sm" required>
+                <option value="Principal">Foto Principal (Laudo)</option>
+                <option value="Geral">Fotos Gerais do Imóvel</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="foto-arquivo" style="font-size:11px;">Arquivo * (Max: JPG, JPEG, PNG de 10MB)</label>
+              <input type="file" id="foto-arquivo" name="arquivo" class="form-control form-control-sm" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm" style="height:38px; display:inline-flex; align-items:center; gap:6px;">
+              <i class="fi fi-rr-upload"></i> Enviar
+            </button>
+          </form>
+        </div>
+
+        <h4 style="font-weight:700; margin-bottom:12px; font-size:12px; text-transform:uppercase; color:var(--color-primary);">Galeria de Fotos</h4>
+        <div class="checklist-img-grid" id="det-galeria-fotos" style="grid-template-columns: repeat(4, 1fr); gap: 12px;">
+          <div style="text-align:center; color:var(--color-text-muted); grid-column: span 4; padding:20px;">Nenhuma foto na galeria.</div>
+        </div>
+      </div>
+
+      <!-- TAB 4: TIMELINE -->
+      <div class="modal-tab-pane" id="tab-det-timeline">
+        <div class="timeline" id="det-timeline-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum histórico encontrado.</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-fechar-detalhes">Fechar Ficha</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZOOM IMAGE OVERLAY -->
+  <div class="image-zoom-overlay" id="zoom-overlay">
+    <span class="image-zoom-close" id="btn-close-zoom">&times;</span>
+    <div class="image-zoom-content">
+      <img src="" id="zoom-img" alt="Zoomed image">
+    </div>
+  </div>
+
+  <!-- Shared Global JS Utilities -->
+  <script src="/js/api.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/modules/vistorias.js"></script>
+  <script src="/js/app.js"></script>
+
+</body>
+</html>

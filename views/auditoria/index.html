@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoria e Logs - NexoMoveis</title>
+  <meta name="description" content="Registros de auditoria e logs de ações do sistema NexoMoveis.">
+
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <style>
+    /* ── Auditoria Page Styles ── */
+    .auditoria-page { padding: 24px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: 10px; }
+    .page-title i { color: var(--color-primary); font-size: 22px; }
+    .page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Cards */
+    .audit-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .audit-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: box-shadow .2s; }
+    .audit-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .audit-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .audit-card-icon.blue { background: #dbeafe; color: #1d4ed8; }
+    .audit-card-icon.green { background: #dcfce7; color: #15803d; }
+    .audit-card-icon.amber { background: #fef3c7; color: #b45309; }
+    .audit-card-icon.purple { background: #ede9fe; color: #6d28d9; }
+    .audit-card-info { flex: 1; min-width: 0; }
+    .audit-card-value { font-size: 28px; font-weight: 700; color: var(--color-text); line-height: 1; }
+    .audit-card-label { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+
+    /* Filtros */
+    .filter-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
+    .filter-panel-title { font-size: 13px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .filter-grid .form-group { margin-bottom: 0; }
+    .filter-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+    /* Tabela */
+    .table-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; overflow: hidden; }
+    .table-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--color-border); flex-wrap: wrap; gap: 10px; }
+    .table-panel-title { font-size: 15px; font-weight: 600; color: var(--color-text); display: flex; align-items: center; gap: 8px; }
+    .table-count { font-size: 12px; color: var(--color-text-muted); }
+    .table-responsive { overflow-x: auto; }
+    table.audit-table { width: 100%; border-collapse: collapse; }
+    .audit-table th { background: var(--color-surface-alt, #f8fafc); color: var(--color-text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+    .audit-table td { padding: 12px 14px; font-size: 13px; color: var(--color-text); border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+    .audit-table tr:last-child td { border-bottom: none; }
+    .audit-table tr:hover td { background: var(--color-surface-alt, #f8fafc); }
+
+    /* Badges */
+    .badge-acao { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .badge-CREATE { background: #dcfce7; color: #15803d; }
+    .badge-UPDATE { background: #dbeafe; color: #1e40af; }
+    .badge-DELETE_LOGICO { background: #fee2e2; color: #b91c1c; }
+    .badge-LOGIN { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-LOGOUT { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+    .badge-EXPORT { background: #ede9fe; color: #6d28d9; }
+    .badge-PAYMENT { background: #d1fae5; color: #065f46; }
+    .badge-REVERSAL { background: #fee2e2; color: #991b1b; }
+    .badge-UPLOAD { background: #e0f2fe; color: #0369a1; }
+    .badge-DOWNLOAD { background: #e0f2fe; color: #0369a1; }
+    .badge-VIEW { background: #f1f5f9; color: #475569; }
+
+    /* Paginação */
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--color-border); flex-wrap: wrap; gap: 8px; }
+    .pagination-info { font-size: 12px; color: var(--color-text-muted); }
+    .pagination-controls { display: flex; gap: 4px; }
+    .page-btn { width: 32px; height: 32px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .page-btn:hover, .page-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Estado vazio */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--color-text-muted); }
+    .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: .4; }
+    .empty-state p { font-size: 14px; }
+
+    /* Loading */
+    .loading-row td { text-align: center; padding: 40px; color: var(--color-text-muted); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--color-surface); border-radius: 18px; width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); transform: translateY(20px); transition: transform .2s; }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--color-border); }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: 10px; }
+    .modal-close { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--color-border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); transition: all .15s; }
+    .modal-close:hover { background: var(--color-danger); color: #fff; border-color: var(--color-danger); }
+    .modal-body { padding: 24px; }
+
+    /* Detalhes do log */
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+    .detail-field { display: flex; flex-direction: column; gap: 4px; }
+    .detail-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--color-text-muted); }
+    .detail-value { font-size: 14px; color: var(--color-text); font-weight: 500; }
+
+    /* Comparação antes/depois */
+    .diff-section { margin-top: 20px; }
+    .diff-title { font-size: 14px; font-weight: 600; color: var(--color-text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .diff-table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; border: 1px solid var(--color-border); }
+    .diff-table th { background: var(--color-secondary, #001731); color: #fff; font-size: 11px; font-weight: 600; padding: 10px 14px; text-align: left; text-transform: uppercase; letter-spacing: .5px; }
+    .diff-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+    .diff-table tr:last-child td { border-bottom: none; }
+    .diff-before { background: #fff5f5; color: #b91c1c; }
+    .diff-after { background: #f0fdf4; color: #15803d; }
+    .diff-field { font-weight: 600; color: var(--color-text); }
+    .no-diff { font-size: 13px; color: var(--color-text-muted); font-style: italic; text-align: center; padding: 20px; }
+
+    /* Dark mode */
+    [data-theme="dark"] .audit-card-icon.blue { background: rgba(29,78,216,.2); }
+    [data-theme="dark"] .audit-card-icon.green { background: rgba(21,128,61,.2); }
+    [data-theme="dark"] .audit-card-icon.amber { background: rgba(180,83,9,.2); }
+    [data-theme="dark"] .audit-card-icon.purple { background: rgba(109,40,217,.2); }
+    [data-theme="dark"] .audit-table tr:hover td { background: rgba(255,255,255,.04); }
+    [data-theme="dark"] .diff-before { background: rgba(185,28,28,.15); }
+    [data-theme="dark"] .diff-after { background: rgba(21,128,61,.15); }
+    [data-theme="dark"] .badge-VIEW { background: rgba(71,85,105,.2); color: #94a3b8; }
+
+    /* Responsivo */
+    @media (max-width: 1024px) { .audit-cards { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) {
+      .audit-cards { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .audit-table th:nth-child(n+5), .audit-table td:nth-child(n+5) { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" id="app-sidebar">
+    <div class="sidebar-header">
+      <i class="fi fi-rr-key"></i>
+      <span class="brand-name">NexoMoveis</span>
+    </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="/dashboard" class="nav-item"><i class="fi fi-rr-apps"></i><span>Dashboard</span></a></li>
+        <li><a href="/imoveis" class="nav-item"><i class="fi fi-rr-home"></i><span>Imóveis</span></a></li>
+        <li><a href="/proprietarios" class="nav-item"><i class="fi fi-rr-portrait"></i><span>Proprietários</span></a></li>
+        <li><a href="/locatarios" class="nav-item"><i class="fi fi-rr-users"></i><span>Locatários</span></a></li>
+        <li><a href="/contratos" class="nav-item"><i class="fi fi-rr-document-signed"></i><span>Contratos</span></a></li>
+        <li><a href="/recebimentos" class="nav-item"><i class="fi fi-rr-money-bill-wave"></i><span>Recebimentos</span></a></li>
+        <li><a href="/despesas" class="nav-item"><i class="fi fi-rr-wallet"></i><span>Despesas</span></a></li>
+        <li><a href="/manutencoes" class="nav-item"><i class="fi fi-rr-settings"></i><span>Manutenções</span></a></li>
+        <li><a href="/vistorias" class="nav-item"><i class="fi fi-rr-eye"></i><span>Vistorias</span></a></li>
+        <li><a href="/calendario" class="nav-item"><i class="fi fi-rr-calendar"></i><span>Calendário</span></a></li>
+        <li><a href="/relatorios" class="nav-item"><i class="fi fi-rr-stats"></i><span>Relatórios</span></a></li>
+        <li><a href="/auditoria" class="nav-item active"><i class="fi fi-rr-shield-check"></i><span>Auditoria</span></a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <img src="/img/avatar-default.png" alt="Avatar" class="user-avatar" id="sidebar-user-avatar">
+        <div class="user-info">
+          <span class="user-name" id="sidebar-user-name">Carregando...</span>
+          <span class="user-role" id="sidebar-user-role">Carregando...</span>
+        </div>
+        <button class="logout-btn" id="logout-btn" title="Sair"><i class="fi fi-rr-sign-out-alt"></i></button>
+      </div>
+      <div class="system-meta"><span>Versão 1.0</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="app-main">
+
+    <!-- NAVBAR -->
+    <header class="app-navbar">
+      <div class="navbar-left">
+        <button class="menu-toggle-btn" id="menu-toggle" title="Menu"><i class="fi fi-rr-menu-burger"></i></button>
+        <div class="search-bar-container">
+          <i class="fi fi-rr-search search-icon"></i>
+          <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, contratos, locatários...">
+          <div class="search-results-dropdown glass" id="search-results" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="navbar-bell-container">
+          <button class="navbar-btn" id="notification-btn" title="Notificações">
+            <i class="fi fi-rr-bell"></i>
+            <span class="bell-badge" id="notification-badge" style="display:none;">0</span>
+          </button>
+          <div class="notifications-dropdown glass" id="notifications-dropdown" style="display:none;"></div>
+        </div>
+        <button class="navbar-btn" id="theme-toggle" title="Alternar tema"><i class="fi fi-rr-brightness"></i></button>
+        <div class="navbar-user-container">
+          <button class="navbar-btn user-menu-btn" id="user-menu-btn">
+            <img src="/img/avatar-default.png" alt="Avatar" class="nav-user-avatar" id="nav-user-avatar">
+            <span class="nav-user-name" id="nav-user-name">...</span>
+            <i class="fi fi-rr-angle-small-down"></i>
+          </button>
+          <div class="user-dropdown glass" id="user-dropdown" style="display:none;">
+            <a href="/usuarios" class="dropdown-item"><i class="fi fi-rr-user"></i>Meu Perfil</a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item text-danger" id="dropdown-logout-btn"><i class="fi fi-rr-sign-out-alt"></i>Sair</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="app-content">
+      <div class="auditoria-page">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title"><i class="fi fi-rr-shield-check"></i> Auditoria e Logs</h1>
+            <p style="font-size:13px;color:var(--color-text-muted);margin-top:4px;">Registro completo de todas as ações executadas no sistema.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" id="btn-export-excel" title="Exportar Excel">
+              <i class="fi fi-rr-file-spreadsheet"></i> Excel
+            </button>
+            <button class="btn btn-primary" id="btn-export-pdf" title="Exportar PDF">
+              <i class="fi fi-rr-file-pdf"></i> PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="audit-cards" id="audit-cards">
+          <div class="audit-card">
+            <div class="audit-card-icon blue"><i class="fi fi-rr-list"></i></div>
+            <div class="audit-card-info">
+              <div class="audit-card-value" id="card-total">-</div>
+              <div class="audit-card-label">Total de Logs</div>
+            </div>
+          </div>
+          <div class="audit-card">
+            <div class="audit-card-icon green"><i class="fi fi-rr-sign-in-alt"></i></div>
+            <div class="audit-card-info">
+              <div class="audit-card-value" id="card-logins">-</div>
+              <div class="audit-card-label">Logins Hoje</div>
+            </div>
+          </div>
+          <div class="audit-card">
+            <div class="audit-card-icon amber"><i class="fi fi-rr-pencil"></i></div>
+            <div class="audit-card-info">
+              <div class="audit-card-value" id="card-alteracoes">-</div>
+              <div class="audit-card-label">Alterações Hoje</div>
+            </div>
+          </div>
+          <div class="audit-card">
+            <div class="audit-card-icon purple"><i class="fi fi-rr-download"></i></div>
+            <div class="audit-card-info">
+              <div class="audit-card-value" id="card-exportacoes">-</div>
+              <div class="audit-card-label">Exportações Hoje</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-panel">
+          <div class="filter-panel-title"><i class="fi fi-rr-filter"></i> Filtros</div>
+          <div class="filter-grid">
+            <div class="form-group">
+              <label class="form-label">Usuário</label>
+              <input type="text" id="filter-usuario" class="form-control" placeholder="Nome, e-mail ou CPF">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Perfil</label>
+              <select id="filter-perfil" class="form-control">
+                <option value="">Todos</option>
+                <option value="administrador">Administrador</option>
+                <option value="operacional">Operacional</option>
+                <option value="consulta">Consulta</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Módulo</label>
+              <select id="filter-modulo" class="form-control">
+                <option value="">Todos</option>
+                <option value="Usuários">Usuários</option>
+                <option value="Proprietários">Proprietários</option>
+                <option value="Locatários">Locatários</option>
+                <option value="Imóveis">Imóveis</option>
+                <option value="Contratos">Contratos</option>
+                <option value="Recebimentos">Recebimentos</option>
+                <option value="Despesas">Despesas</option>
+                <option value="Manutenções">Manutenções</option>
+                <option value="Vistorias">Vistorias</option>
+                <option value="Relatórios">Relatórios</option>
+                <option value="Auditoria">Auditoria</option>
+                <option value="Notificações">Notificações</option>
+                <option value="Calendário">Calendário</option>
+                <option value="Segurança">Segurança</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ação</label>
+              <select id="filter-acao" class="form-control">
+                <option value="">Todas</option>
+                <option value="LOGIN">LOGIN</option>
+                <option value="LOGOUT">LOGOUT</option>
+                <option value="CREATE">CREATE</option>
+                <option value="UPDATE">UPDATE</option>
+                <option value="DELETE_LOGICO">DELETE_LOGICO</option>
+                <option value="UPLOAD">UPLOAD</option>
+                <option value="DOWNLOAD">DOWNLOAD</option>
+                <option value="VIEW">VIEW</option>
+                <option value="PAYMENT">PAYMENT</option>
+                <option value="REVERSAL">REVERSAL</option>
+                <option value="EXPORT">EXPORT</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Data Inicial</label>
+              <input type="date" id="filter-data-inicio" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Data Final</label>
+              <input type="date" id="filter-data-fim" class="form-control">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="form-label">Busca Livre</label>
+              <input type="text" id="filter-texto" class="form-control" placeholder="Buscar em descrição, entidade, usuário...">
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-ghost" id="btn-limpar-filtros"><i class="fi fi-rr-cross-circle"></i> Limpar</button>
+            <button class="btn btn-primary" id="btn-filtrar"><i class="fi fi-rr-search"></i> Filtrar</button>
+          </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-panel">
+          <div class="table-panel-header">
+            <div class="table-panel-title">
+              <i class="fi fi-rr-list"></i> Registros de Auditoria
+              <span class="table-count" id="table-count"></span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Hora</th>
+                  <th>Usuário</th>
+                  <th>Módulo</th>
+                  <th>Ação</th>
+                  <th>Descrição</th>
+                  <th>IP</th>
+                  <th style="width:60px;text-align:center;">Ver</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody">
+                <tr class="loading-row"><td colspan="8"><i class="fi fi-rr-spinner"></i> Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination-container"></div>
+        </div>
+
+      </div><!-- /auditoria-page -->
+    </main>
+  </div><!-- /app-main -->
+</div><!-- /app-layout -->
+
+<!-- MODAL DE DETALHES -->
+<div class="modal-overlay" id="modal-detalhes">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fi fi-rr-shield-check"></i> Detalhes do Log</div>
+      <button class="modal-close" id="modal-close"><i class="fi fi-rr-cross"></i></button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="detail-grid" id="detail-fields"></div>
+      <div class="diff-section" id="diff-section"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/notificacoes.js"></script>
+<script src="/js/buscaGlobal.js"></script>
+<script src="/js/auditoria.js"></script>
+</body>
+</html>

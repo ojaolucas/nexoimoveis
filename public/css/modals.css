@@ -1,0 +1,92 @@
+/* NexoMoveis - Modal Shared Styling */
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background-color: var(--color-bg-card) !important;
+  background: var(--color-bg-card) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-radius: 12px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important; /* Firefox */
+  transition: background-color var(--transition-normal);
+}
+
+.modal-content::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari */
+}
+
+/* Make forms elements clean & minimal inside modals */
+.modal-content .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.modal-content .form-control {
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-base); /* slight distinction from card body */
+  transition: all var(--transition-fast);
+}
+
+.modal-content .form-control:focus {
+  background-color: var(--color-bg-card);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Modal header/footer consistency */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 12px;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-main);
+}
+
+.modal-close {
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--color-text-main);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 16px;
+}

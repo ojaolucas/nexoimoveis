@@ -1,0 +1,183 @@
+/* NexoMoveis - Navbar Styles */
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.menu-toggle-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-main);
+  background-color: var(--color-bg-base);
+  transition: background-color var(--transition-fast);
+}
+
+.menu-toggle-btn:hover {
+  background-color: var(--color-border);
+}
+
+/* Global Search Input Box */
+.search-bar-container {
+  position: relative;
+  max-width: 420px;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px 0 44px;
+  background-color: var(--color-bg-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-main);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.search-input:focus {
+  background-color: var(--color-bg-card);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Search Results Dropdown Panel */
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  border-radius: var(--border-radius-md);
+  padding: 12px;
+  z-index: 150;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Navbar actions on right side */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-main);
+  background-color: var(--color-bg-base);
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+
+.navbar-btn:hover {
+  background-color: var(--color-border);
+}
+
+.bell-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background-color: var(--color-error);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-bg-card);
+}
+
+/* Notifications Dropdown Panel */
+.notifications-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 360px;
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  z-index: 150;
+  box-shadow: var(--shadow-lg);
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+}
+
+.dropdown-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mark-all-read-btn {
+  font-size: 12px;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.mark-all-read-btn:hover {
+  text-decoration: underline;
+}
+
+.dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dropdown-empty {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* User Profiling info */
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 16px;
+  border-left: 1px solid var(--color-border);
+}
+
+.navbar-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+.navbar-bell-container {
+  position: relative;
+}

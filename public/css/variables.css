@@ -1,0 +1,71 @@
+/* NexoMoveis - Design System Variables */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Fonts */
+  --font-primary: 'Inter', Arial, sans-serif;
+
+  /* Colors Light Mode */
+  --color-primary: #478C27;
+  --color-primary-hover: #3b7420;
+  --color-primary-light: rgba(71, 140, 39, 0.1);
+  --color-secondary: #001731;
+  --color-secondary-hover: #000c1b;
+  --color-bg-base: #F9F9F9;
+  --color-bg-card: #FFFFFF;
+  --color-text-main: #111827;
+  --color-text-muted: #6B7280;
+  --color-text-light: #F3F4F6;
+  --color-border: #E5E7EB;
+
+  /* Status Colors */
+  --color-success: #16A34A;
+  --color-success-light: rgba(22, 163, 74, 0.1);
+  --color-warning: #F59E0B;
+  --color-warning-light: rgba(245, 158, 11, 0.1);
+  --color-error: #DC2626;
+  --color-error-light: rgba(220, 38, 38, 0.1);
+  --color-info: #2563EB;
+  --color-info-light: rgba(37, 99, 235, 0.1);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 23, 49, 0.08);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-blur: blur(12px);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s ease;
+
+  /* Layout dimensions */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --navbar-height: 70px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 18px;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] {
+  --color-bg-base: #0F172A;
+  --color-bg-card: #1E293B;
+  --color-text-main: #F8FAFC;
+  --color-text-muted: #94A3B8;
+  --color-border: #334155;
+  --color-secondary: #0A0F1D;
+  --color-secondary-hover: #02050b;
+
+  /* Glassmorphism Dark */
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --color-primary-light: rgba(71, 140, 39, 0.15);
+}
