@@ -113,3 +113,58 @@ function hideLoader(elementId = 'global-loader') {
     loader.remove();
   }
 }
+
+// Global Custom Confirm dialog utility
+window.confirmarAcao = function(titulo, texto, confirmText = 'Confirmar', cancelText = 'Cancelar', isDanger = false) {
+  return new Promise((resolve) => {
+    // Create elements
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-modal-overlay';
+    
+    // Choose icon and button classes
+    const iconClass = isDanger ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-question';
+    const btnConfirmClass = isDanger ? 'btn-danger' : 'btn-primary';
+    const colorStyle = isDanger ? 'style="color: var(--color-error);"' : 'style="color: var(--color-warning);"';
+    
+    overlay.innerHTML = `
+      <div class="confirm-modal-box">
+        <div class="confirm-modal-header">
+          <i class="${iconClass}" ${colorStyle}></i>
+          <h3>${titulo}</h3>
+        </div>
+        <div class="confirm-modal-body">
+          <p>${texto}</p>
+        </div>
+        <div class="confirm-modal-footer">
+          <button class="btn btn-secondary confirm-cancel-btn" type="button" style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">${cancelText}</button>
+          <button class="btn ${btnConfirmClass} confirm-ok-btn" type="button">${confirmText}</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Trigger animations
+    setTimeout(() => {
+      overlay.classList.add('active');
+    }, 10);
+    
+    const cleanup = (result) => {
+      overlay.classList.remove('active');
+      setTimeout(() => {
+        overlay.remove();
+      }, 200);
+      resolve(result);
+    };
+    
+    overlay.querySelector('.confirm-cancel-btn').addEventListener('click', () => cleanup(false));
+    overlay.querySelector('.confirm-ok-btn').addEventListener('click', () => cleanup(true));
+    
+    // Close on clicking backdrop
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        cleanup(false);
+      }
+    });
+  });
+};

@@ -1,0 +1,61 @@
+window.inquilinosTabelaState = window.inquilinosTabelaState || {
+  listaInquilinos: [],
+  listaFiltrada: [],
+  paginaAtual: 1,
+  itensPorPagina: 20,
+  eventosBindados: false
+};
+
+function onlyDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function maskCpfCnpj(value) {
+  const digits = onlyDigits(value);
+  if (digits.length === 11) return `${digits.slice(0, 3)}.***.***-${digits.slice(-2)}`;
+  if (digits.length === 14) return `${digits.slice(0, 2)}.***.***/****-${digits.slice(-2)}`;
+  return value || "-";
+}
+
+function maskRg(value) {
+  const digits = onlyDigits(value);
+  if (!digits) return "-";
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}${"*".repeat(Math.max(1, digits.length - 4))}${digits.slice(-2)}`;
+}
+
+function formatTelefone(value) {
+  const digits = onlyDigits(value);
+  if (!digits) return "Não informado";
+  if (digits.length < 10) return "Não informado";
+  if (digits.length === 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  if (digits.length === 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return value || "Não informado";
+}
+
+function formatEmail(value) {
+  const email = String(value || "").trim();
+  if (!email || !email.includes("@")) return "Não informado";
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return "Não informado";
+  const localMask = local.length <= 2 ? `${local.charAt(0) || "*"}***` : `${local.slice(0, 2)}***`;
+  return `${localMask}@${domain}`;
+}
+
+function maskTelefoneExibicao(value) {
+  const raw = String(value || "").trim();
+  if (raw.includes("*")) return raw;
+  const digits = onlyDigits(value);
+  if (digits.length === 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)}****-**${digits.slice(-2)}`;
+  if (digits.length === 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)}***-**${digits.slice(-2)}`;
+  return "Não informado";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

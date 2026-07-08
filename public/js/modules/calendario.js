@@ -46,7 +46,7 @@ function bindUiEvents() {
   });
 
   // Filter Checkboxes & Selects
-  const filters = ['chk-contratos', 'chk-recebimentos', 'chk-despesas', 'chk-manutencoes', 'chk-vistorias', 'filter-imovel'];
+  const filters = ['chk-contratos', 'chk-recebimentos', 'chk-despesas', 'chk-manutencoes', 'filter-imovel'];
   filters.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -103,7 +103,7 @@ async function loadImoveisFilter() {
       res.data.forEach(imovel => {
         const opt = document.createElement('option');
         opt.value = imovel.id;
-        opt.textContent = `${imovel.nome} (${imovel.codigo})`;
+        opt.textContent = imovel.nome;
         select.appendChild(opt);
       });
     }
@@ -166,7 +166,6 @@ function getActiveFilters() {
   if (document.getElementById('chk-recebimentos').checked) tipos.push('Recebimento');
   if (document.getElementById('chk-despesas').checked) tipos.push('Despesa');
   if (document.getElementById('chk-manutencoes').checked) tipos.push('Manutencao');
-  if (document.getElementById('chk-vistorias').checked) tipos.push('Vistoria');
 
   const imovelId = document.getElementById('filter-imovel').value;
 

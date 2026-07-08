@@ -1,0 +1,50 @@
+function aplicarFiltros() {
+  const state = window.imoveisListarState;
+  const busca = document.getElementById("filtroBusca")?.value.toLowerCase() || "";
+  const status = document.getElementById("filtroStatus")?.value || "";
+  const tipo = document.getElementById("filtroTipo")?.value || "";
+
+  state.listaFiltrada = state.listaImoveis.filter(i => {
+    const texto = `${i.titulo || ""} ${i.complemento || ""} ${i.condominio || ""} ${i.inquilino || ""}`.toLowerCase();
+    if (busca && !texto.includes(busca)) return false;
+    if (status && i.status !== status) return false;
+    if (tipo && i.tipo !== tipo) return false;
+    return true;
+  });
+
+  state.paginaAtual = 1;
+  renderTabelaPaginada();
+}
+
+function configurarFiltrosImoveis() {
+  document.addEventListener("input", e => {
+    if (e.target.id === "filtroBusca") aplicarFiltros();
+  });
+
+  document.addEventListener("change", e => {
+    const state = window.imoveisListarState;
+    if (e.target.id === "filtroStatus" || e.target.id === "filtroTipo") aplicarFiltros();
+    if (e.target.id === "itensPorPagina") {
+      state.itensPorPagina = Math.max(1, parseInt(e.target.value || "20", 10));
+      state.paginaAtual = 1;
+      renderTabelaPaginada();
+    }
+  });
+}
+
+function paginaAnteriorImoveis() {
+  const state = window.imoveisListarState;
+  if (state.paginaAtual > 1) {
+    state.paginaAtual -= 1;
+    renderTabelaPaginada();
+  }
+}
+
+function proximaPaginaImoveis() {
+  const state = window.imoveisListarState;
+  const totalPaginas = Math.max(1, Math.ceil(state.listaFiltrada.length / state.itensPorPagina));
+  if (state.paginaAtual < totalPaginas) {
+    state.paginaAtual += 1;
+    renderTabelaPaginada();
+  }
+}

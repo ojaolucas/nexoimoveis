@@ -1,0 +1,842 @@
+(function () {
+  const form = document.getElementById('inquilinoNovoForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const saveAnotherBtn = document.getElementById('saveAnotherBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const tipoPessoaInput = document.getElementById('tipoPessoaInput');
+  const cpfField = document.getElementById('cpfField');
+  const cnpjField = document.getElementById('cnpjField');
+  const cpfInput = document.getElementById('cpfInput');
+  const cnpjInput = document.getElementById('cnpjInput');
+  const razaoSocialField = document.getElementById('razaoSocialField');
+  const razaoSocialInput = document.getElementById('razaoSocialInput');
+  const docsDropzone = document.getElementById('docsDropzone');
+  const docsInput = document.getElementById('docsInput');
+  const docsUploadHelp = document.getElementById('docsUploadHelp');
+  const docsPendingList = document.getElementById('docsPendingList');
+  const docsSavedWrap = document.getElementById('docsSavedWrap');
+  const docsSavedList = document.getElementById('docsSavedList');
+  const telefoneInput = document.getElementById('telefoneInput');
+  const rgInput = document.getElementById('rgInput');
+  const rgOrgaoInput = form?.querySelector('input[name="rg_orgao"]');
+  const cepInput = document.getElementById('cepInput');
+  const cepSearchBtn = document.getElementById('cepSearchBtn');
+  const ruaInput = document.getElementById('ruaInput');
+  const numeroInput = document.getElementById('numeroInput');
+  const bairroInput = document.getElementById('bairroInput');
+  const cidadeInput = document.getElementById('cidadeInput');
+  const ufInput = document.getElementById('ufInput');
+  const imovelMoradiaInput = document.getElementById('imovelMoradiaInput');
+  const imovelMoradiaHelp = document.getElementById('imovelMoradiaHelp');
+  const pageTitle = document.querySelector('.inq-new-header h1');
+  const pageSubtitle = document.querySelector('.inq-new-header p');
+  const urlParams = new URLSearchParams(window.location.search);
+  const editId = Number(urlParams.get('id') || 0);
+  const isEditMode = Number.isFinite(editId) && editId > 0;
+  const DOC_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
+  const DOC_UPLOAD_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+  let isSubmitting = false;
+  let imoveisMoradia = [];
+  let imovelMoradiaSelecionado = '';
+  let pendingDocumentFiles = [];
+  let savedDocuments = [];
+
+  if (!form) return;
+
+  carregarImoveisMoradia();
+  inicializarUploadDocumentos();
+
+  if (isEditMode) {
+    if (pageTitle) pageTitle.textContent = 'Edite o inquilino';
+    if (pageSubtitle) pageSubtitle.textContent = 'Atualize os dados para manter contratos e cobranças consistentes.';
+    if (saveAnotherBtn) saveAnotherBtn.style.display = 'none';
+    if (submitBtn) submitBtn.textContent = 'Salvar alterações';
+    carregarDadosEdicao(editId);
+    carregarDocumentosSalvos(editId);
+  }
+
+  tipoPessoaInput?.addEventListener('change', () => {
+    atualizarCampoDocumentoPorTipo(true, true);
+  });
+
+  cpfInput?.addEventListener('input', () => { cpfInput.value = maskCpf(cpfInput.value); });
+  cnpjInput?.addEventListener('input', () => { cnpjInput.value = maskCnpj(cnpjInput.value); });
+
+  telefoneInput?.addEventListener('input', () => {
+    telefoneInput.value = maskTelefone(telefoneInput.value);
+  });
+
+  rgInput?.addEventListener('input', () => {
+    rgInput.value = maskRg(rgInput.value);
+  });
+
+  rgOrgaoInput?.addEventListener('input', () => {
+    rgOrgaoInput.value = String(rgOrgaoInput.value || '').toUpperCase();
+  });
+  cepInput?.addEventListener('input', () => {
+    cepInput.value = maskCep(cepInput.value);
+  });
+  ufInput?.addEventListener('input', () => {
+    ufInput.value = String(ufInput.value || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+  });
+  cepSearchBtn?.addEventListener('click', buscarCep);
+  imovelMoradiaInput?.addEventListener('change', () => {
+    imovelMoradiaSelecionado = String(imovelMoradiaInput.value || '');
+    aplicarEnderecoDoImovelSelecionado(true);
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (isSubmitting) return;
+
+    const submitter = event.submitter || submitBtn;
+    const mode = isEditMode ? 'save' : (submitter?.dataset?.submitMode || 'save');
+    const fd = new FormData(form);
+    const nome = String(fd.get('nome') || '').trim();
+    const tipoPessoa = String(tipoPessoaInput?.value || '').trim();
+    const documento = tipoPessoa === 'juridica' ? onlyDigits(cnpjInput?.value) : onlyDigits(cpfInput?.value);
+    const razaoSocial = String(razaoSocialInput?.value || '').trim();
+    const telefone = onlyDigits(fd.get('telefone'));
+
+    if (!nome || !telefone) {
+      showError('Preencha nome e celular.');
+      return;
+    }
+
+    if (!tipoPessoa) {
+      showError('Selecione o tipo de pessoa.');
+      return;
+    }
+
+    if (tipoPessoa === 'fisica' && !documento) {
+      showError('Informe o CPF.');
+      return;
+    }
+
+    if (tipoPessoa === 'juridica' && !documento) {
+      showError('Informe o CNPJ.');
+      return;
+    }
+    if (tipoPessoa === 'juridica' && !razaoSocial) {
+      showError('Informe a razão social.');
+      return;
+    }
+
+    if (tipoPessoa === 'fisica' && documento && !isCpfValido(documento)) {
+      showError('CPF inválido.');
+      return;
+    }
+
+    if (tipoPessoa === 'juridica' && documento && !isCnpjValido(documento)) {
+      showError('CNPJ inválido.');
+      return;
+    }
+
+    fd.set('razao_social', tipoPessoa === 'juridica' ? razaoSocial : '');
+    fd.set('tipo_pessoa', tipoPessoa);
+    fd.set('cpf_cnpj', documento);
+    fd.set('rg_numero', maskRg(fd.get('rg_numero')));
+    fd.set('rg_orgao', String(fd.get('rg_orgao') || '').toUpperCase());
+    fd.set('cep', maskCep(fd.get('cep')));
+    fd.set('uf', String(fd.get('uf') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2));
+    fd.set('imovel_moradia_id', String(imovelMoradiaInput?.value || ''));
+
+    setLoading(true, submitter);
+    setDocumentosBusy(true);
+    try {
+      const endpoint = isEditMode
+        ? `/inquilinos/api/editar.php?id=${encodeURIComponent(String(editId))}`
+        : '/inquilinos/api/criar.php';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: fd
+      });
+      const json = await response.json();
+
+      if (!json?.ok) {
+        showError(json?.erro || 'Não foi possível salvar o inquilino.');
+        return;
+      }
+
+      const inquilinoId = isEditMode ? editId : Number(json.id || 0);
+      const upload = await enviarDocumentosPendentes(inquilinoId);
+      const msgBase = isEditMode ? 'Inquilino atualizado com sucesso' : 'Inquilino cadastrado com sucesso';
+      const msgFinal = upload.ok
+        ? (upload.uploaded ? `${msgBase}. Documentos enviados para validação.` : msgBase)
+        : `${msgBase}. Houve falha ao enviar os documentos.`;
+
+      if (!isEditMode && mode === 'save_another') {
+        limparFormularioNovoInquilino();
+        showSuccess(upload.ok ? 'Inquilino cadastrado. Você pode adicionar outro.' : msgFinal);
+        if (!upload.ok) showError(upload.erro || 'Não foi possível enviar os documentos.');
+        form.querySelector('input[name="nome"]')?.focus();
+        return;
+      }
+
+      showSuccess(msgFinal);
+      if (!upload.ok) {
+        showError(upload.erro || 'Não foi possível enviar os documentos.');
+      }
+      setTimeout(() => {
+        window.location.href = '/inquilinos/';
+      }, upload.ok ? 650 : 1200);
+    } catch (_) {
+      showError('Erro de conexão. Tente novamente.');
+    } finally {
+      setLoading(false);
+      setDocumentosBusy(false);
+    }
+  });
+
+  function inicializarUploadDocumentos() {
+    if (!docsDropzone || !docsInput || !docsPendingList) return;
+
+    docsDropzone.addEventListener('click', () => {
+      if (!docsInput.disabled) docsInput.click();
+    });
+
+    docsDropzone.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      if (!docsInput.disabled) docsInput.click();
+    });
+
+    docsDropzone.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      docsDropzone.classList.add('is-dragover');
+    });
+
+    docsDropzone.addEventListener('dragleave', () => {
+      docsDropzone.classList.remove('is-dragover');
+    });
+
+    docsDropzone.addEventListener('drop', (event) => {
+      event.preventDefault();
+      docsDropzone.classList.remove('is-dragover');
+      adicionarDocumentos(event.dataTransfer?.files);
+    });
+
+    docsInput.addEventListener('change', () => {
+      adicionarDocumentos(docsInput.files);
+      docsInput.value = '';
+    });
+
+    docsPendingList.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-doc-index]');
+      if (!btn) return;
+      const index = Number(btn.dataset.docIndex || -1);
+      if (!Number.isInteger(index) || index < 0) return;
+      pendingDocumentFiles.splice(index, 1);
+      renderizarDocumentosPendentes();
+    });
+
+    docsSavedList?.addEventListener('click', async (event) => {
+      const btn = event.target.closest('[data-doc-delete-id]');
+      if (!btn || btn.disabled) return;
+      event.preventDefault();
+      const docId = Number(btn.dataset.docDeleteId || 0);
+      if (!docId) return;
+      await excluirDocumentoSalvo(docId, btn);
+    });
+
+    renderizarDocumentosPendentes();
+    renderizarDocumentosSalvos();
+  }
+
+  function adicionarDocumentos(fileList) {
+    const arquivos = Array.from(fileList || []);
+    if (!arquivos.length) return;
+
+    const erros = [];
+    arquivos.forEach((file) => {
+      const validacao = validarDocumento(file);
+      if (!validacao.ok) {
+        erros.push(`${file.name}: ${validacao.erro}`);
+        form.querySelector('input[name="nome"]')?.focus();
+        return;
+      }
+
+      const duplicado = pendingDocumentFiles.some((item) =>
+        item.name === file.name && item.size === file.size && item.lastModified === file.lastModified
+      );
+      if (!duplicado) pendingDocumentFiles.push(file);
+    });
+
+    renderizarDocumentosPendentes();
+    if (erros.length) showError(erros.join('\n'));
+  }
+
+  function validarDocumento(file) {
+    const nome = String(file?.name || '').toLowerCase();
+    const mime = String(file?.type || '').toLowerCase();
+    const pdfPorExtensao = nome.endsWith('.pdf');
+    const tipoValido = DOC_UPLOAD_TYPES.has(mime) || (pdfPorExtensao && (mime === '' || mime === 'application/octet-stream'));
+
+    if (!tipoValido) return { ok: false, erro: 'tipo de arquivo não permitido' };
+    if (Number(file?.size || 0) <= 0) return { ok: false, erro: 'arquivo vazio' };
+    if (Number(file.size || 0) > DOC_UPLOAD_MAX_BYTES) return { ok: false, erro: 'arquivo acima de 5MB' };
+    return { ok: true };
+  }
+
+  function renderizarDocumentosPendentes() {
+    if (!docsPendingList) return;
+
+    if (docsUploadHelp) {
+      docsUploadHelp.textContent = pendingDocumentFiles.length
+        ? `${pendingDocumentFiles.length} documento(s) pronto(s) para envio ao salvar.`
+        : 'Os arquivos serão enviados junto com o cadastro do inquilino.';
+    }
+
+    if (!pendingDocumentFiles.length) {
+      docsPendingList.innerHTML = '<p class="inq-doc-empty">Nenhum documento selecionado.</p>';
+      return;
+    }
+
+    docsPendingList.innerHTML = pendingDocumentFiles.map((file, index) => `
+      <div class="inq-doc-item">
+        <div class="inq-doc-meta">
+          <strong>${escapeHtml(file.name)}</strong>
+          <span>${formatarTamanhoArquivo(file.size)}</span>
+        </div>
+        <div class="inq-doc-actions">
+          <button type="button" class="inq-doc-remove" data-doc-index="${index}">Remover</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderizarDocumentosSalvos() {
+    if (!docsSavedWrap || !docsSavedList) return;
+
+    if (!isEditMode) {
+      docsSavedWrap.hidden = true;
+      return;
+    }
+
+    docsSavedWrap.hidden = false;
+    if (!savedDocuments.length) {
+      docsSavedList.innerHTML = '<p class="inq-doc-empty">Nenhum documento salvo para este inquilino.</p>';
+      return;
+    }
+
+    docsSavedList.innerHTML = savedDocuments.map((doc) => `
+      <div class="inq-doc-item">
+        <div class="inq-doc-meta">
+          <strong>${escapeHtml(doc.nome_original || 'Documento')}</strong>
+          <span>${escapeHtml(docLabelStatus(doc))}</span>
+        </div>
+        <div class="inq-doc-actions">
+          ${doc.download_url ? `<a class="inq-doc-link" href="${escapeHtml(doc.download_url)}&inline=1" target="_blank" rel="noopener noreferrer">Abrir</a>` : ''}
+          <button type="button" class="inq-doc-remove" data-doc-delete-id="${Number(doc.id || 0)}">Excluir</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function docLabelStatus(doc) {
+    const status = String(doc?.scan_status || '').trim();
+    if (status === 'pending_scan') return 'Validando arquivo';
+    if (status === 'infected') return 'Arquivo removido na validação';
+    if (status === 'scan_error') return 'Erro na validação do arquivo';
+    return 'Documento salvo';
+  }
+
+  function formatarTamanhoArquivo(bytes) {
+    const value = Number(bytes || 0);
+    if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
+    return `${(value / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
+  }
+
+  function limparDocumentosPendentes() {
+    pendingDocumentFiles = [];
+    if (docsInput) docsInput.value = '';
+    renderizarDocumentosPendentes();
+  }
+
+  function limparFormularioNovoInquilino() {
+    form.reset();
+    tipoPessoaInput.value = 'fisica';
+    atualizarCampoDocumentoPorTipo(false, false);
+    cpfInput.value = '';
+    cnpjInput.value = '';
+    if (razaoSocialInput) razaoSocialInput.value = '';
+    telefoneInput.value = '';
+    rgInput.value = '';
+    if (rgOrgaoInput) rgOrgaoInput.value = '';
+    if (cepInput) cepInput.value = '';
+    if (ufInput) ufInput.value = '';
+    if (imovelMoradiaInput) imovelMoradiaInput.value = '';
+    imovelMoradiaSelecionado = '';
+    atualizarAjudaImovelMoradia(null);
+    limparDocumentosPendentes();
+  }
+
+  function setDocumentosBusy(state) {
+    if (docsInput) docsInput.disabled = state;
+    if (docsDropzone) docsDropzone.classList.toggle('is-disabled', !!state);
+  }
+
+  async function enviarDocumentosPendentes(inquilinoId) {
+    if (!inquilinoId || !pendingDocumentFiles.length) {
+      return { ok: true, uploaded: false };
+    }
+
+    const fd = new FormData();
+    fd.set('inquilino_id', String(inquilinoId));
+    pendingDocumentFiles.forEach((file) => fd.append('documentos[]', file, file.name));
+
+    const csrfToken = getCsrfToken('cadastros');
+    if (csrfToken) fd.append('_csrf', csrfToken);
+
+    try {
+      const response = await fetch('/inquilinos/api/docs_upload.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: Object.assign(
+          {
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
+        ),
+        body: fd
+      });
+      const json = await response.json();
+      if (!json?.ok) {
+        return { ok: false, erro: json?.erro || 'Não foi possível enviar os documentos.' };
+      }
+      limparDocumentosPendentes();
+      if (isEditMode && inquilinoId > 0) carregarDocumentosSalvos(inquilinoId);
+      return { ok: true, uploaded: true };
+    } catch (_) {
+      return { ok: false, erro: 'Erro de conexão ao enviar os documentos.' };
+    }
+  }
+
+  async function carregarDocumentosSalvos(inquilinoId) {
+    if (!docsSavedWrap || !docsSavedList || !inquilinoId) return;
+
+    savedDocuments = [];
+    renderizarDocumentosSalvos();
+    try {
+      const response = await fetch(`/inquilinos/api/docs_listar.php?inquilino_id=${encodeURIComponent(String(inquilinoId))}`, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      const json = await response.json();
+      if (!json?.ok || !Array.isArray(json.documentos)) {
+        docsSavedList.innerHTML = '<p class="inq-doc-empty">Não foi possível carregar os documentos salvos.</p>';
+        return;
+      }
+      savedDocuments = json.documentos;
+      renderizarDocumentosSalvos();
+    } catch (_) {
+      docsSavedList.innerHTML = '<p class="inq-doc-empty">Erro ao carregar os documentos salvos.</p>';
+    }
+  }
+
+  async function excluirDocumentoSalvo(docId, btn) {
+    const csrfToken = getCsrfToken('cadastros');
+    const fd = new FormData();
+    fd.set('id', String(docId));
+    if (csrfToken) fd.append('_csrf', csrfToken);
+
+    btn.disabled = true;
+    try {
+      const response = await fetch('/inquilinos/api/docs_excluir.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: Object.assign(
+          {
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
+        ),
+        body: fd
+      });
+      const json = await response.json();
+      if (!json?.ok) {
+        showError(json?.erro || 'Não foi possível excluir o documento.');
+        return;
+      }
+      savedDocuments = savedDocuments.filter((doc) => Number(doc.id || 0) !== docId);
+      renderizarDocumentosSalvos();
+      showSuccess('Documento excluído com sucesso.');
+    } catch (_) {
+      showError('Erro de conexão ao excluir o documento.');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function setLoading(state, clickedBtn) {
+    isSubmitting = state;
+
+    const controls = [submitBtn, saveAnotherBtn, cancelBtn].filter(Boolean);
+    controls.forEach((el) => {
+      if ('disabled' in el) el.disabled = state;
+      if (state) el.classList.add('is-disabled');
+      else el.classList.remove('is-disabled');
+    });
+
+    if (submitBtn) {
+      if (state && clickedBtn === submitBtn) {
+        submitBtn.textContent = 'Salvando...';
+      } else {
+        submitBtn.textContent = isEditMode ? 'Salvar alterações' : 'Salvar inquilino';
+      }
+    }
+    if (saveAnotherBtn) {
+      saveAnotherBtn.textContent = state && clickedBtn === saveAnotherBtn ? 'Salvando...' : 'Salvar e criar outro';
+    }
+  }
+
+  function showError(message) {
+    if (typeof window.toastWarning === 'function') {
+      window.toastWarning(message);
+      return;
+    }
+    alert(message);
+  }
+
+  function showSuccess(message) {
+    if (typeof window.toastSuccess === 'function') {
+      window.toastSuccess(message);
+      return;
+    }
+    alert(message);
+  }
+
+  function onlyDigits(value) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  function maskCpf(value) {
+    const digits = onlyDigits(value).slice(0, 11);
+    return digits
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  }
+
+  function maskCnpj(value) {
+    const digits = onlyDigits(value).slice(0, 14);
+    return digits
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  }
+
+  function maskTelefone(value) {
+    const digits = onlyDigits(value).slice(0, 11);
+    if (digits.length <= 10) {
+      return digits
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{4})(\d)/, '$1-$2');
+    }
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2');
+  }
+
+  function maskRg(value) {
+    const digits = onlyDigits(value).slice(0, 10);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+    if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
+    if (digits.length === 9) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}-${digits.slice(8, 9)}`;
+    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}-${digits.slice(8, 10)}`;
+  }
+
+  function maskCep(value) {
+    const digits = onlyDigits(value).slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  }
+
+  async function buscarCep() {
+    const cep = onlyDigits(cepInput?.value).slice(0, 8);
+    if (cep.length !== 8) {
+      showError('Informe um CEP válido com 8 dígitos.');
+      return;
+    }
+
+    if (cepSearchBtn) cepSearchBtn.textContent = '...';
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const j = await r.json();
+      if (j?.erro) {
+        showError('CEP não encontrado.');
+        return;
+      }
+      if (!String(ruaInput?.value || '').trim()) ruaInput.value = j.logradouro || '';
+      if (!String(bairroInput?.value || '').trim()) bairroInput.value = j.bairro || '';
+      if (!String(cidadeInput?.value || '').trim()) cidadeInput.value = j.localidade || '';
+      if (ufInput && !String(ufInput.value || '').trim()) ufInput.value = String(j.uf || '').toUpperCase();
+      numeroInput?.focus();
+    } catch (_) {
+      showError('Falha ao buscar CEP. Tente novamente.');
+    } finally {
+      if (cepSearchBtn) cepSearchBtn.textContent = '🔍';
+    }
+  }
+
+  async function carregarImoveisMoradia() {
+    if (!imovelMoradiaInput) return;
+
+    try {
+      const response = await fetch('/imoveis/api/listar_select.php', {
+        method: 'GET',
+        credentials: 'same-origin'
+      });
+      const json = await response.json();
+      if (!json?.ok || !Array.isArray(json.imoveis)) return;
+
+      imoveisMoradia = json.imoveis;
+      renderizarOpcoesImoveisMoradia();
+      if (imovelMoradiaSelecionado) {
+        imovelMoradiaInput.value = imovelMoradiaSelecionado;
+        aplicarEnderecoDoImovelSelecionado(false);
+      }
+    } catch (_) {}
+  }
+
+  function renderizarOpcoesImoveisMoradia() {
+    if (!imovelMoradiaInput) return;
+
+    const atual = imovelMoradiaSelecionado || String(imovelMoradiaInput.value || '');
+    const options = ['<option value="">Não vincular imóvel agora</option>'];
+    imoveisMoradia.forEach((imovel) => {
+      const id = String(imovel.id || '');
+      if (!id) return;
+      const label = montarLabelImovelMoradia(imovel);
+      options.push(`<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`);
+    });
+
+    imovelMoradiaInput.innerHTML = options.join('');
+    imovelMoradiaInput.value = atual;
+  }
+
+  function aplicarEnderecoDoImovelSelecionado(substituirEndereco) {
+    const imovel = obterImovelMoradiaSelecionado();
+    atualizarAjudaImovelMoradia(imovel);
+    if (!imovel || !substituirEndereco) return;
+
+    if (cepInput) cepInput.value = maskCep(imovel.cep || '');
+    if (ruaInput) ruaInput.value = imovel.rua || '';
+    if (numeroInput) numeroInput.value = imovel.numero || '';
+    if (bairroInput) bairroInput.value = imovel.bairro || '';
+    if (cidadeInput) cidadeInput.value = imovel.cidade || '';
+    if (ufInput) ufInput.value = String(imovel.uf || '').toUpperCase();
+  }
+
+  function obterImovelMoradiaSelecionado() {
+    const id = String(imovelMoradiaInput?.value || '');
+    if (!id) return null;
+    return imoveisMoradia.find((imovel) => String(imovel.id || '') === id) || null;
+  }
+
+  function atualizarAjudaImovelMoradia(imovel) {
+    if (!imovelMoradiaHelp) return;
+    imovelMoradiaHelp.textContent = imovel
+      ? 'Endereço preenchido com o imóvel selecionado. Esse mesmo vínculo aparece no cadastro do imóvel.'
+      : 'Escolha um imóvel já cadastrado. O endereço abaixo será preenchido com o endereço desse imóvel.';
+  }
+
+  function formatarEnderecoImovel(imovel) {
+    const rua = String(imovel?.rua || '').trim();
+    const numero = String(imovel?.numero || '').trim();
+    const complemento = String(imovel?.complemento || '').trim();
+    const bairro = String(imovel?.bairro || '').trim();
+    const cidade = String(imovel?.cidade || '').trim();
+    const uf = String(imovel?.uf || '').trim().toUpperCase();
+    const cep = maskCep(imovel?.cep || '');
+
+    const enderecoPrincipal = [rua, numero].filter(Boolean).join(', ');
+    const cidadeUf = cidade && uf ? `${cidade}/${uf}` : (cidade || uf);
+    return [
+      enderecoPrincipal,
+      complemento,
+      bairro,
+      cidadeUf,
+      cep ? `CEP ${cep}` : ''
+    ].filter(Boolean).join(' - ');
+  }
+
+  function montarLabelImovelMoradia(imovel) {
+    const id = String(imovel?.id || '').trim();
+    const tipo = String(imovel?.tipo || '').trim();
+    const titulo = String(imovel?.titulo || '').trim();
+    const endereco = formatarEnderecoImovel(imovel);
+    const tituloNormalizado = normalizarTextoComparacao(titulo);
+    const tipoNormalizado = normalizarTextoComparacao(tipo);
+    const ruaNormalizada = normalizarTextoComparacao(imovel?.rua || '');
+    const numeroNormalizado = normalizarTextoComparacao(imovel?.numero || '');
+    const tituloPareceEndereco = ruaNormalizada && tituloNormalizado.includes(ruaNormalizada)
+      && (!numeroNormalizado || tituloNormalizado.includes(numeroNormalizado));
+    const usarTitulo = titulo
+      && tituloNormalizado !== tipoNormalizado
+      && !tituloPareceEndereco
+      && !(tipoNormalizado && tituloNormalizado.startsWith(`${tipoNormalizado} -`));
+    const base = [tipo, usarTitulo ? titulo : ''].filter(Boolean).join(' - ') || titulo || `Imóvel #${id}`;
+
+    if (!endereco) return base;
+    return `${base} - ${endereco}`;
+  }
+
+  function normalizarTextoComparacao(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    })[ch]);
+  }
+
+  function isCpfValido(cpf) {
+    if (/^(\d)\1+$/.test(cpf)) return false;
+    let sum = 0;
+    for (let i = 0; i < 9; i += 1) sum += Number(cpf[i]) * (10 - i);
+    let r = (sum * 10) % 11;
+    if (r === 10) r = 0;
+    if (r !== Number(cpf[9])) return false;
+
+    sum = 0;
+    for (let i = 0; i < 10; i += 1) sum += Number(cpf[i]) * (11 - i);
+    r = (sum * 10) % 11;
+    if (r === 10) r = 0;
+    return r === Number(cpf[10]);
+  }
+
+  function isCnpjValido(cnpj) {
+    if (/^(\d)\1+$/.test(cnpj)) return false;
+
+    const calc = (base, weights) => {
+      let sum = 0;
+      for (let i = 0; i < weights.length; i += 1) {
+        sum += Number(base[i]) * weights[i];
+      }
+      const rest = sum % 11;
+      return rest < 2 ? 0 : 11 - rest;
+    };
+
+    const d1 = calc(cnpj, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+    const d2 = calc(cnpj, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+
+    return d1 === Number(cnpj[12]) && d2 === Number(cnpj[13]);
+  }
+
+  function carregarDadosEdicao(id) {
+    const fd = new FormData();
+    fd.set('id', String(id));
+    const csrfToken = getCsrfToken('cadastros');
+    if (csrfToken) fd.set('_csrf', csrfToken);
+
+    fetch('/inquilinos/api/detalhe.php', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+      body: fd
+    })
+      .then((r) => r.json())
+      .then((j) => {
+        if (!j?.ok || !j.inquilino) {
+          showError('Não foi possível carregar os dados para edição.');
+          return;
+        }
+        preencherFormularioEdicao(j.inquilino);
+      })
+      .catch(() => showError('Erro ao carregar dados do inquilino.'));
+  }
+
+  function preencherFormularioEdicao(inq) {
+    const set = (selector, value) => {
+      const el = form.querySelector(selector);
+      if (el) el.value = value ?? '';
+    };
+    const setDate = (selector, value) => {
+      const el = form.querySelector(selector);
+      if (!el) return;
+      const data = /^\d{4}-\d{2}-\d{2}$/.test(String(value || '')) ? String(value) : '';
+      el.defaultValue = '';
+      el.value = data;
+      if (data === '') el.valueAsDate = null;
+    };
+
+    set('input[name="nome"]', inq.nome || '');
+    set('#razaoSocialInput', inq.razao_social || '');
+    set('input[name="telefone"]', maskTelefone(inq.telefone || ''));
+    set('input[name="email"]', inq.email || '');
+    setDate('input[name="data_nascimento"]', inq.data_nascimento || '');
+    set('input[name="rg_numero"]', maskRg(inq.rg_numero || ''));
+    set('input[name="rg_orgao"]', String(inq.rg_orgao || '').toUpperCase());
+    set('select[name="rg_uf"]', inq.rg_uf || '');
+    set('select[name="genero"]', inq.genero || '');
+    set('input[name="nacionalidade"]', inq.nacionalidade || '');
+    set('select[name="estado_civil"]', inq.estado_civil || '');
+    set('input[name="profissao"]', inq.profissao || '');
+    set('input[name="cep"]', maskCep(inq.cep || ''));
+    set('input[name="rua"]', inq.rua || '');
+    set('input[name="numero"]', inq.numero || '');
+    set('input[name="bairro"]', inq.bairro || '');
+    set('input[name="cidade"]', inq.cidade || '');
+    set('input[name="uf"]', String(inq.uf || '').toUpperCase());
+    imovelMoradiaSelecionado = String(inq.imovel_moradia_id || '');
+    if (imovelMoradiaInput) {
+      imovelMoradiaInput.value = imovelMoradiaSelecionado;
+      aplicarEnderecoDoImovelSelecionado(false);
+    }
+
+    const docDigits = onlyDigits(inq.cpf_cnpj || inq.cpf || '');
+    tipoPessoaInput.value = docDigits.length === 14 ? 'juridica' : 'fisica';
+    atualizarCampoDocumentoPorTipo(false, false);
+    if (tipoPessoaInput.value === 'juridica') cnpjInput.value = maskCnpj(docDigits);
+    else cpfInput.value = maskCpf(docDigits);
+  }
+
+  function atualizarCampoDocumentoPorTipo(limparValor, focarCampo) {
+    const tipo = String(tipoPessoaInput?.value || '');
+    const isJuridica = tipo === 'juridica';
+    if (cpfField) cpfField.style.display = isJuridica ? 'none' : '';
+    if (cnpjField) cnpjField.style.display = isJuridica ? '' : 'none';
+    if (razaoSocialField) razaoSocialField.style.display = isJuridica ? '' : 'none';
+    if (razaoSocialInput) razaoSocialInput.required = isJuridica;
+    if (limparValor) {
+      if (isJuridica) cpfInput.value = '';
+      else {
+        cnpjInput.value = '';
+        if (razaoSocialInput) razaoSocialInput.value = '';
+      }
+    }
+    if (focarCampo) (isJuridica ? cnpjInput : cpfInput)?.focus();
+  }
+
+  function getCsrfToken(namespace) {
+    const cfg = window.LOKAFY_CSRF || {};
+    const byNamespace = cfg.byNamespace && typeof cfg.byNamespace === 'object' ? cfg.byNamespace : {};
+    return String(byNamespace[namespace] || cfg.token || document.querySelector('meta[name="csrf-token"]')?.content || '').trim();
+  }
+
+  if (!isEditMode) {
+    tipoPessoaInput.value = 'fisica';
+    atualizarCampoDocumentoPorTipo(false, false);
+    form.querySelector('input[name="nome"]')?.focus();
+  }
+})();

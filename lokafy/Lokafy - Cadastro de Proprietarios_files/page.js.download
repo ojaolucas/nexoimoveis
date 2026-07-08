@@ -1,0 +1,528 @@
+(function () {
+  const form = document.getElementById("proprietarioNovoForm");
+  if (!form) return;
+
+  const tipoPessoaInput = document.getElementById("tipoPessoaInput");
+  const nomeInput = document.getElementById("nomeInput");
+  const nomeLabel = document.getElementById("nomeLabel");
+  const docsDropzone = document.getElementById("docsDropzone");
+  const docsInput = document.getElementById("docsInput");
+  const docsUploadHelp = document.getElementById("docsUploadHelp");
+  const docsPendingList = document.getElementById("docsPendingList");
+  const docsSavedWrap = document.getElementById("docsSavedWrap");
+  const docsSavedList = document.getElementById("docsSavedList");
+  const razaoSocialField = document.getElementById("razaoSocialField");
+  const razaoSocialInput = document.getElementById("razaoSocialInput");
+  const cpfField = document.getElementById("cpfField");
+  const cnpjField = document.getElementById("cnpjField");
+  const cpfInput = document.getElementById("cpfInput");
+  const cnpjInput = document.getElementById("cnpjInput");
+  const toggleRepresentanteBtn = document.getElementById("toggleRepresentanteBtn");
+  const representanteFieldsWrap = document.getElementById("representanteFieldsWrap");
+  const repNomeInput = document.getElementById("repNomeInput");
+  const repCpfInput = document.getElementById("repCpfInput");
+  const repCargoInput = document.getElementById("repCargoInput");
+  const telefoneInput = document.getElementById("telefoneInput");
+  const rgInput = document.getElementById("rgInput");
+  const rgOrgaoInput = document.getElementById("rgOrgaoInput");
+  const estadoInput = document.getElementById("estadoInput");
+  const rgUfInput = document.getElementById("rgUfInput");
+  const cepInput = document.getElementById("cepInput");
+  const cepSearchBtn = document.getElementById("cepSearchBtn");
+  const ruaInput = document.getElementById("ruaInput");
+  const numeroInput = document.getElementById("numeroInput");
+  const bairroInput = document.getElementById("bairroInput");
+  const cidadeInput = document.getElementById("cidadeInput");
+  const submitBtn = document.getElementById("submitBtn");
+  const saveAnotherBtn = document.getElementById("saveAnotherBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const tituloPagina = document.getElementById("tituloPagina");
+
+  const editId = Number(new URLSearchParams(window.location.search).get("id") || 0);
+  const isEditMode = Number.isFinite(editId) && editId > 0;
+  const DOC_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
+  const DOC_UPLOAD_TYPES = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
+  let saving = false;
+  let pendingDocumentFiles = [];
+  let savedDocuments = [];
+
+  const toastW = (msg) => {
+    if (window.toastWarning) window.toastWarning(msg);
+    else if (window.toastError) window.toastError(msg);
+    else window.alert(msg);
+  };
+  const toastS = (msg) => {
+    if (window.toastSuccess) window.toastSuccess(msg);
+    else window.alert(msg);
+  };
+  function onlyDigits(v) { return String(v || "").replace(/\D/g, ""); }
+  function maskCpf(v) { const d = onlyDigits(v).slice(0, 11); return d.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2"); }
+  function maskCnpj(v) { const d = onlyDigits(v).slice(0, 14); return d.replace(/(\d{2})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1/$2").replace(/(\d{4})(\d{1,2})$/, "$1-$2"); }
+  function maskTelefone(v) { const d = onlyDigits(v).slice(0, 11); return d.length <= 10 ? d.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2") : d.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2"); }
+  function maskRg(v) { const d = onlyDigits(v).slice(0, 10); if (d.length <= 2) return d; if (d.length <= 5) return `${d.slice(0,2)}.${d.slice(2)}`; if (d.length <= 8) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5)}`; if (d.length === 9) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}-${d.slice(8,9)}`; return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}-${d.slice(8,10)}`; }
+  function maskCep(v) { const d = onlyDigits(v).slice(0, 8); return d.length > 5 ? `${d.slice(0,5)}-${d.slice(5)}` : d; }
+  function uf(v) { return String(v || "").replace(/[^a-zA-Z]/g, "").slice(0,2).toUpperCase(); }
+  function isCpfValido(v){ const cpf = onlyDigits(v); if (cpf.length !== 11) return false; if (/^(\d)\1+$/.test(cpf)) return false; let s=0; for(let i=0;i<9;i+=1) s += Number(cpf[i])*(10-i); let r=(s*10)%11; if(r===10) r=0; if(r!==Number(cpf[9])) return false; s=0; for(let i=0;i<10;i+=1) s += Number(cpf[i])*(11-i); r=(s*10)%11; if(r===10) r=0; return r===Number(cpf[10]); }
+  function calcCnpj(base, pesos) { let soma = 0; for (let i = 0; i < pesos.length; i += 1) soma += Number(base[i]) * pesos[i]; const resto = soma % 11; return resto < 2 ? 0 : 11 - resto; }
+  function isCnpjValido(v) { const cnpj = onlyDigits(v); if (cnpj.length !== 14) return false; if (/^(\d)\1+$/.test(cnpj)) return false; const d1 = calcCnpj(cnpj, [5,4,3,2,9,8,7,6,5,4,3,2]); const d2 = calcCnpj(cnpj, [6,5,4,3,2,9,8,7,6,5,4,3,2]); return d1 === Number(cnpj[12]) && d2 === Number(cnpj[13]); }
+  async function buscarCep() {
+    const raw = onlyDigits(cepInput.value);
+    if (raw.length !== 8) {
+      toastW("Informe um CEP válido.");
+      return;
+    }
+    if (cepSearchBtn) cepSearchBtn.textContent = "...";
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+      const j = await r.json();
+      if (!j || j.erro) {
+        toastW("CEP não encontrado.");
+        return;
+      }
+      if (!String(ruaInput.value || "").trim()) ruaInput.value = j.logradouro || "";
+      if (!String(bairroInput.value || "").trim()) bairroInput.value = j.bairro || "";
+      if (!String(cidadeInput.value || "").trim()) cidadeInput.value = j.localidade || "";
+      if (!String(estadoInput.value || "").trim()) estadoInput.value = uf(j.uf || "");
+      numeroInput.focus();
+    } catch (_) {
+      toastW("Não foi possível buscar o CEP agora.");
+    } finally {
+      if (cepSearchBtn) cepSearchBtn.textContent = "🔍";
+    }
+  }
+
+  function setMode() {
+    const pj = tipoPessoaInput.value === "juridica";
+    cpfField.style.display = pj ? "none" : "";
+    cnpjField.style.display = pj ? "" : "none";
+    razaoSocialField.style.display = pj ? "" : "none";
+    razaoSocialInput.required = pj;
+    setRepresentanteOpen(false);
+    nomeLabel.textContent = pj ? "Nome do responsável *" : "Nome completo *";
+    if (pj) cpfInput.value = ""; else { cnpjInput.value = ""; razaoSocialInput.value = ""; }
+  }
+
+  function setRepresentanteOpen(open) {
+    if (!representanteFieldsWrap || !toggleRepresentanteBtn) return;
+    representanteFieldsWrap.classList.toggle("is-hidden", !open);
+    toggleRepresentanteBtn.textContent = open
+      ? "Remover representante legal"
+      : "+ Adicionar representante legal";
+  }
+
+  function clearRepresentante() {
+    repNomeInput.value = "";
+    repCpfInput.value = "";
+    repCargoInput.value = "";
+  }
+
+  function inicializarUploadDocumentos() {
+    if (!docsDropzone || !docsInput || !docsPendingList) return;
+
+    docsDropzone.addEventListener("click", () => {
+      if (!docsInput.disabled) docsInput.click();
+    });
+    docsDropzone.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      if (!docsInput.disabled) docsInput.click();
+    });
+    docsDropzone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      docsDropzone.classList.add("is-dragover");
+    });
+    docsDropzone.addEventListener("dragleave", () => {
+      docsDropzone.classList.remove("is-dragover");
+    });
+    docsDropzone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      docsDropzone.classList.remove("is-dragover");
+      adicionarDocumentos(event.dataTransfer?.files);
+    });
+    docsInput.addEventListener("change", () => {
+      adicionarDocumentos(docsInput.files);
+      docsInput.value = "";
+    });
+    docsPendingList.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-doc-index]");
+      if (!btn) return;
+      const index = Number(btn.dataset.docIndex || -1);
+      if (!Number.isInteger(index) || index < 0) return;
+      pendingDocumentFiles.splice(index, 1);
+      renderizarDocumentosPendentes();
+    });
+    docsSavedList?.addEventListener("click", async (event) => {
+      const btn = event.target.closest("[data-doc-delete-id]");
+      if (!btn || btn.disabled) return;
+      event.preventDefault();
+      const docId = Number(btn.dataset.docDeleteId || 0);
+      if (!docId) return;
+      await excluirDocumentoSalvo(docId, btn);
+    });
+    renderizarDocumentosPendentes();
+    renderizarDocumentosSalvos();
+  }
+
+  function validarDocumento(file) {
+    const nome = String(file?.name || "").toLowerCase();
+    const mime = String(file?.type || "").toLowerCase();
+    const pdfPorExtensao = nome.endsWith(".pdf");
+    const tipoValido = DOC_UPLOAD_TYPES.has(mime) || (pdfPorExtensao && (mime === "" || mime === "application/octet-stream"));
+    if (!tipoValido) return { ok: false, erro: "tipo de arquivo não permitido" };
+    if (Number(file?.size || 0) <= 0) return { ok: false, erro: "arquivo vazio" };
+    if (Number(file.size || 0) > DOC_UPLOAD_MAX_BYTES) return { ok: false, erro: "arquivo acima de 5MB" };
+    return { ok: true };
+  }
+
+  function adicionarDocumentos(fileList) {
+    const arquivos = Array.from(fileList || []);
+    if (!arquivos.length) return;
+    const erros = [];
+    arquivos.forEach((file) => {
+      const validacao = validarDocumento(file);
+      if (!validacao.ok) {
+        erros.push(`${file.name}: ${validacao.erro}`);
+        return;
+      }
+      const duplicado = pendingDocumentFiles.some((item) =>
+        item.name === file.name && item.size === file.size && item.lastModified === file.lastModified
+      );
+      if (!duplicado) pendingDocumentFiles.push(file);
+    });
+    renderizarDocumentosPendentes();
+    if (erros.length) toastW(erros.join("\n"));
+  }
+
+  function formatarTamanhoArquivo(bytes) {
+    const value = Number(bytes || 0);
+    if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
+    return `${(value / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+  }
+
+  function renderizarDocumentosPendentes() {
+    if (!docsPendingList) return;
+    if (docsUploadHelp) {
+      docsUploadHelp.textContent = pendingDocumentFiles.length
+        ? `${pendingDocumentFiles.length} documento(s) pronto(s) para envio ao salvar.`
+        : "Esse passo é opcional. Se quiser, você já pode deixar os documentos salvos agora no cadastro. Formatos aceitos: JPG, PNG, WEBP e PDF de até 5MB cada.";
+    }
+    if (!pendingDocumentFiles.length) {
+      docsPendingList.innerHTML = '<p class="prop-doc-empty">Nenhum documento selecionado.</p>';
+      return;
+    }
+    docsPendingList.innerHTML = pendingDocumentFiles.map((file, index) => `
+      <div class="prop-doc-item">
+        <div class="prop-doc-meta">
+          <strong>${escapeHtml(file.name)}</strong>
+          <span>${formatarTamanhoArquivo(file.size)}</span>
+        </div>
+        <div class="prop-doc-actions">
+          <button type="button" class="prop-doc-remove" data-doc-index="${index}">Remover</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function renderizarDocumentosSalvos() {
+    if (!docsSavedWrap || !docsSavedList) return;
+    if (!isEditMode) {
+      docsSavedWrap.hidden = true;
+      return;
+    }
+    docsSavedWrap.hidden = false;
+    if (!savedDocuments.length) {
+      docsSavedList.innerHTML = '<p class="prop-doc-empty">Nenhum documento salvo para este proprietário.</p>';
+      return;
+    }
+    docsSavedList.innerHTML = savedDocuments.map((doc) => `
+      <div class="prop-doc-item">
+        <div class="prop-doc-meta">
+          <strong>${escapeHtml(doc.nome_original || "Documento")}</strong>
+          <span>${escapeHtml(docLabelStatus(doc))}</span>
+        </div>
+        <div class="prop-doc-actions">
+          ${doc.download_url ? `<a class="prop-doc-link" href="${escapeHtml(doc.download_url)}&inline=1" target="_blank" rel="noopener noreferrer">Abrir</a>` : ""}
+          <button type="button" class="prop-doc-remove" data-doc-delete-id="${Number(doc.id || 0)}">Excluir</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function docLabelStatus(doc) {
+    const status = String(doc?.scan_status || "").trim();
+    if (status === "pending_scan") return "Validando arquivo";
+    if (status === "infected") return "Arquivo removido na validação";
+    if (status === "scan_error") return "Erro na validação do arquivo";
+    return "Documento salvo";
+  }
+
+  function limparDocumentosPendentes() {
+    pendingDocumentFiles = [];
+    if (docsInput) docsInput.value = "";
+    renderizarDocumentosPendentes();
+  }
+
+  function setDocumentosBusy(state) {
+    if (docsInput) docsInput.disabled = state;
+    if (docsDropzone) docsDropzone.classList.toggle("is-disabled", !!state);
+  }
+
+  async function enviarDocumentosPendentes(proprietarioId) {
+    if (!proprietarioId || !pendingDocumentFiles.length) {
+      return { ok: true, uploaded: false };
+    }
+    const fd = new FormData();
+    fd.set("proprietario_id", String(proprietarioId));
+    pendingDocumentFiles.forEach((file) => fd.append("documentos[]", file, file.name));
+    const csrfToken = getCsrfToken("cadastros");
+    if (csrfToken) fd.append("_csrf", csrfToken);
+    try {
+      const response = await fetch("/proprietarios/api/docs_upload.php", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: Object.assign(
+          { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
+          csrfToken ? { "X-CSRF-Token": csrfToken } : {}
+        ),
+        body: fd
+      });
+      const json = await response.json();
+      if (!json?.ok) return { ok: false, erro: json?.erro || "Não foi possível enviar os documentos." };
+      limparDocumentosPendentes();
+      if (isEditMode && proprietarioId > 0) carregarDocumentosSalvos(proprietarioId);
+      return { ok: true, uploaded: true };
+    } catch (_) {
+      return { ok: false, erro: "Erro de conexão ao enviar os documentos." };
+    }
+  }
+
+  async function carregarDocumentosSalvos(proprietarioId) {
+    if (!docsSavedWrap || !docsSavedList || !proprietarioId) return;
+    savedDocuments = [];
+    renderizarDocumentosSalvos();
+    try {
+      const response = await fetch(`/proprietarios/api/docs_listar.php?proprietario_id=${encodeURIComponent(String(proprietarioId))}`, {
+        method: "GET",
+        credentials: "same-origin",
+        headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" }
+      });
+      const json = await response.json();
+      if (!json?.ok || !Array.isArray(json.documentos)) {
+        docsSavedList.innerHTML = '<p class="prop-doc-empty">Não foi possível carregar os documentos salvos.</p>';
+        return;
+      }
+      savedDocuments = json.documentos;
+      renderizarDocumentosSalvos();
+    } catch (_) {
+      docsSavedList.innerHTML = '<p class="prop-doc-empty">Erro ao carregar os documentos salvos.</p>';
+    }
+  }
+
+  async function excluirDocumentoSalvo(docId, btn) {
+    const csrfToken = getCsrfToken("cadastros");
+    const fd = new FormData();
+    fd.set("id", String(docId));
+    if (csrfToken) fd.append("_csrf", csrfToken);
+    btn.disabled = true;
+    try {
+      const response = await fetch("/proprietarios/api/docs_excluir.php", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: Object.assign(
+          { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
+          csrfToken ? { "X-CSRF-Token": csrfToken } : {}
+        ),
+        body: fd
+      });
+      const json = await response.json();
+      if (!json?.ok) {
+        toastW(json?.erro || "Não foi possível excluir o documento.");
+        return;
+      }
+      savedDocuments = savedDocuments.filter((doc) => Number(doc.id || 0) !== docId);
+      renderizarDocumentosSalvos();
+      toastS("Documento excluído com sucesso.");
+    } catch (_) {
+      toastW("Erro de conexão ao excluir o documento.");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function setSaving(on, fromAnother) {
+    saving = on;
+    submitBtn.disabled = on; saveAnotherBtn.disabled = on; cancelBtn.disabled = on;
+    if (!on) { submitBtn.textContent = isEditMode ? "Salvar alterações" : "Salvar proprietário"; saveAnotherBtn.textContent = "Salvar e criar outro"; return; }
+    if (fromAnother) saveAnotherBtn.textContent = "Salvando..."; else submitBtn.textContent = "Salvando...";
+  }
+
+  function clearForm() {
+    form.reset();
+    tipoPessoaInput.value = "fisica";
+    cpfInput.value = ""; cnpjInput.value = ""; razaoSocialInput.value = "";
+    repNomeInput.value = ""; repCpfInput.value = ""; repCargoInput.value = "";
+    setMode();
+    limparDocumentosPendentes();
+    nomeInput.focus();
+  }
+
+  async function loadEdit() {
+    try {
+      const r = await fetch(`/proprietarios/api/editar_proprietario.php?id=${encodeURIComponent(editId)}`, { cache: "no-store" });
+      const j = await r.json();
+      if (!j?.ok || !j.proprietario) { toastW(j?.erro || "Erro ao carregar proprietário."); return; }
+      const p = j.proprietario;
+      nomeInput.value = p.nome || "";
+      document.getElementById("emailInput").value = p.email || "";
+      telefoneInput.value = maskTelefone(p.telefone || "");
+      rgInput.value = maskRg(p.rg_numero || "");
+      rgOrgaoInput.value = String(p.rg_orgao || "").toUpperCase();
+      rgUfInput.value = String(p.rg_uf || "").toUpperCase();
+      cepInput.value = maskCep(p.cep || "");
+      document.getElementById("ruaInput").value = p.rua || "";
+      document.getElementById("numeroInput").value = p.numero || "";
+      document.getElementById("bairroInput").value = p.bairro || "";
+      document.getElementById("cidadeInput").value = p.cidade || "";
+      estadoInput.value = uf(p.estado || "");
+      document.getElementById("generoInput").value = p.genero || "";
+      document.getElementById("estadoCivilInput").value = p.estado_civil || "";
+      document.getElementById("nacionalidadeInput").value = p.nacionalidade || "";
+      document.getElementById("profissaoInput").value = p.profissao || "";
+      const doc = onlyDigits(p.cpf_cnpj || "");
+      tipoPessoaInput.value = doc.length === 14 ? "juridica" : "fisica";
+      setMode();
+      if (tipoPessoaInput.value === "juridica") {
+        cnpjInput.value = maskCnpj(doc);
+        razaoSocialInput.value = p.razao_social || "";
+        repNomeInput.value = p.representante_legal_nome || "";
+        repCpfInput.value = maskCpf(p.representante_legal_cpf || "");
+        repCargoInput.value = p.representante_legal_cargo || "";
+        const temRepresentante = !!(
+          String(repNomeInput.value || "").trim() ||
+          onlyDigits(repCpfInput.value).length ||
+          String(repCargoInput.value || "").trim()
+        );
+        setRepresentanteOpen(temRepresentante);
+      } else {
+        cpfInput.value = maskCpf(doc);
+      }
+      carregarDocumentosSalvos(editId);
+    } catch (_) { toastW("Erro ao carregar proprietário."); }
+  }
+
+  async function submit(criarOutro) {
+    if (saving) return;
+    const pj = tipoPessoaInput.value === "juridica";
+    const nome = String(nomeInput.value || "").trim();
+    const telefone = String(telefoneInput.value || "").trim();
+    const doc = pj ? onlyDigits(cnpjInput.value) : onlyDigits(cpfInput.value);
+    const razaoSocial = String(razaoSocialInput.value || "").trim();
+
+    if (!nome || !telefone || !doc) { toastW("Preencha nome, telefone e documento."); return; }
+    if (!pj && !doc) { toastW("Informe o CPF."); return; }
+    if (pj && !doc) { toastW("Informe o CNPJ."); return; }
+    if (!pj && !isCpfValido(doc)) { toastW("CPF inválido."); return; }
+    if (pj && !isCnpjValido(doc)) { toastW("CNPJ inválido."); return; }
+
+    if (pj) {
+      if (!razaoSocial) { toastW("Informe a razão social."); return; }
+      const repCpf = onlyDigits(repCpfInput.value);
+      if (repCpf && !isCpfValido(repCpf)) { toastW("CPF do representante legal inválido."); return; }
+    }
+
+    if (isEditMode && criarOutro) criarOutro = false;
+    setSaving(true, criarOutro);
+    setDocumentosBusy(true);
+
+    const fd = new FormData();
+    if (isEditMode) fd.set("id", String(editId));
+    fd.set("nome", nome);
+    fd.set("telefone", telefone);
+    fd.set("email", String(document.getElementById("emailInput").value || "").trim());
+    fd.set("cpf_cnpj", pj ? maskCnpj(cnpjInput.value) : maskCpf(cpfInput.value));
+    fd.set("razao_social", pj ? String(razaoSocialInput.value || "").trim() : "");
+    fd.set("rg_numero", maskRg(rgInput.value));
+    fd.set("rg_orgao", String(rgOrgaoInput.value || "").trim().toUpperCase());
+    fd.set("rg_uf", String(rgUfInput.value || "").trim().toUpperCase());
+    fd.set("genero", String(document.getElementById("generoInput").value || "").trim());
+    fd.set("estado_civil", String(document.getElementById("estadoCivilInput").value || "").trim());
+    fd.set("nacionalidade", String(document.getElementById("nacionalidadeInput").value || "").trim());
+    fd.set("profissao", String(document.getElementById("profissaoInput").value || "").trim());
+    fd.set("cep", maskCep(cepInput.value));
+    fd.set("rua", String(document.getElementById("ruaInput").value || "").trim());
+    fd.set("numero", String(document.getElementById("numeroInput").value || "").trim());
+    fd.set("bairro", String(document.getElementById("bairroInput").value || "").trim());
+    fd.set("cidade", String(document.getElementById("cidadeInput").value || "").trim());
+    fd.set("estado", uf(estadoInput.value));
+    fd.set("representante_legal_nome", pj ? String(repNomeInput.value || "").trim() : "");
+    fd.set("representante_legal_cpf", pj ? maskCpf(repCpfInput.value) : "");
+    fd.set("representante_legal_cargo", pj ? String(repCargoInput.value || "").trim() : "");
+
+    try {
+      const r = await fetch("/proprietarios/api/salvar_proprietario.php", { method: "POST", body: fd });
+      const j = await r.json();
+      if (!j?.ok) { toastW(j?.erro || "Erro ao salvar proprietário."); return; }
+      const proprietarioId = isEditMode ? editId : Number(j.id || 0);
+      const upload = await enviarDocumentosPendentes(proprietarioId);
+      const msgBase = isEditMode ? "Proprietário atualizado com sucesso." : "Proprietário cadastrado com sucesso.";
+      const msgFinal = upload.ok
+        ? (upload.uploaded ? `${msgBase} Documentos enviados para validação.` : msgBase)
+        : `${msgBase} Houve falha ao enviar os documentos.`;
+      toastS(msgFinal);
+      if (!upload.ok) toastW(upload.erro || "Não foi possível enviar os documentos.");
+      if (criarOutro) clearForm();
+      else window.location.href = "/proprietarios/";
+    } catch (_) { toastW("Erro ao salvar proprietário."); }
+    finally { setSaving(false, false); setDocumentosBusy(false); }
+  }
+
+  tipoPessoaInput.addEventListener("change", () => { setMode(); (tipoPessoaInput.value === "juridica" ? cnpjInput : cpfInput).focus(); });
+  cpfInput.addEventListener("input", () => { cpfInput.value = maskCpf(cpfInput.value); });
+  cnpjInput.addEventListener("input", () => { cnpjInput.value = maskCnpj(cnpjInput.value); });
+  repCpfInput.addEventListener("input", () => { repCpfInput.value = maskCpf(repCpfInput.value); });
+  telefoneInput.addEventListener("input", () => { telefoneInput.value = maskTelefone(telefoneInput.value); });
+  rgInput.addEventListener("input", () => { rgInput.value = maskRg(rgInput.value); });
+  rgOrgaoInput.addEventListener("input", () => { rgOrgaoInput.value = String(rgOrgaoInput.value || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toUpperCase(); });
+  rgUfInput.addEventListener("input", () => { rgUfInput.value = uf(rgUfInput.value); });
+  estadoInput.addEventListener("input", () => { estadoInput.value = uf(estadoInput.value); });
+  cepInput.addEventListener("input", () => { cepInput.value = maskCep(cepInput.value); });
+  cepSearchBtn?.addEventListener("click", buscarCep);
+  toggleRepresentanteBtn?.addEventListener("click", () => {
+    const abrindo = representanteFieldsWrap?.classList.contains("is-hidden");
+    if (!abrindo) clearRepresentante();
+    setRepresentanteOpen(!!abrindo);
+  });
+
+  form.addEventListener("submit", (e) => { e.preventDefault(); submit(false); });
+  saveAnotherBtn.addEventListener("click", (e) => { e.preventDefault(); submit(true); });
+  inicializarUploadDocumentos();
+
+  if (isEditMode) {
+    tituloPagina.textContent = "Editar proprietário";
+    submitBtn.textContent = "Salvar alterações";
+    saveAnotherBtn.style.display = "none";
+    loadEdit();
+  } else {
+    tituloPagina.textContent = "Novo proprietário";
+    submitBtn.textContent = "Salvar proprietário";
+    saveAnotherBtn.style.display = "";
+    clearForm();
+  }
+
+  setRepresentanteOpen(false);
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    })[ch]);
+  }
+
+  function getCsrfToken(namespace) {
+    const byNamespace = window.__lkCsrfByNamespace || {};
+    return String(byNamespace[namespace] || window.__lkCsrfToken || "").trim();
+  }
+})();

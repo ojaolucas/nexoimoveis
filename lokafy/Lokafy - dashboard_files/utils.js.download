@@ -1,0 +1,45 @@
+(function(window){
+  'use strict';
+
+  function apiData(payload){
+    if (!payload || typeof payload !== 'object') return {};
+    if (payload.data && typeof payload.data === 'object') {
+      return Object.assign({}, payload, payload.data);
+    }
+    return payload;
+  }
+
+  function money(v){ return Number(v || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
+  function num(v){ return Number(v || 0).toLocaleString('pt-BR'); }
+  function pct(n,d){ if(!d || d <= 0) return 0; return Math.max(0, Math.min(100, Math.round((n / d) * 100))); }
+  function esc(s){ return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[m])); }
+
+  function labelPrazo(dateStr){
+    const d = new Date(String(dateStr || '') + 'T00:00:00');
+    const t = new Date(); t.setHours(0,0,0,0);
+    const diff = Math.round((d - t) / 86400000);
+    if (!isFinite(diff)) return {txt:'Prazo', cls:'outro'};
+    if (diff <= 0) return {txt:'Hoje', cls:'hoje'};
+    if (diff === 1) return {txt:'Amanhã', cls:'amanha'};
+    const wd = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()] || 'Prazo';
+    return {txt:wd, cls:'outro'};
+  }
+
+  function fmtDateTimeLabel(iso){
+    if (!iso) return 'Agora';
+    const d = new Date(String(iso).replace(' ', 'T'));
+    if (!(d instanceof Date) || Number.isNaN(d.getTime())) return 'Agora';
+    const now = new Date();
+    const y = new Date(now); y.setDate(now.getDate() - 1);
+    const same = (a,b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    if (same(d, now)) return `Hoje, ${hh}:${mm}`;
+    if (same(d, y)) return `Ontem, ${hh}:${mm}`;
+    const dia = String(d.getDate()).padStart(2,'0');
+    const mes = d.toLocaleDateString('pt-BR', {month:'short'}).toUpperCase().replace('.','');
+    return `${dia} ${mes}, ${hh}:${mm}`;
+  }
+
+  window.LokafyDashboardUtils = {apiData, money, num, pct, esc, labelPrazo, fmtDateTimeLabel};
+})(window);

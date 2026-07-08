@@ -1,0 +1,30 @@
+function carregarProprietarios() {
+  fetch('/proprietarios/api/listar_proprietario.php', { cache: 'no-store' })
+    .then((r) => r.json())
+    .then((j) => {
+      if (!j.ok) {
+        toastWarning(j.erro || 'Erro ao carregar proprietários');
+        return;
+      }
+
+      const state = window.proprietariosTabelaState;
+      state.listaOriginal = j.lista || [];
+      state.listaFiltrada = [...state.listaOriginal];
+      state.paginaAtual = 1;
+      atualizarCardsProprietarios(state.listaOriginal);
+      aplicarFiltrosProprietarios(false);
+    })
+    .catch(() => toastWarning('Erro de conexão'));
+}
+
+function atualizarCardsProprietarios(lista) {
+  const dados = Array.isArray(lista) ? lista : [];
+  const total = dados.length;
+  const comImoveis = dados.filter((p) => Number(p.total_imoveis || 0) > 0).length;
+  const inativos = dados.filter((p) => Number(p.total_contratos || 0) <= 0).length;
+  setText('cardTotal', total);
+  setText('cardComImoveis', comImoveis);
+  setText('cardInativos', inativos);
+}
+
+window.carregarProprietarios = carregarProprietarios;

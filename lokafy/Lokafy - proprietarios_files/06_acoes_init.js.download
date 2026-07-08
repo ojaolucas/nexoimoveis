@@ -1,0 +1,71 @@
+function configurarAcoesProprietarios() {
+  if (window.proprietariosAcoesBindadas) return;
+  window.proprietariosAcoesBindadas = true;
+
+  document.addEventListener('click', (e) => {
+    const btnMore = e.target.closest('.proprietarios-page .btn-more');
+    if (btnMore) {
+      const menu = btnMore.closest('.actions-menu');
+      document.querySelectorAll('.proprietarios-page .actions-menu.open').forEach((m) => m !== menu && m.classList.remove('open'));
+      menu?.classList.toggle('open');
+      return;
+    }
+
+    if (!e.target.closest('.proprietarios-page .actions-menu')) {
+      document.querySelectorAll('.proprietarios-page .actions-menu.open').forEach((m) => m.classList.remove('open'));
+    }
+
+    const btnEdit = e.target.closest('.btn-editar-proprietario');
+    if (btnEdit) {
+      const id = Number(btnEdit.dataset.id || 0);
+      if (id) window.location.href = `/proprietarios/novo/?id=${encodeURIComponent(id)}`;
+      return;
+    }
+
+    const btnExcluir = e.target.closest('.btn-excluir-proprietario');
+    if (btnExcluir) {
+      const id = Number(btnExcluir.dataset.id || 0);
+      if (id && typeof window.excluirProprietario === 'function') window.excluirProprietario(id);
+      return;
+    }
+
+    const btn = e.target.closest('.btn-ver-imoveis');
+    if (btn) return abrirModalImoveisProprietario(btn.dataset.id, btn.dataset.nome);
+    const btnContratos = e.target.closest('.btn-ver-contratos');
+    if (btnContratos) return abrirModalContratosProprietario(btnContratos.dataset.id, btnContratos.dataset.nome);
+    const btnAbrirContrato = e.target.closest('.btn-abrir-contrato-prop');
+    if (btnAbrirContrato) return abrirContratoDoProprietario(btnAbrirContrato.dataset.contratoId);
+    const btnAbrirImovel = e.target.closest('.btn-abrir-imovel-prop');
+    if (btnAbrirImovel) return abrirImovelDoProprietario(btnAbrirImovel.dataset.imovelId);
+
+    if (e.target.closest('#fecharModalImoveisProprietario')) return fecharModalImoveisProprietario();
+    if (e.target.closest('#fecharModalContratosProprietario')) return fecharModalContratosProprietario();
+
+    const modalImoveis = document.getElementById('modalImoveisProprietario');
+    if (modalImoveis && e.target === modalImoveis) return fecharModalImoveisProprietario();
+
+    const modalContratos = document.getElementById('modalContratosProprietario');
+    if (modalContratos && e.target === modalContratos) fecharModalContratosProprietario();
+  });
+}
+
+function initProprietariosPage() {
+  const pageRoot = document.querySelector('.proprietarios-page');
+  const state = window.proprietariosTabelaState;
+  if (!pageRoot || !state) return;
+  if (pageRoot.dataset.proprietariosInit === '1') return;
+
+  pageRoot.dataset.proprietariosInit = '1';
+  configurarFiltrosPaginacaoProprietarios();
+  configurarAcoesProprietarios();
+  if (window.lucide) window.lucide.createIcons();
+  carregarProprietarios();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initProprietariosPage, { once: true });
+} else {
+  initProprietariosPage();
+}
+
+document.addEventListener('lokafy:page-ready', initProprietariosPage);

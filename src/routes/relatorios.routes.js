@@ -1,8 +1,14 @@
 const express = require('express');
+const { requireAuth } = require('../middlewares/auth.middleware');
+const relatoriosController = require('../controllers/relatorios.controller');
+
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.json({ success: true, message: 'Relatorios route placeholder' });
-});
+// Protect all reports routes
+router.use(requireAuth);
+
+router.get('/', relatoriosController.obterVisualizacao);
+router.get('/exportar/excel', relatoriosController.exportarExcel);
+router.get('/exportar/pdf', relatoriosController.exportarPDF);
 
 module.exports = router;

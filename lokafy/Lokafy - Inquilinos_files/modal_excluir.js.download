@@ -1,0 +1,69 @@
+/* ============================================================
+   EXCLUSAO DE INQUILINO
+=========================================================== */
+
+let inquilinoParaExcluir = null;
+const modalExcluirInquilino = document.getElementById("modalExcluirInquilino");
+const btnConfirmarExcluirInquilino = document.getElementById("btnConfirmarExcluirInquilino");
+const csrfTokenInquilinoExcluir = document.querySelector('meta[name="csrf-token"]')?.content || "";
+
+function excluirInquilino(id) {
+  inquilinoParaExcluir = id;
+  abrirModalExcluirInquilino();
+}
+
+function abrirModalExcluirInquilino() {
+  modalExcluirInquilino?.classList.add("active");
+}
+
+function fecharModalExcluirInquilino() {
+  modalExcluirInquilino?.classList.remove("active");
+  inquilinoParaExcluir = null;
+}
+
+btnConfirmarExcluirInquilino?.addEventListener("click", async () => {
+  if (!inquilinoParaExcluir) return;
+  const textoOriginal = btnConfirmarExcluirInquilino.textContent || "Excluir";
+  btnConfirmarExcluirInquilino.disabled = true;
+  btnConfirmarExcluirInquilino.textContent = "Excluindo...";
+
+  try {
+    const body = new URLSearchParams({ id: String(inquilinoParaExcluir) });
+    if (csrfTokenInquilinoExcluir) body.set("_csrf", csrfTokenInquilinoExcluir);
+
+    const r = await fetch("/inquilinos/api/excluir.php", {
+      method: "POST",
+      headers: csrfTokenInquilinoExcluir
+        ? {
+            "X-CSRF-Token": csrfTokenInquilinoExcluir,
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        : { "Content-Type": "application/x-www-form-urlencoded" },
+      body
+    });
+    const json = await r.json();
+
+    if (!json.ok) {
+      toastWarning(json.erro || "Erro ao excluir inquilino");
+      return;
+    }
+
+    fecharModalExcluirInquilino();
+    toastSuccess("Inquilino excluído com sucesso");
+
+    if (typeof carregarInquilinos === "function") {
+      carregarInquilinos();
+    }
+  } catch (_) {
+    toastWarning("Erro de conexão");
+  } finally {
+    btnConfirmarExcluirInquilino.disabled = false;
+    btnConfirmarExcluirInquilino.textContent = textoOriginal;
+  }
+});
+
+modalExcluirInquilino?.addEventListener("click", (e) => {
+  if (e.target === modalExcluirInquilino) {
+    fecharModalExcluirInquilino();
+  }
+});

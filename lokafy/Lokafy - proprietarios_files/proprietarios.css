@@ -1,0 +1,1282 @@
+.proprietarios-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.proprietarios-page .page-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.proprietarios-page .btn-primary {
+  background: linear-gradient(180deg, #0f5d56 0%, #0d4d47 100%);
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid #0b433e;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  box-shadow: 0 10px 24px rgba(13,77,71,.24);
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+}
+
+.proprietarios-page .btn-primary i {
+  font-size: 13px;
+}
+
+.proprietarios-page .btn-primary:hover {
+  background: linear-gradient(180deg, #106960 0%, #0d5750 100%);
+  border-color: #0b4a44;
+  box-shadow: 0 14px 30px rgba(13,77,71,.28);
+  transform: translateY(-1px);
+}
+
+.proprietarios-page .cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.proprietarios-page .card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #dbe4ea;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transition: border-color .18s ease, transform .18s ease;
+  overflow: hidden;
+}
+
+.proprietarios-page .card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 4px;
+  background: #d2ebe7;
+}
+
+.proprietarios-page .card:hover {
+  border-color: #c9d7e2;
+  transform: translateY(-1px);
+}
+
+.proprietarios-page .card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #eef6f5;
+  border: 1px solid #d8ebe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f766e;
+  font-size: 20px;
+}
+
+.proprietarios-page .card-info span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #64748b;
+}
+
+.proprietarios-page .card-info strong {
+  display: block;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+  color: #0f172a;
+}
+
+.proprietarios-page .card-info small {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.proprietarios-page .filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) minmax(180px, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.proprietarios-page .filters input,
+.proprietarios-page .filters select {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.proprietarios-page .table-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e8eef5;
+  box-shadow: 0 10px 28px rgba(0,0,0,.05);
+}
+
+.proprietarios-page .table-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf2f7;
+  background: #ffffff;
+}
+
+.proprietarios-page .table-head h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.proprietarios-page .table-head span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.proprietarios-page .table-wrap {
+  overflow: visible;
+  max-height: none;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #6cb8b2 #e6f4f2;
+}
+
+@media (max-width: 1200px) {
+  .proprietarios-page .table-wrap {
+    min-height: 420px;
+  }
+}
+
+.proprietarios-page table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 0;
+}
+
+.proprietarios-page thead {
+  background: #f8fafc;
+}
+
+.proprietarios-page th,
+.proprietarios-page td {
+  padding: 14px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.proprietarios-page th {
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.proprietarios-page tbody tr {
+  border-top: 1px solid #e5e7eb;
+}
+
+.proprietarios-page tbody tr:hover {
+  background: #f9fafb;
+}
+
+.proprietarios-page .col-acoes {
+  width: 140px;
+  text-align: center;
+}
+
+.proprietarios-page .col-acoes button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.proprietarios-page .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  color: #64748b;
+  font-size: 15px;
+  transition: color .15s ease;
+}
+
+.proprietarios-page .btn-icon:hover {
+  color: #0b5f5a;
+}
+
+.proprietarios-page .btn-danger:hover {
+  color: #dc2626;
+}
+
+.proprietarios-page .btn-link-imoveis {
+  border: 1px solid #dbe3ed;
+  background: #f8fafc;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.proprietarios-page .btn-link-imoveis:hover {
+  border-color: #0b5f5a;
+  color: #0b5f5a;
+  background: #f0fdfa;
+}
+
+.modal-imoveis-proprietario .btn-abrir-contrato-prop,
+.modal-imoveis-proprietario .btn-abrir-imovel-prop{
+  min-height:30px;
+  padding:0 12px;
+  border-radius:10px;
+  border:1px solid #cfe3df;
+  background:#f7fbfa;
+  color:#0f5d56;
+  font-size:12px;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.modal-imoveis-proprietario .btn-abrir-contrato-prop:hover,
+.modal-imoveis-proprietario .btn-abrir-imovel-prop:hover{
+  background:#eaf5f3;
+  border-color:#b7d7d1;
+  color:#0c4d47;
+}
+
+.proprietarios-page .table-empty {
+  width: min(560px, 100%);
+  margin: 22px auto 8px;
+  padding: 22px 18px;
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.proprietarios-page .table-empty .empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  color: #0f766e;
+  font-size: 20px;
+}
+
+.proprietarios-page .table-empty h4 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.proprietarios-page .table-empty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.proprietarios-page .table-empty p strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.proprietarios-page .prop-grid-v2 tbody tr.empty-state-row td {
+  padding: 48px 20px !important;
+  text-align: center !important;
+  border-bottom: none !important;
+}
+
+.proprietarios-page .prop-grid-v2 .table-empty-inline {
+  margin: 0 auto;
+}
+
+.modal-imoveis-proprietario {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  display: none;
+  z-index: 1100;
+}
+
+.modal-imoveis-proprietario.active {
+  display: block;
+}
+
+.modal-imoveis-box {
+  width: min(680px, calc(100vw - 24px));
+  height: 100vh;
+  background: #fff;
+  border-radius: 0 16px 16px 0;
+  border: 1px solid #e8eef5;
+  border-left: none;
+  box-shadow: 20px 0 40px rgba(2, 6, 23, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.22s ease;
+}
+
+.modal-imoveis-proprietario.active .modal-imoveis-box {
+  transform: translateX(0);
+}
+
+.modal-imoveis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.modal-imoveis-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.modal-imoveis-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #dbe3ed;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.modal-imoveis-close:hover {
+  border-color: #0b5f5a;
+  color: #0b5f5a;
+  background: #f0fdfa;
+}
+
+.modal-imoveis-body {
+  padding: 14px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.imovel-item {
+  border: 1px solid #e8eef5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.imovel-item-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.imovel-item p {
+  margin: 8px 0 4px;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.imovel-item small {
+  color: #64748b;
+}
+
+.imoveis-loading,
+.imoveis-vazio {
+  text-align: center;
+  color: #64748b;
+  padding: 16px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status.ativo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.inativo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+@media (max-width: 980px) {
+  .proprietarios-page .page-header {
+    width: 100%;
+  }
+
+  .proprietarios-page .page-header .btn-primary {
+    width: 100%;
+  }
+
+  .proprietarios-page .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .proprietarios-page .table-wrap {
+    min-height: 0;
+  }
+
+  .proprietarios-page table {
+    min-width: 0;
+  }
+
+  .proprietarios-page thead {
+    display: none;
+  }
+
+  .proprietarios-page tbody tr {
+    display: block;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 12px;
+  }
+
+  .proprietarios-page .prop-grid-v2 tbody tr.empty-state-row {
+    display: table-row;
+    border-bottom: none;
+    padding: 0;
+  }
+
+  .proprietarios-page tbody td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border: none;
+    padding: 6px 0;
+  }
+
+  .proprietarios-page tbody td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .proprietarios-page .prop-grid-v2 tbody tr.empty-state-row td {
+    display: table-cell;
+    padding: 32px 14px !important;
+  }
+
+  .proprietarios-page .prop-grid-v2 tbody tr.empty-state-row td::before {
+    content: none !important;
+  }
+}
+
+/* ================= TABELA V2 (PADRÃO) ================= */
+.proprietarios-page .prop-table-v2{
+  border:1px solid #dbe3ec;
+  border-radius:16px;
+  box-shadow:none;
+  padding:0;
+  overflow:visible !important;
+}
+
+.proprietarios-page .prop-grid-v2{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:auto;
+  min-width:0;
+}
+
+.proprietarios-page .prop-grid-v2 thead th{
+  position:sticky;
+  top:-33px;
+  z-index:5;
+  background:#f8fafc;
+  color:#475569;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  padding:12px 12px;
+  border-bottom:1px solid #dbe3ec;
+}
+
+.proprietarios-page .prop-grid-v2 thead th:first-child{
+  border-top-left-radius:12px;
+}
+
+.proprietarios-page .prop-grid-v2 thead th:last-child{
+  border-top-right-radius:12px;
+}
+
+.proprietarios-page .prop-grid-v2 tbody td{
+  padding:12px 12px;
+  border-bottom:1px solid #eef2f7;
+  vertical-align:middle;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
+}
+
+.proprietarios-page .prop-grid-v2 tbody tr:last-child td{
+  border-bottom:none;
+}
+
+.proprietarios-page .prop-grid-v2 tbody tr:hover{
+  background:#f8fafc;
+}
+
+.proprietarios-page .h-id,
+.proprietarios-page .fx-id{ width:52px; min-width:52px; text-align:center; color:#94a3b8; font-size:12px; font-weight:600; }
+.proprietarios-page .h-nome,
+.proprietarios-page .fx-nome{ width:22%; text-align:left; }
+.proprietarios-page .h-telefone,
+.proprietarios-page .fx-telefone{ width:15%; text-align:left; }
+.proprietarios-page .h-documentos,
+.proprietarios-page .fx-documentos{ width:27%; text-align:left; }
+.proprietarios-page .h-imoveis,
+.proprietarios-page .fx-imoveis{ width:11%; text-align:center; }
+.proprietarios-page .h-contratos,
+.proprietarios-page .fx-contratos{ width:11%; text-align:center; }
+.proprietarios-page .h-acoes,
+.proprietarios-page .fx-acoes{ width:12%; text-align:center; }
+
+.proprietarios-page .fx-main{
+  display:block;
+  font-size:14px;
+  font-weight:600;
+  color:#0f172a;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.proprietarios-page .fx-nome,
+.proprietarios-page .fx-telefone,
+.proprietarios-page .fx-imoveis,
+.proprietarios-page .fx-contratos{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+}
+
+.proprietarios-page .fx-telefone,
+.proprietarios-page .fx-documentos{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.proprietarios-page .fx-documentos{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+}
+
+.proprietarios-page .imoveis-link{
+  height:30px;
+  max-width:140px;
+  padding:0 10px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:6px;
+  font-size:12px;
+  font-weight:700;
+  color:#0f766e;
+  background:#ecfdf5;
+  border:1px solid rgba(15,118,110,.18);
+  cursor:pointer;
+}
+
+.proprietarios-page .imoveis-link-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.proprietarios-page .imoveis-link:hover{
+  background:#d1fae5;
+}
+
+.proprietarios-page .prop-relacao-stack{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+}
+
+.proprietarios-page .fx-imoveis .prop-chip-empty,
+.proprietarios-page .fx-contratos .prop-chip-empty{
+  text-align:center;
+}
+
+.proprietarios-page .fx-acoes{
+  white-space:nowrap;
+  position:relative;
+}
+
+.proprietarios-page .prop-nome-stack,
+.proprietarios-page .prop-tel-stack{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  min-width:0;
+}
+
+.proprietarios-page .prop-nome-stack{
+  align-items:flex-start;
+}
+
+.proprietarios-page .prop-nome-content{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.proprietarios-page .prop-nome-extra{
+  font-size:12px;
+  color:#64748b;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.proprietarios-page .prop-nome-icon,
+.proprietarios-page .prop-tel-icon{
+  font-size:12px;
+  color:#0f766e;
+  opacity:.92;
+  flex:0 0 auto;
+}
+
+.proprietarios-page .prop-tel-value{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  color:#475569;
+}
+
+.proprietarios-page .prop-tel-content{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+
+.proprietarios-page .prop-tel-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.proprietarios-page .prop-tel-icon{
+  flex:0 0 14px;
+  width:14px;
+  text-align:center;
+}
+
+.proprietarios-page .prop-tel-email{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  color:#64748b;
+}
+
+.proprietarios-page .prop-doc-list{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  min-width:0;
+}
+
+.proprietarios-page .prop-doc-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  white-space:nowrap;
+  font-size:12.5px;
+  line-height:1.25;
+  color:#334155;
+}
+
+.proprietarios-page .prop-doc-icon{
+  font-size:12px;
+  color:#0f766e;
+  opacity:.9;
+  flex:0 0 auto;
+}
+
+.proprietarios-page .prop-doc-label{
+  font-size:11px;
+  font-weight:700;
+  color:#64748b;
+  letter-spacing:.02em;
+  flex:0 0 auto;
+}
+
+.proprietarios-page .prop-doc-value{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#475569;
+}
+
+.proprietarios-page .prop-chip-empty{
+  font-size:12.5px;
+  color:#94a3b8;
+}
+
+.proprietarios-page .fx-acoes .actions-menu{
+  position:relative;
+  display:inline-flex;
+  justify-content:center;
+}
+
+.proprietarios-page .fx-acoes .btn-more{
+  width:32px;
+  height:32px;
+  border:1px solid #dbe3ec;
+  border-radius:10px;
+  background:#fff;
+  color:#475569;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.proprietarios-page .fx-acoes .btn-more:hover{
+  background:#f8fafc;
+  border-color:#cbd5e1;
+  color:#0f766e;
+}
+
+.proprietarios-page .fx-acoes .dropdown{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  min-width:150px;
+  padding:6px;
+  border-radius:12px;
+  border:1px solid #dbe3ec;
+  background:#fff;
+  box-shadow:0 14px 28px rgba(2,6,23,.12);
+  display:none;
+  z-index:30;
+}
+
+.proprietarios-page .fx-acoes .actions-menu.open .dropdown{
+  display:grid;
+  gap:4px;
+}
+
+.proprietarios-page .fx-acoes .dropdown button{
+  width:100%;
+  height:32px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#334155;
+  text-align:left;
+  font-size:13px;
+  font-weight:600;
+  padding:0 10px;
+  cursor:pointer;
+}
+
+.proprietarios-page .fx-acoes .dropdown button:hover{
+  background:#f1f5f9;
+}
+
+.proprietarios-page .fx-acoes .dropdown .danger{
+  color:#b91c1c;
+}
+
+.proprietarios-page .fx-acoes .dropdown .danger:hover{
+  background:#fef2f2;
+}
+
+/* ================= TABLE HEAD/FOOTER (PADRÃO PAGINAÇÃO) ================= */
+.proprietarios-page .prop-table-v2 .table-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  border-top-left-radius:16px;
+  border-top-right-radius:16px;
+}
+
+.proprietarios-page .prop-table-v2 .table-head-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.proprietarios-page .prop-table-v2 .table-head-actions label{
+  font-size:12px;
+  color:#334155;
+  font-weight:600;
+}
+
+.proprietarios-page .prop-table-v2 .table-head-actions select{
+  height:34px;
+  border:1px solid #dbe3ec;
+  border-radius:8px;
+  padding:0 10px;
+  font-size:13px;
+  background:#fff;
+}
+
+.proprietarios-page .prop-table-v2 .table-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-top:1px solid #eef2f7;
+  background:#ffffff;
+  border-bottom-left-radius:16px;
+  border-bottom-right-radius:16px;
+}
+
+.proprietarios-page .prop-table-v2 .table-footer small{
+  color:#64748b;
+  font-size:12px;
+}
+
+.proprietarios-page .prop-table-v2 .table-footer-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.proprietarios-page .prop-table-v2 .table-footer-actions button{
+  height:34px;
+  padding:0 12px;
+  border-radius:10px;
+  border:1px solid #d6e1eb;
+  background:#ffffff;
+  color:#0f4c46;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.18s ease;
+}
+
+.proprietarios-page .prop-table-v2 .table-footer-actions button:hover{
+  border-color:#0f766e;
+  color:#0f766e;
+}
+
+.proprietarios-page .prop-table-v2 .table-footer-actions button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+@media (max-width: 760px){
+  .proprietarios-page .prop-table-v2 .table-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .proprietarios-page .prop-table-v2 .table-footer{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
+.proprietarios-page .table-wrap::-webkit-scrollbar{
+  height:10px;
+  width:10px;
+}
+
+.proprietarios-page .table-wrap::-webkit-scrollbar-track{
+  background:#e6f4f2;
+  border-radius:999px;
+}
+
+.proprietarios-page .table-wrap::-webkit-scrollbar-thumb{
+  background:#6cb8b2;
+  border-radius:999px;
+}
+
+.proprietarios-page .table-wrap::-webkit-scrollbar-thumb:hover{
+  background:#4ea49c;
+}
+
+:root[data-theme="dark"] .proprietarios-page .card,
+:root[data-theme="dark"] .proprietarios-page .table-card,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 {
+  background: #111b29;
+  border-color: #223246;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] .proprietarios-page .card::before {
+  background: #214958;
+}
+
+:root[data-theme="dark"] .proprietarios-page .card-icon {
+  background: #162434;
+  border-color: #2a4b60;
+  color: #7dd3ca;
+}
+
+:root[data-theme="dark"] .proprietarios-page .card-info span,
+:root[data-theme="dark"] .proprietarios-page .card-info small,
+:root[data-theme="dark"] .proprietarios-page .table-head span,
+:root[data-theme="dark"] .proprietarios-page th,
+:root[data-theme="dark"] .proprietarios-page tbody td::before,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 .table-footer small {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .card-info strong,
+:root[data-theme="dark"] .proprietarios-page .table-head h3,
+:root[data-theme="dark"] .proprietarios-page td,
+:root[data-theme="dark"] .proprietarios-page .fx-main {
+  color: #e2e8f0 !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters input,
+:root[data-theme="dark"] .proprietarios-page .filters select,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 .table-head-actions select,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 .table-footer-actions button,
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .btn-more {
+  background: #22364d;
+  border-color: #3a5a78;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .modal-imoveis-proprietario .btn-abrir-contrato-prop,
+:root[data-theme="dark"] .modal-imoveis-proprietario .btn-abrir-imovel-prop{
+  background:#22364d;
+  border-color:#3a5a78;
+  color:#d7e5f5;
+}
+
+:root[data-theme="dark"] .modal-imoveis-proprietario .btn-abrir-contrato-prop:hover,
+:root[data-theme="dark"] .modal-imoveis-proprietario .btn-abrir-imovel-prop:hover{
+  background:#2a4563;
+  border-color:#4f7092;
+  color:#f1f5f9;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters input::placeholder{
+  color:#a6b9cf;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters select option,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 .table-head-actions select option{
+  background:#22364d;
+  color:#e2e8f0;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-head,
+:root[data-theme="dark"] .proprietarios-page .prop-grid-v2 thead th,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 .table-footer {
+  background: #162434;
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-wrap {
+  scrollbar-color: #3d6d8a #142638;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-wrap::-webkit-scrollbar-track {
+  background: #142638;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-wrap::-webkit-scrollbar-thumb {
+  background: #3d6d8a;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #4f7f9d;
+}
+
+:root[data-theme="dark"] .proprietarios-page .prop-grid-v2 tbody td,
+:root[data-theme="dark"] .proprietarios-page tbody tr {
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .proprietarios-page tbody tr:hover,
+:root[data-theme="dark"] .proprietarios-page .prop-grid-v2 tbody tr:hover {
+  background: #1a2d40;
+}
+
+:root[data-theme="dark"] .proprietarios-page .imoveis-link {
+  background: #12313b;
+  border-color: #25525f;
+  color: #6ee7d7;
+}
+
+:root[data-theme="dark"] .proprietarios-page .imoveis-link:hover {
+  background: #18414d;
+}
+
+:root[data-theme="dark"] .proprietarios-page .prop-nome-icon,
+:root[data-theme="dark"] .proprietarios-page .prop-tel-icon,
+:root[data-theme="dark"] .proprietarios-page .prop-doc-icon {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .proprietarios-page .prop-tel-value,
+:root[data-theme="dark"] .proprietarios-page .prop-doc-item,
+:root[data-theme="dark"] .proprietarios-page .prop-doc-value {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .proprietarios-page .prop-doc-label,
+:root[data-theme="dark"] .proprietarios-page .prop-chip-empty {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .btn-more {
+  color:#94a3b8;
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .btn-more:hover {
+  color:#7dd3ca;
+  border-color:#2f4d65;
+  background:#1e3247;
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .dropdown{
+  background:#1b2b3c;
+  border-color:#2f4a62;
+  box-shadow:0 16px 30px rgba(0,0,0,.35);
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .dropdown button{
+  color:#dbe7f3;
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .dropdown button:hover{
+  background:#263b52;
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .dropdown .danger{
+  color:#fca5a5;
+}
+
+:root[data-theme="dark"] .proprietarios-page .fx-acoes .dropdown .danger:hover{
+  background:#3b1f29;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-empty .empty-icon {
+  background: #12313b;
+  border-color: #25525f;
+  color: #6ee7d7;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-empty h4,
+:root[data-theme="dark"] .proprietarios-page .table-empty p strong {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .proprietarios-page .table-empty p {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .modal-imoveis-box,
+:root[data-theme="dark"] .imovel-item {
+  background: #111b29;
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .modal-imoveis-header,
+:root[data-theme="dark"] .modal-imoveis-close {
+  background: #162434;
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .modal-imoveis-header h3,
+:root[data-theme="dark"] .imovel-item p {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .imovel-item small,
+:root[data-theme="dark"] .imoveis-loading,
+:root[data-theme="dark"] .imoveis-vazio {
+  color: #94a3b8;
+}
+.proprietarios-page .page-header{
+  justify-content:space-between;
+  gap:20px;
+  border:1px solid rgba(148,163,184,.24);
+  background:rgba(255,255,255,.86);
+  border-radius:20px;
+  padding:20px 22px;
+  box-shadow:0 20px 45px rgba(15,23,42,.1);
+}
+.proprietarios-page .page-header-copy{display:flex;flex-direction:column;gap:6px}
+.proprietarios-page .page-header-copy .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#0f766e}
+.proprietarios-page .page-header-copy h2{margin:0;font-size:clamp(21px,2vw,28px);line-height:1.1;color:#0f172a;font-weight:800}
+.proprietarios-page .page-header-copy p{margin:0;font-size:13px;color:#64748b}
+.proprietarios-page .card{background:#fff;border:1px solid #dbe3eb;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.proprietarios-page .card::before{width:3px;height:100%;background:#0f766e}
+.proprietarios-page .card:nth-child(2)::before{background:#166534}
+.proprietarios-page .card:nth-child(3)::before{background:#b45309}
+.proprietarios-page .card-icon i,.proprietarios-page .card-icon svg{width:20px;height:20px;display:block;stroke-width:2.1}
+.proprietarios-page .card-info strong{font-size:31px}
+.proprietarios-page .filters-wrap{border:1px solid rgba(148,163,184,.24);border-radius:16px;background:rgba(255,255,255,.86);box-shadow:0 10px 24px rgba(15,23,42,.06);padding:14px}
+.proprietarios-page .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.proprietarios-page .filters-title{display:inline-flex;align-items:center;gap:8px;color:#0f172a;font-weight:700}
+.proprietarios-page .filters-title i,.proprietarios-page .filters-title svg{width:16px;height:16px;color:#0f766e}
+.proprietarios-page .filters-title small{font-size:11px;font-weight:700;color:#0f766e;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:999px;padding:3px 8px}
+.proprietarios-page .btn-filter-clear{border:1px solid #dbe3ed;background:#fff;color:#334155;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.proprietarios-page .btn-filter-clear i,.proprietarios-page .btn-filter-clear svg{width:14px;height:14px}
+.proprietarios-page .filters .field{position:relative;display:flex;align-items:center}
+.proprietarios-page .filters .field.with-icon i,.proprietarios-page .filters .field.with-icon svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#64748b;pointer-events:none;z-index:2}
+.proprietarios-page .filters .field.with-icon input,.proprietarios-page .filters .field.with-icon select{padding-left:40px}
+.proprietarios-page .filters .field.with-icon select{padding-right:34px;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:linear-gradient(45deg,transparent 50%,#64748b 50%),linear-gradient(135deg,#64748b 50%,transparent 50%);background-position:calc(100% - 16px) calc(50% - 2px),calc(100% - 11px) calc(50% - 2px);background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.proprietarios-page .table-head{padding:18px 20px;background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,255,255,.62))}
+.proprietarios-page .table-head h3{font-size:18px;letter-spacing:-.01em}
+.proprietarios-page .table-footer-actions button{border:1px solid #d5dfea;background:#f8fbfe}
+@media (max-width:980px){.proprietarios-page .page-header{padding:16px;border-radius:16px}.proprietarios-page .page-header-copy h2{font-size:22px}.proprietarios-page .filters-head{flex-direction:column;align-items:flex-start}.proprietarios-page .btn-filter-clear{width:100%;justify-content:center}}
+
+/* Icones coloridos nos cards de resumo (proprietarios-page) */
+.proprietarios-page .cards .card:nth-child(1) .card-icon{background:linear-gradient(145deg,#eff6ff,#dbeafe);border-color:#bfdbfe;color:#1d4ed8}
+.proprietarios-page .cards .card:nth-child(2) .card-icon{background:linear-gradient(145deg,#ecfdf5,#dcfce7);border-color:#bbf7d0;color:#15803d}
+.proprietarios-page .cards .card:nth-child(3) .card-icon{background:linear-gradient(145deg,#fff7ed,#ffedd5);border-color:#fed7aa;color:#c2410c}
+:root[data-theme="dark"] .proprietarios-page .cards .card:nth-child(1) .card-icon{background:rgba(59,130,246,.2);border-color:rgba(147,197,253,.45);color:#93c5fd}
+:root[data-theme="dark"] .proprietarios-page .cards .card:nth-child(2) .card-icon{background:rgba(34,197,94,.18);border-color:rgba(134,239,172,.4);color:#86efac}
+:root[data-theme="dark"] .proprietarios-page .cards .card:nth-child(3) .card-icon{background:rgba(249,115,22,.2);border-color:rgba(253,186,116,.45);color:#fdba74}
+
+/* Ajuste final dark mode - proprietarios */
+:root[data-theme="dark"] .proprietarios-page .page-header,
+:root[data-theme="dark"] .proprietarios-page .filters-wrap {
+  background: linear-gradient(180deg, rgba(17, 27, 41, .96), rgba(13, 22, 35, .96)) !important;
+  border-color: rgba(63, 88, 116, .72) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .34) !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .page-header-copy .eyebrow,
+:root[data-theme="dark"] .proprietarios-page .filters-title i,
+:root[data-theme="dark"] .proprietarios-page .filters-title svg,
+:root[data-theme="dark"] .proprietarios-page .filters .field.with-icon i,
+:root[data-theme="dark"] .proprietarios-page .filters .field.with-icon svg {
+  color: #5eead4 !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .page-header-copy h2,
+:root[data-theme="dark"] .proprietarios-page .filters-title,
+:root[data-theme="dark"] .proprietarios-page .filters-title span {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .page-header-copy p {
+  color: #9fb0c5 !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters-title small {
+  background: rgba(34, 197, 94, .18) !important;
+  border-color: rgba(134, 239, 172, .38) !important;
+  color: #86efac !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .btn-filter-clear {
+  background: #16283d !important;
+  border-color: #365673 !important;
+  color: #dbeafe !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .btn-filter-clear:hover {
+  background: #1d344f !important;
+  border-color: #4b6f91 !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters input,
+:root[data-theme="dark"] .proprietarios-page .filters select,
+:root[data-theme="dark"] .proprietarios-page #filtroImovel,
+:root[data-theme="dark"] .proprietarios-page #filtroContrato,
+:root[data-theme="dark"] .proprietarios-page #itensPorPaginaProprietarios {
+  background-color: #142235 !important;
+  border-color: #34506c !important;
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  color-scheme: dark !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters input::placeholder {
+  color: #8fa3bc !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page .filters .field.with-icon select,
+:root[data-theme="dark"] .proprietarios-page .prop-table-v2 .table-head-actions select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #cbd5e1 50%),
+    linear-gradient(135deg, #cbd5e1 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 13px) calc(50% - 2px) !important;
+  background-size: 5px 5px, 5px 5px !important;
+  background-repeat: no-repeat !important;
+}
+
+:root[data-theme="dark"] .proprietarios-page #filtroImovel option,
+:root[data-theme="dark"] .proprietarios-page #filtroContrato option,
+:root[data-theme="dark"] .proprietarios-page #itensPorPaginaProprietarios option {
+  background: #142235 !important;
+  color: #f1f5f9 !important;
+}

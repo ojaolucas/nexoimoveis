@@ -1,0 +1,26 @@
+function bindEventos() {
+  const state = window.inquilinosTabelaState;
+  if (state.eventosBindados) return;
+  state.eventosBindados = true;
+  configurarFiltrosPaginacaoInquilinos();
+  configurarAcoesInquilinos();
+  configurarModalImovelInquilino();
+  atualizarBadgeFiltros("", "", "");
+}
+
+function initInquilinosTabela() {
+  const pageRoot = document.querySelector(".inquilinos-page");
+  if (!pageRoot) return;
+  if (pageRoot.dataset.inquilinosTabelaInit === "1") return;
+  pageRoot.dataset.inquilinosTabelaInit = "1";
+  bindEventos();
+  carregarInquilinos();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initInquilinosTabela, { once: true });
+} else {
+  initInquilinosTabela();
+}
+
+document.addEventListener("lokafy:page-ready", initInquilinosTabela);

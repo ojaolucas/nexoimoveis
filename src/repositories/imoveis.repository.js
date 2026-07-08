@@ -13,25 +13,33 @@ async function findById(id) {
 }
 
 async function create(imovel) {
-  const { codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal } = imovel;
+  const { codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet } = imovel;
   const query = `
-    INSERT INTO imoveis (codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    INSERT INTO imoveis (codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     RETURNING *
   `;
-  const result = await db.query(query, [codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status || 'Disponível', observacoes, foto_principal]);
+  const result = await db.query(query, [
+    codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status || 'Disponível', observacoes, foto_principal,
+    quartos || 0, banheiros || 0, vagas_garagem || 0, mobiliado || 'Não informado', valor_condominio || 0, aceita_pet || 'Não informado'
+  ]);
   return result.rows[0];
 }
 
 async function update(id, imovel) {
-  const { nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal } = imovel;
+  const { nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet } = imovel;
   const query = `
     UPDATE imoveis
-    SET nome = $1, tipo = $2, proprietario_id = $3, endereco = $4, area_total = $5, valor_locacao = $6, status = $7, observacoes = $8, foto_principal = $9, atualizado_em = CURRENT_TIMESTAMP
-    WHERE id = $10
+    SET nome = $1, tipo = $2, proprietario_id = $3, endereco = $4, area_total = $5, valor_locacao = $6, status = $7, observacoes = $8, foto_principal = $9, 
+        quartos = $10, banheiros = $11, vagas_garagem = $12, mobiliado = $13, valor_condominio = $14, aceita_pet = $15, atualizado_em = CURRENT_TIMESTAMP
+    WHERE id = $16
     RETURNING *
   `;
-  const result = await db.query(query, [nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, id]);
+  const result = await db.query(query, [
+    nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal,
+    quartos || 0, banheiros || 0, vagas_garagem || 0, mobiliado || 'Não informado', valor_condominio || 0, aceita_pet || 'Não informado',
+    id
+  ]);
   return result.rows[0];
 }
 

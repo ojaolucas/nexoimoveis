@@ -6,9 +6,9 @@
   --font-primary: 'Inter', Arial, sans-serif;
 
   /* Colors Light Mode */
-  --color-primary: #478C27;
-  --color-primary-hover: #3b7420;
-  --color-primary-light: rgba(71, 140, 39, 0.1);
+  --color-primary: #0f766e;
+  --color-primary-hover: #0d5f59;
+  --color-primary-light: rgba(15, 118, 110, 0.1);
   --color-secondary: #001731;
   --color-secondary-hover: #000c1b;
   --color-bg-base: #F9F9F9;
@@ -67,5 +67,5 @@
   --glass-bg: rgba(30, 41, 59, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --color-primary-light: rgba(71, 140, 39, 0.15);
+  --color-primary-light: rgba(15, 118, 110, 0.15);
 }

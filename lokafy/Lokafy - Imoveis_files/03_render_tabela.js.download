@@ -1,0 +1,149 @@
+function renderTabelaPaginada() {
+  const state = window.imoveisListarState;
+  const tbody = document.getElementById("tbodyImoveis");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  const total = state.listaFiltrada.length;
+
+  if (!total) {
+    renderTabelaVazia(tbody);
+    atualizarPaginacaoInfo(0, 0, 0);
+    atualizarControlesPaginacao(0);
+    return;
+  }
+
+  const totalPaginas = Math.max(1, Math.ceil(total / state.itensPorPagina));
+  if (state.paginaAtual > totalPaginas) state.paginaAtual = totalPaginas;
+
+  const inicio = (state.paginaAtual - 1) * state.itensPorPagina;
+  const fim = Math.min(inicio + state.itensPorPagina, total);
+  const pagina = state.listaFiltrada.slice(inicio, fim);
+
+  tbody.innerHTML = pagina.map(renderImovelRow).join("");
+  atualizarPaginacaoInfo(inicio + 1, fim, total);
+  atualizarControlesPaginacao(totalPaginas);
+}
+
+function renderTabelaVazia(tbody) {
+  const state = window.imoveisListarState;
+  const busca = (document.getElementById("filtroBusca")?.value || "").trim();
+  const status = (document.getElementById("filtroStatus")?.value || "").trim();
+  const tipo = (document.getElementById("filtroTipo")?.value || "").trim();
+  const temFiltroAtivo = !!(busca || status || tipo);
+  const semCadastro = state.listaImoveis.length === 0;
+  const titulo = semCadastro ? "Nenhum imóvel cadastrado" : "Nenhum imóvel encontrado";
+  const texto = semCadastro
+    ? "Use o botão <strong>Novo imóvel</strong> para começar."
+    : (temFiltroAtivo ? "Tente ajustar os filtros." : "Não há dados para exibir no momento.");
+  const iconHtml = semCadastro
+    ? '<span class="empty-icon"><i class="fa-regular fa-building"></i></span>'
+    : '<span class="empty-icon"><i class="fa-solid fa-filter-circle-xmark"></i></span>';
+
+  tbody.innerHTML = `
+    <tr class="empty-state">
+      <td colspan="4">
+        <div class="empty-box">
+          ${iconHtml}
+          <h4>${titulo}</h4>
+          <p>${texto}</p>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function renderImovelRow(i) {
+  const temContrato = !!i.contrato_id;
+  const resumoImovel = `${i.tipo || "Tipo não informado"} · ${somenteEndereco(i.titulo, i.tipo) || "Endereço não informado"} · ${i.complemento || "Sem complemento"}`;
+  const statusImovel = i.status ? i.status.charAt(0).toUpperCase() + i.status.slice(1) : "—";
+  const proprietarios = Array.isArray(i.proprietarios_nomes) && i.proprietarios_nomes.length
+    ? i.proprietarios_nomes.join(" / ")
+    : (i.proprietario_nome ?? "—");
+  const qtdProprietarios = Array.isArray(i.proprietarios_nomes) && i.proprietarios_nomes.length
+    ? i.proprietarios_nomes.length
+    : (i.proprietario_nome ? 1 : 0);
+  const labelProprietario = qtdProprietarios > 1 ? "Proprietários" : "Proprietário";
+  const inquilino = String(i.inquilino || "").trim() || "-";
+  const inquilinoLabel = inquilino && inquilino !== "-" ? inquilino : "Sem inquilino";
+
+  return `
+    <tr>
+      <td class="col-codigo" data-label="Código">${escapeHtml(i.codigo || `#IM${i.id}`)}</td>
+      <td class="cell-imovel" data-label="Imóvel">
+        <div class="imovel-list">
+          <div class="imovel-item principal" title="${escapeHtml(resumoImovel)}"><i class="fa-solid fa-building"></i><span>${escapeHtml(resumoImovel)}</span></div>
+          <div class="imovel-item" title="${escapeHtml(i.condominio || "Sem condomínio")}"><i class="fa-solid fa-city"></i><span>Condomínio: ${escapeHtml(i.condominio || "Sem condomínio")}</span></div>
+          <div class="imovel-item" title="${escapeHtml(proprietarios)}"><i class="fa-solid fa-user-tie"></i><span>${labelProprietario}: ${escapeHtml(proprietarios)}</span></div>
+          <div class="imovel-item" title="${escapeHtml(inquilinoLabel)}"><i class="fa-regular fa-user"></i><span>Inquilino: ${escapeHtml(inquilinoLabel)}</span></div>
+          <div class="imovel-item" title="${escapeHtml(statusImovel)}"><i class="fa-solid fa-circle-info"></i><span>Status: ${escapeHtml(statusImovel)}</span></div>
+        </div>
+      </td>
+      <td class="cell-contrato" data-label="Contrato">${renderContratoImovel(i)}</td>
+      <td class="cell-acoes" data-label="Ações">${renderAcoesImovel(i, temContrato)}</td>
+    </tr>
+  `;
+}
+
+function renderContratoImovel(i) {
+  if (!i.contrato_codigo) return '<span class="contrato-vazio">Sem contrato</span>';
+  return `
+    <div class="contrato-stack">
+      <span class="contrato-pill" title="Contrato vinculado: ${escapeHtml(i.contrato_codigo)}">
+        <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+        <span class="contrato-code">${escapeHtml(i.contrato_codigo)}</span>
+      </span>
+      <span class="contrato-sub">Vinculado</span>
+    </div>
+  `;
+}
+
+function renderAcoesImovel(i, temContrato) {
+  const criarContratoUrl = montarUrlCriarContratoImovel(i, "/contratos/novo/");
+
+  return `
+    <div class="actions-menu">
+      <button class="btn-more" type="button" aria-label="Ações do imóvel"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+      <div class="dropdown">
+        <div class="dropdown-group" role="group" aria-label="Ações do imóvel">
+          <button type="button" class="btn-editar" data-id="${escapeHtml(i.id)}">Editar imóvel</button>
+          <button type="button" class="btn-duplicar" data-id="${escapeHtml(i.id)}">Duplicar cadastro</button>
+        </div>
+        <div class="dropdown-group" role="group" aria-label="Locação do imóvel">
+          ${!temContrato ? `<button type="button" class="btn-criar-contrato" data-url="${escapeHtml(criarContratoUrl)}">Criar contrato</button>` : ""}
+          ${temContrato ? `<a href="/contratos/novo/?id=${encodeURIComponent(String(i.contrato_id))}" class="btn-ver-contrato" data-contrato="${escapeHtml(i.contrato_id)}">Ver contrato</a>` : ""}
+          <button type="button" class="btn-ver-despesas" data-id="${escapeHtml(i.id)}">Ver despesas</button>
+        </div>
+        <div class="dropdown-group dropdown-group-danger" role="group" aria-label="Remover imóvel">
+          <button type="button" class="danger btn-excluir" data-id="${escapeHtml(i.id)}">Excluir imóvel</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function montarUrlCriarContratoImovel(i, baseUrl) {
+  const params = new URLSearchParams();
+  const imovelId = String(i?.id || "").trim();
+  const inquilinoId = String(i?.inquilino_id || "").trim();
+  params.set("inicio", "contrato");
+  if (imovelId) params.set("imovel_id", imovelId);
+  if (inquilinoId) params.set("inquilino_id", inquilinoId);
+  const query = params.toString();
+  return query ? `${baseUrl}?${query}` : baseUrl;
+}
+
+function atualizarPaginacaoInfo(inicio, fim, total) {
+  const info = document.getElementById("paginacaoInfo");
+  if (!info) return;
+  info.innerText = total === 0 ? "Mostrando 0 de 0 imóveis" : `Mostrando ${inicio}-${fim} de ${total} imóveis`;
+}
+
+function atualizarControlesPaginacao(totalPaginas) {
+  const state = window.imoveisListarState;
+  const prev = document.getElementById("btnPaginaAnterior");
+  const next = document.getElementById("btnProximaPagina");
+  if (!prev || !next) return;
+  prev.disabled = state.paginaAtual <= 1;
+  next.disabled = state.paginaAtual >= totalPaginas;
+}

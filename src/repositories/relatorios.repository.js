@@ -1,178 +1,269 @@
 const db = require('../config/database');
 
-/**
- * Helper to build WHERE clause based on filters object.
- * Returns { clause: string, params: array }
- */
-function buildWhere(filters, startIndex = 1) {
-  let clause = '';
+async function getReceitas(filters = {}) {
+  let query = `
+    SELECT 
+      i.nome AS imovel_nome,
+      l.nome_razao_social AS locatario_nome,
+      r.competencia,
+      r.vencimento,
+      r.valor_previsto,
+      r.valor_recebido,
+      r.data_pagamento,
+      r.forma_pagamento,
+      r.status,
+      r.observacoes
+    FROM recebimentos r
+    JOIN contratos c ON r.contrato_id = c.id
+    JOIN imoveis i ON c.imovel_id = i.id
+    JOIN locatarios l ON c.locatario_id = l.id
+    WHERE 1=1
+  `;
   const params = [];
-  let idx = startIndex;
-  for (const [key, value] of Object.entries(filters)) {
-    if (value === undefined || value === null || value === '') continue;
-    switch (key) {
-      case 'status':
-        clause += ` AND status = $${idx}`;
-        params.push(value);
-        idx++; break;
-      case 'imovel':
-        clause += ` AND imovel_id = $${idx}`;
-        params.push(value);
-        idx++; break;
-      case 'locatario':
-        clause += ` AND locatario_id = $${idx}`;
-        params.push(value);
-        idx++; break;
-      case 'proprietario':
-        clause += ` AND proprietario_id = $${idx}`;
-        params.push(value);
-        idx++; break;
-      case 'periodo':
-        // expecting { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
-        if (value.start) {
-          clause += ` AND data >= $${idx}`;
-          params.push(value.start);
-          idx++;
-        }
-        if (value.end) {
-          clause += ` AND data <= $${idx}`;
-          params.push(value.end);
-          idx++;
-        }
-        break;
-      case 'categoria':
-        clause += ` AND categoria = $${idx}`;
-        params.push(value);
-        idx++; break;
-      case 'responsavel':
-        clause += ` AND responsavel_id = $${idx}`;
-        params.push(value);
-        idx++; break;
-    }
+  let paramCount = 1;
+
+  if (filters.status) {
+    query += ` AND r.status = $${paramCount}`;
+    params.push(filters.status);
+    paramCount++;
   }
-  return { clause, params };
-}
+  if (filters.data_inicio) {
+    query += ` AND r.vencimento >= $${paramCount}`;
+    params.push(filters.data_inicio);
+    paramCount++;
+  }
+  if (filters.data_fim) {
+    query += ` AND r.vencimento <= $${paramCount}`;
+    params.push(filters.data_fim);
+    paramCount++;
+  }
+  if (filters.imovel_id) {
+    query += ` AND c.imovel_id = $${paramCount}`;
+    params.push(filters.imovel_id);
+    paramCount++;
+  }
 
-/** Imóveis */
-async function listarImoveis(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT * FROM imoveis WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} ORDER BY id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Proprietários */
-async function listarProprietarios(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT p.*, COUNT(i.id) AS imoveis_qtd, SUM(i.valor_locacao) AS valor_total_locacoes FROM proprietarios p LEFT JOIN imoveis i ON i.proprietario_id = p.id WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} GROUP BY p.id ORDER BY p.id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Locatários */
-async function listarLocatarios(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT l.*, COUNT(c.id) AS contratos_qtd, COUNT(i.id) AS imoveis_qtd FROM locatarios l LEFT JOIN contratos c ON c.locatario_id = l.id LEFT JOIN imoveis i ON c.imovel_id = i.id WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} GROUP BY l.id ORDER BY l.id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Contratos */
-async function listarContratos(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT * FROM contratos WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} ORDER BY id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Recebimentos */
-async function listarRecebimentos(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT * FROM recebimentos WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} ORDER BY data_vencimento DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Despesas */
-async function listarDespesas(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT * FROM despesas WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} ORDER BY data_vencimento DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Manutenções */
-async function listarManutencoes(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT * FROM manutencoes WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} ORDER BY data_prevista DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Vistorias */
-async function listarVistorias(filtros = {}, limit = 50, offset = 0) {
-  const base = `SELECT * FROM vistorias WHERE 1=1`;
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `${base}${clause} ORDER BY data_vistoria DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  const allParams = [...params, limit, offset];
-  const result = await db.query(query, allParams);
-  return result.rows;
-}
-
-/** Ocupação */
-async function obterOcupacao() {
-  const query = 'SELECT * FROM vw_relatorio_ocupacao';
-  const result = await db.query(query);
-  return result.rows[0];
-}
-
-/** Inadimplência */
-async function obterInadimplencia(filtros = {}) {
-  const { clause, params } = buildWhere(filtros, 1);
-  const query = `SELECT * FROM vw_relatorio_inadimplencia WHERE 1=1${clause}`;
+  query += ` ORDER BY r.vencimento DESC`;
   const result = await db.query(query, params);
   return result.rows;
 }
 
-/** Fluxo de Caixa */
-async function obterFluxoCaixa() {
-  const query = 'SELECT * FROM vw_relatorio_fluxo_caixa';
-  const result = await db.query(query);
+async function getDespesas(filters = {}) {
+  let query = `
+    SELECT 
+      i.nome AS imovel_nome,
+      d.categoria,
+      d.responsavel,
+      d.competencia,
+      d.vencimento,
+      d.valor,
+      d.data_pagamento,
+      d.status,
+      d.observacoes
+    FROM despesas d
+    JOIN imoveis i ON d.imovel_id = i.id
+    WHERE 1=1
+  `;
+  const params = [];
+  let paramCount = 1;
+
+  if (filters.status) {
+    query += ` AND d.status = $${paramCount}`;
+    params.push(filters.status);
+    paramCount++;
+  }
+  if (filters.categoria) {
+    query += ` AND d.categoria = $${paramCount}`;
+    params.push(filters.categoria);
+    paramCount++;
+  }
+  if (filters.data_inicio) {
+    query += ` AND d.vencimento >= $${paramCount}`;
+    params.push(filters.data_inicio);
+    paramCount++;
+  }
+  if (filters.data_fim) {
+    query += ` AND d.vencimento <= $${paramCount}`;
+    params.push(filters.data_fim);
+    paramCount++;
+  }
+  if (filters.imovel_id) {
+    query += ` AND d.imovel_id = $${paramCount}`;
+    params.push(filters.imovel_id);
+    paramCount++;
+  }
+
+  query += ` ORDER BY d.vencimento DESC`;
+  const result = await db.query(query, params);
   return result.rows;
 }
 
-/** Financeiro (resumo geral) */
-async function obterFinanceiro() {
-  const query = 'SELECT * FROM vw_relatorio_financeiro';
-  const result = await db.query(query);
+async function getFinanceiroPorImovel(filters = {}) {
+  let query = `
+    SELECT 
+      i.id AS imovel_id,
+      i.nome AS imovel_nome,
+      COALESCE(r.total_receitas, 0) AS total_receitas,
+      COALESCE(d.total_despesas, 0) AS total_despesas,
+      (COALESCE(r.total_receitas, 0) - COALESCE(d.total_despesas, 0)) AS saldo
+    FROM imoveis i
+    LEFT JOIN (
+      SELECT c.imovel_id, SUM(COALESCE(rec.valor_recebido, 0)) AS total_receitas
+      FROM recebimentos rec
+      JOIN contratos c ON rec.contrato_id = c.id
+      WHERE rec.status = 'Pago'
+      GROUP BY c.imovel_id
+    ) r ON i.id = r.imovel_id
+    LEFT JOIN (
+      SELECT desp.imovel_id, SUM(desp.valor) AS total_despesas
+      FROM despesas desp
+      WHERE desp.status = 'Pago'
+      GROUP BY desp.imovel_id
+    ) d ON i.id = d.imovel_id
+    WHERE i.status != 'Inativo'
+  `;
+  const params = [];
+  let paramCount = 1;
+
+  if (filters.imovel_id) {
+    query += ` AND i.id = $${paramCount}`;
+    params.push(filters.imovel_id);
+    paramCount++;
+  }
+
+  query += ` ORDER BY i.nome ASC`;
+  const result = await db.query(query, params);
+  return result.rows;
+}
+
+async function getInadimplencia(filters = {}) {
+  let query = `
+    SELECT 
+      i.nome AS imovel_nome,
+      l.nome_razao_social AS locatario_nome,
+      r.competencia,
+      r.vencimento,
+      r.valor_previsto,
+      (CURRENT_DATE - r.vencimento) AS dias_atraso
+    FROM recebimentos r
+    JOIN contratos c ON r.contrato_id = c.id
+    JOIN imoveis i ON c.imovel_id = i.id
+    JOIN locatarios l ON c.locatario_id = l.id
+    WHERE r.status = 'Vencido'
+  `;
+  const params = [];
+  let paramCount = 1;
+
+  if (filters.imovel_id) {
+    query += ` AND c.imovel_id = $${paramCount}`;
+    params.push(filters.imovel_id);
+    paramCount++;
+  }
+
+  query += ` ORDER BY r.vencimento ASC`;
+  const result = await db.query(query, params);
+  return result.rows;
+}
+
+async function getContratos(filters = {}) {
+  let query = `
+    SELECT 
+      i.nome AS imovel_nome,
+      l.nome_razao_social AS locatario_nome,
+      c.data_inicio,
+      c.data_fim,
+      c.valor_mensal,
+      c.status
+    FROM contratos c
+    JOIN imoveis i ON c.imovel_id = i.id
+    JOIN locatarios l ON c.locatario_id = l.id
+    WHERE 1=1
+  `;
+  const params = [];
+  let paramCount = 1;
+
+  if (filters.status) {
+    query += ` AND c.status = $${paramCount}`;
+    params.push(filters.status);
+    paramCount++;
+  }
+  if (filters.imovel_id) {
+    query += ` AND c.imovel_id = $${paramCount}`;
+    params.push(filters.imovel_id);
+    paramCount++;
+  }
+
+  query += ` ORDER BY c.data_inicio DESC`;
+  const result = await db.query(query, params);
+  return result.rows;
+}
+
+async function getOcupacao(filters = {}) {
+  let query = `
+    SELECT 
+      i.nome AS imovel_nome,
+      i.tipo,
+      i.status,
+      i.valor_locacao,
+      l.nome_razao_social AS locatario_nome
+    FROM imoveis i
+    LEFT JOIN contratos c ON c.imovel_id = i.id AND c.status = 'Ativo'
+    LEFT JOIN locatarios l ON c.locatario_id = l.id
+    WHERE i.status != 'Inativo'
+  `;
+  const params = [];
+  let paramCount = 1;
+
+  if (filters.status) {
+    query += ` AND i.status = $${paramCount}`;
+    params.push(filters.status);
+    paramCount++;
+  }
+
+  query += ` ORDER BY i.nome ASC`;
+  const result = await db.query(query, params);
+  return result.rows;
+}
+
+async function getImoveis(filters = {}) {
+  let query = `
+    SELECT 
+      i.nome AS imovel_nome,
+      i.tipo,
+      i.status,
+      i.area_total,
+      i.valor_locacao,
+      i.endereco,
+      p.nome_razao_social AS proprietario_nome
+    FROM imoveis i
+    JOIN proprietarios p ON i.proprietario_id = p.id
+    WHERE i.status != 'Inativo'
+  `;
+  const params = [];
+  let paramCount = 1;
+
+  if (filters.status) {
+    query += ` AND i.status = $${paramCount}`;
+    params.push(filters.status);
+    paramCount++;
+  }
+  if (filters.tipo) {
+    query += ` AND i.tipo = $${paramCount}`;
+    params.push(filters.tipo);
+    paramCount++;
+  }
+
+  query += ` ORDER BY i.nome ASC`;
+  const result = await db.query(query, params);
   return result.rows;
 }
 
 module.exports = {
-  listarImoveis,
-  listarProprietarios,
-  listarLocatarios,
-  listarContratos,
-  listarRecebimentos,
-  listarDespesas,
-  listarManutencoes,
-  listarVistorias,
-  obterOcupacao,
-  obterInadimplencia,
-  obterFluxoCaixa,
-  obterFinanceiro,
+  getReceitas,
+  getDespesas,
+  getFinanceiroPorImovel,
+  getInadimplencia,
+  getContratos,
+  getOcupacao,
+  getImoveis
 };

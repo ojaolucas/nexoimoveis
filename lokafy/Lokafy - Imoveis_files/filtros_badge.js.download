@@ -1,0 +1,35 @@
+(function () {
+  if (window.lucide) window.lucide.createIcons();
+
+  const busca = document.getElementById("filtroBusca");
+  const status = document.getElementById("filtroStatus");
+  const tipo = document.getElementById("filtroTipo");
+  const badge = document.getElementById("filtrosAtivosBadge");
+  const limpar = document.getElementById("btnLimparFiltros");
+
+  function atualizar() {
+    if (!badge) return;
+    let ativos = 0;
+    if ((busca?.value || "").trim()) ativos += 1;
+    if (status?.value) ativos += 1;
+    if (tipo?.value) ativos += 1;
+    badge.textContent = ativos + " ativo" + (ativos === 1 ? "" : "s");
+  }
+
+  [busca, status, tipo].forEach(function (el) {
+    el?.addEventListener("input", atualizar);
+    el?.addEventListener("change", atualizar);
+  });
+
+  limpar?.addEventListener("click", function () {
+    if (busca) busca.value = "";
+    if (status) status.value = "";
+    if (tipo) tipo.value = "";
+    busca?.dispatchEvent(new Event("input", { bubbles: true }));
+    status?.dispatchEvent(new Event("change", { bubbles: true }));
+    tipo?.dispatchEvent(new Event("change", { bubbles: true }));
+    atualizar();
+  });
+
+  atualizar();
+})();

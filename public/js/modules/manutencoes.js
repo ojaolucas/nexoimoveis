@@ -384,7 +384,6 @@ function setupEventListeners() {
       document.getElementById('manutencao-id').value = '';
       document.getElementById('manutencao-codigo').value = '';
       document.getElementById('modal-title').textContent = 'Nova Manutenção';
-      document.getElementById('btn-salvar-manutencao').textContent = 'Cadastrar';
       
       // Default solicitacao date to today
       document.getElementById('data_solicitacao').value = new Date().toISOString().split('T')[0];
@@ -396,15 +395,60 @@ function setupEventListeners() {
         <option value="Em Andamento">Em Andamento</option>
       `;
 
+      goToStep(1);
       modalForm.classList.add('active');
     });
   }
 
   document.getElementById('btn-close-modal').addEventListener('click', () => modalForm.classList.remove('active'));
-  document.getElementById('btn-cancelar-modal').addEventListener('click', () => modalForm.classList.remove('active'));
 
-  // Save/Update Form Handler
-  document.getElementById('form-manutencao').addEventListener('submit', handleSaveManutencao);
+  // Wizard navigation buttons for Manutenção
+  document.getElementById('wizard-btn-prev').addEventListener('click', () => {
+    if (currentStep === 1) {
+      document.getElementById('modal-manutencao').classList.remove('active');
+    } else {
+      goToStep(currentStep - 1);
+    }
+  });
+
+  document.getElementById('wizard-btn-next').addEventListener('click', () => {
+    if (currentStep < 4) {
+      if (validateStep(currentStep)) {
+        goToStep(currentStep + 1);
+      }
+    }
+  });
+
+  // Intercept form submit or click next for Manutenção
+  document.getElementById('form-manutencao').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (currentStep < 4) {
+      if (validateStep(currentStep)) {
+        goToStep(currentStep + 1);
+      }
+    } else {
+      handleSaveManutencao(e);
+    }
+  });
+
+  // Wizard sidebar steps navigation click for Manutenção
+  document.querySelectorAll('#modal-manutencao .wizard-step').forEach(stepEl => {
+    stepEl.addEventListener('click', () => {
+      const target = parseInt(stepEl.getAttribute('data-step-target'));
+      if (target === currentStep) return;
+      
+      if (target > currentStep) {
+        // Validate intermediate steps
+        let tempStep = currentStep;
+        while (tempStep < target) {
+          if (!validateStep(tempStep)) return;
+          tempStep++;
+        }
+      }
+      
+      goToStep(target);
+    });
+  });
 
   // Conclusion modal toggles
   const modalConcluir = document.getElementById('modal-concluir');
@@ -427,6 +471,12 @@ function setupEventListeners() {
 
   // Attachment upload form submit
   document.getElementById('form-upload-anexo').addEventListener('submit', handleUploadAnexo);
+
+  // Wizard attachment upload button
+  const btnWizardUploadAnexo = document.getElementById('btn-manut-wizard-upload');
+  if (btnWizardUploadAnexo) {
+    btnWizardUploadAnexo.addEventListener('click', handleWizardUploadAnexo);
+  }
 }
 
 function switchMainTab(target) {
@@ -542,8 +592,9 @@ window.editarManutencao = async function(id) {
       statusSelect.value = m.status;
 
       document.getElementById('modal-title').textContent = `Editar Manutenção - ${m.codigo}`;
-      document.getElementById('btn-salvar-manutencao').textContent = 'Salvar Alterações';
-
+      currentManutencaoId = m.id;
+      renderWizardAnexos(m.anexos || []);
+      goToStep(1);
       document.getElementById('modal-manutencao').classList.add('active');
     }
   } catch (err) {
@@ -553,7 +604,8 @@ window.editarManutencao = async function(id) {
 
 // Cancel maintenance trigger
 window.cancelarManutencao = async function(id, codigo) {
-  if (confirm(`Deseja realmente CANCELAR a manutenção "${codigo}"?\nEsta ação registrará um log permanente e atualizará o status para Cancelada.`)) {
+  const confirmar = await confirmarAcao('Cancelar Manutenção', `Deseja realmente CANCELAR a manutenção "${codigo}"?\nEsta ação registrará um log permanente e atualizará o status para Cancelada.`, 'Cancelar', 'Voltar', true);
+  if (confirmar) {
     showLoader();
     try {
       const res = await api.patch(`/api/manutencoes/${id}/cancelar`);
@@ -798,7 +850,8 @@ async function handleUploadAnexo(e) {
 window.removerAnexo = async function(arquivoId) {
   if (!currentManutencaoId) return;
 
-  if (confirm('Deseja realmente excluir este anexo permanentemente?')) {
+  const confirmar = await confirmarAcao('Excluir Anexo', 'Deseja realmente excluir este anexo permanentemente?', 'Excluir', 'Cancelar', true);
+  if (confirmar) {
     showLoader();
     try {
       const res = await api.delete(`/api/manutencoes/${currentManutencaoId}/anexos/${arquivoId}`);
@@ -822,3 +875,288 @@ window.removerAnexo = async function(arquivoId) {
     }
   }
 };
+
+// Wizard helper functions
+function goToStep(step) {
+  currentStep = step;
+  
+  if (step === 3) {
+    const isEdit = document.getElementById('manutencao-id').value !== '';
+    const ac = document.getElementById('manut-wizard-attachments-card');
+    const ic = document.getElementById('manut-wizard-informative-card');
+    if (ac) ac.style.display = isEdit ? 'block' : 'none';
+    if (ic) ic.style.display = isEdit ? 'none' : 'block';
+  }
+
+  // Update step elements in sidebar
+  document.querySelectorAll('#modal-manutencao .wizard-step').forEach(el => {
+    const targetStep = parseInt(el.getAttribute('data-step-target'));
+    el.classList.toggle('active', targetStep === step);
+  });
+  
+  // Show active pane
+  document.querySelectorAll('#modal-manutencao .wizard-pane').forEach(el => {
+    el.style.display = el.getAttribute('id') === `wizard-pane-${step}` ? 'block' : 'none';
+  });
+  
+  // Configure footer buttons
+  const btnPrev = document.getElementById('wizard-btn-prev');
+  const btnNext = document.getElementById('wizard-btn-next');
+  
+  if (step === 1) {
+    btnPrev.textContent = 'Cancelar';
+  } else {
+    btnPrev.textContent = '← Voltar';
+  }
+  
+  if (step < 4) {
+    btnNext.type = 'button';
+    btnNext.innerHTML = 'Próximo Passo <i class="fi fi-rr-arrow-right"></i>';
+  } else {
+    btnNext.type = 'submit';
+    const isEdit = document.getElementById('manutencao-id').value !== '';
+    btnNext.innerHTML = (isEdit ? 'Salvar Alterações' : 'Salvar Cadastro') + ' <i class="fi fi-rr-check"></i>';
+    renderRevision();
+  }
+}
+
+function validateStep(step) {
+  const pane = document.getElementById(`wizard-pane-${step}`);
+  if (!pane) return true;
+  
+  const inputs = pane.querySelectorAll('input, select, textarea');
+  let valid = true;
+  
+  inputs.forEach(input => {
+    // If the input is in a hidden group, skip validating
+    let parent = input.parentElement;
+    let isHidden = false;
+    while (parent && parent !== pane) {
+      if (parent.style.display === 'none') {
+        isHidden = true;
+        break;
+      }
+      parent = parent.parentElement;
+    }
+    if (isHidden) return;
+
+    if (!input.checkValidity()) {
+      input.reportValidity();
+      valid = false;
+    }
+  });
+  
+  return valid;
+}
+
+function renderRevision() {
+  const container = document.getElementById('revisao-conteudo');
+  if (!container) return;
+  
+  const imovelSelect = document.getElementById('imovel_id');
+  const imovelName = imovelSelect.options[imovelSelect.selectedIndex]?.text || '-';
+  const tipo = document.getElementById('tipo').value || '-';
+  const status = document.getElementById('status').value || '-';
+  const titulo = document.getElementById('titulo').value || '-';
+  const descricao = document.getElementById('descricao').value || '-';
+  const dataSolicitacao = formatDate(document.getElementById('data_solicitacao').value);
+  const responsavel = document.getElementById('responsavel').value || '-';
+  const valorPrevisto = formatCurrency(document.getElementById('valor_previsto').value);
+  const dataPrevista = document.getElementById('data_prevista').value ? formatDate(document.getElementById('data_prevista').value) : 'Não informada';
+  const dataInicio = document.getElementById('data_inicio').value ? formatDate(document.getElementById('data_inicio').value) : 'Não informada';
+  
+  const fornecedorNome = document.getElementById('fornecedor_nome').value || 'Não informado';
+  const fornecedorTelefone = document.getElementById('fornecedor_telefone').value || 'Não informado';
+  const fornecedorEmail = document.getElementById('fornecedor_email').value || 'Não informado';
+  const fornecedorObs = document.getElementById('fornecedor_observacoes').value || 'Nenhuma';
+
+  let html = `
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 13px;">
+      <div style="grid-column: span 2;">
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Imóvel</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${imovelName}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Tipo de Manutenção</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${tipo}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Status</span>
+        <span class="badge badge-planejada" style="background:#FEF08A; color:#854D0E;">${status}</span>
+      </div>
+      <div style="grid-column: span 2;">
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Título</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${titulo}</span>
+      </div>
+      <div style="grid-column: span 2;">
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Descrição / Escopo</span>
+        <span style="font-weight: 500; color: var(--color-text-main); white-space: pre-wrap;">${descricao}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Data de Solicitação</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${dataSolicitacao}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Responsável Interno</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${responsavel}</span>
+      </div>
+      
+      <div style="grid-column: span 2; border-top: 1px solid var(--color-border); padding-top: 12px; margin-top: 4px;">
+        <h5 style="margin:0 0 8px 0; font-size:12px; font-weight:700; color:var(--color-primary); text-transform:uppercase;">Custos & Fornecedor</h5>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Valor Previsto (Orçado)</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${valorPrevisto}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Data Prevista</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${dataPrevista}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Data de Início Real</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${dataInicio}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Fornecedor</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${fornecedorNome}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Telefone Fornecedor</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${fornecedorTelefone}</span>
+      </div>
+      <div>
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">E-mail Fornecedor</span>
+        <span style="font-weight: 600; color: var(--color-text-main);">${fornecedorEmail}</span>
+      </div>
+      <div style="grid-column: span 2;">
+        <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Observações do Fornecedor</span>
+        <span style="font-weight: 500; color: var(--color-text-main);">${fornecedorObs}</span>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+// --- Manutenções Wizard Attachments Upload Logic ---
+
+async function handleWizardUploadAnexo(e) {
+  if (e) e.preventDefault();
+  if (!currentManutencaoId) return;
+
+  const fileInput = document.getElementById('manut-wizard-anexo-arquivo');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    showToast('Por favor, selecione um arquivo.', 'error');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const type = document.getElementById('manut-wizard-anexo-tipo').value;
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  // Validate format size limits
+  if (ext === 'pdf' && file.size > 20 * 1024 * 1024) {
+    showToast('O arquivo PDF excede o limite de 20 MB.', 'error');
+    return;
+  }
+  if (['jpg', 'jpeg', 'png'].includes(ext) && file.size > 10 * 1024 * 1024) {
+    showToast('A imagem excede o limite de 10 MB.', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('arquivo', file);
+  formData.append('tipo_anexo', type);
+
+  showLoader();
+  try {
+    const res = await api.post(`/api/manutencoes/${currentManutencaoId}/anexos`, formData, true);
+    if (res.success) {
+      showToast(res.message, 'success');
+      fileInput.value = '';
+      
+      // Reload details to update attachments list
+      const updatedDet = await api.get(`/api/manutencoes/${currentManutencaoId}`);
+      if (updatedDet.success && updatedDet.data) {
+        document.getElementById('det-anexo-count').textContent = updatedDet.data.anexos ? updatedDet.data.anexos.length : 0;
+        renderWizardAnexos(updatedDet.data.anexos || []);
+        renderAnexos(updatedDet.data.anexos || []);
+        renderTimeline(updatedDet.data.timeline || []);
+      }
+    } else {
+      showToast(res.message || 'Erro ao enviar arquivo.', 'error');
+    }
+  } catch (err) {
+    showToast(err.message || 'Erro de conexão.', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+window.excluirAnexoWizard = async function(arquivoId) {
+  if (!currentManutencaoId) return;
+
+  const confirmar = await confirmarAcao('Excluir Anexo', 'Deseja realmente excluir este anexo permanentemente?', 'Excluir', 'Cancelar', true);
+  if (confirmar) {
+    showLoader();
+    try {
+      const res = await api.delete(`/api/manutencoes/${currentManutencaoId}/anexos/${arquivoId}`);
+      if (res.success) {
+        showToast(res.message, 'success');
+        
+        // Reload details to update attachments list
+        const updatedDet = await api.get(`/api/manutencoes/${currentManutencaoId}`);
+        if (updatedDet.success && updatedDet.data) {
+          document.getElementById('det-anexo-count').textContent = updatedDet.data.anexos ? updatedDet.data.anexos.length : 0;
+          renderWizardAnexos(updatedDet.data.anexos || []);
+          renderAnexos(updatedDet.data.anexos || []);
+          renderTimeline(updatedDet.data.timeline || []);
+        }
+      } else {
+        showToast(res.message || 'Erro ao remover anexo.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro de conexão.', 'error');
+    } finally {
+      hideLoader();
+    }
+  }
+};
+
+function renderWizardAnexos(anexos) {
+  const container = document.getElementById('manut-wizard-attachments-list');
+  if (!container) return;
+  if (!anexos || anexos.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-card" style="padding: 16px;">
+        <div class="empty-state-icon" style="font-size: 24px;">📄</div>
+        <h5 class="empty-state-title" style="font-size: 13px;">Nenhum anexo encontrado</h5>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = anexos.map(a => {
+    let deleteBtn = '';
+    if (userProfile === 'administrador' || userProfile === 'operacional') {
+      deleteBtn = `<button type="button" onclick="excluirAnexoWizard('${a.id}')" style="background:none; border:none; color:var(--color-error); font-size:14px; cursor:pointer;" title="Remover Anexo"><i class="fi fi-rr-trash"></i></button>`;
+    }
+    const dateVal = formatDate(a.criado_em);
+
+    return `
+      <div class="document-item" style="padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: 6px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fi fi-rr-document" style="font-size: 16px; color: var(--color-info);"></i>
+          <div>
+            <strong style="font-size:12px; color:var(--color-text-main);">${a.tipo_anexo}</strong>
+            <span style="font-size:10px; color:var(--color-text-muted); display:block;">${a.nome_arquivo} • ${dateVal}</span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <a href="${a.caminho_arquivo}" target="_blank" class="btn btn-secondary btn-icon" style="height:28px; width:28px;" title="Download"><i class="fi fi-rr-download" style="font-size:12px;"></i></a>
+          ${deleteBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
+}

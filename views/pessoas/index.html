@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pessoas - NexoMoveis</title>
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- CSS stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/tables.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <style>
+    /* Custom modal tabs and styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 780px;
+      padding: 30px;
+      border-radius: var(--border-radius-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeIn var(--transition-normal) forwards;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 12px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--color-text-muted);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+      border-top: 1px solid var(--color-border);
+      padding-top: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-pf { background: var(--color-primary-light); color: var(--color-primary); }
+    .badge-pj { background: var(--color-info-light); color: var(--color-info); }
+    .badge-ativo { background: var(--color-success-light); color: var(--color-success); }
+    .badge-inativo { background: var(--color-error-light); color: var(--color-error); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* Sub tabs controls */
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 20px;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      padding: 10px 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      background: none;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn var(--transition-fast) forwards;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      margin-left: 10px;
+      border-left: 2px solid var(--color-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -31px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid var(--color-bg-card);
+    }
+
+    .timeline-time {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-main);
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+
+    .document-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      background: var(--color-bg-base);
+    }
+
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .document-icon {
+      font-size: 20px;
+      color: var(--color-primary);
+    }
+
+    .filter-card {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 16px;
+      align-items: end;
+    }
+
+    @media (max-width: 1024px) {
+      .filter-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .filter-buttons {
+        grid-column: span 2;
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+      .filter-buttons {
+        grid-column: span 1;
+      }
+    }
+
+    /* Main view navigation tab styling */
+    .module-tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--color-bg-base);
+      border: 1px solid var(--color-border);
+      padding: 4px;
+      border-radius: 8px;
+      width: fit-content;
+    }
+
+    .module-tab-btn {
+      padding: 8px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .module-tab-btn.active {
+      background: var(--color-bg-card);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Wizard Classes */
+    .wizard-layout {
+      display: flex;
+      min-height: 480px;
+    }
+    .wizard-sidebar {
+      width: 250px;
+      background-color: var(--color-bg-base);
+      border-right: 1px solid var(--color-border);
+      padding: 30px 20px;
+      flex-shrink: 0;
+    }
+    .wizard-steps-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .wizard-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid transparent;
+    }
+    .wizard-step:hover {
+      background-color: var(--color-bg-base);
+    }
+    .wizard-step.active {
+      background-color: var(--color-success-light) !important;
+      border-color: rgba(71, 140, 39, 0.15);
+    }
+    .wizard-step.active .wizard-step-number {
+      background-color: var(--color-primary) !important;
+      color: #ffffff !important;
+      border-color: var(--color-primary) !important;
+    }
+    .wizard-step.active .wizard-step-text {
+      color: var(--color-primary) !important;
+      font-weight: 700 !important;
+    }
+    .wizard-step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+    .wizard-step-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      transition: all var(--transition-fast);
+    }
+    .wizard-content {
+      flex-grow: 1;
+      padding: 30px;
+      overflow-y: auto;
+      max-height: 520px;
+      background-color: var(--color-bg-base);
+    }
+    .wizard-pane {
+      display: none;
+    }
+    .wizard-pane.active {
+      display: block;
+      animation: fadeIn var(--transition-fast) forwards;
+    }
+    .wizard-card {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: var(--shadow-sm);
+    }
+    .wizard-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      border-top: 1px solid var(--color-border);
+      background-color: var(--color-bg-card);
+    }
+    .wizard-header {
+      padding: 24px 30px;
+      border-bottom: 1px solid var(--color-border);
+      background-color: var(--color-bg-card);
+    }
+    .wizard-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-main);
+      margin: 0;
+    }
+    .wizard-header p {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin: 4px 0 0 0;
+    }
+    @media (max-width: 768px) {
+      .wizard-layout {
+        flex-direction: column;
+      }
+      .wizard-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        padding: 16px 20px;
+      }
+      .wizard-steps-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        gap: 8px;
+      }
+      .wizard-step {
+        padding: 8px 12px;
+      }
+      .wizard-step-text {
+        display: none;
+      }
+      .wizard-content {
+        padding: 20px;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/pessoas" class="nav-item active">
+              <i class="fi fi-rr-users"></i>
+              <span>Pessoas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, locatários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Notification Bell -->
+          <div class="navbar-bell-container">
+            <button class="navbar-btn" id="notification-btn" title="Notificações">
+              <i class="fi fi-rr-bell"></i>
+              <span class="bell-badge" id="notification-badge" style="display: none;">0</span>
+            </button>
+            <div class="notifications-dropdown glass" id="notifications-dropdown" style="display: none;">
+              <div class="dropdown-header">
+                <h3>Notificações</h3>
+                <button class="mark-all-read-btn" id="mark-all-read">Marcar todas como lidas</button>
+              </div>
+              <div class="dropdown-list" id="notifications-list">
+                <div class="dropdown-empty">Nenhuma notificação pendente.</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="navbar-btn" id="theme-toggle" title="Alterar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        
+        <!-- Header -->
+        <div class="view-header">
+          <div>
+            <h1 id="page-title">Gestão de Pessoas</h1>
+            <p id="page-subtitle">Gerencie proprietários e locatários de forma unificada.</p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" id="btn-export-excel" title="Exportar para Excel">
+              <i class="fi fi-rr-file-excel"></i> Excel
+            </button>
+            <button class="btn btn-secondary" id="btn-export-pdf" title="Exportar para PDF">
+              <i class="fi fi-rr-file-pdf"></i> PDF
+            </button>
+            <button class="btn btn-primary" id="btn-novo-registro">
+              <i class="fi fi-rr-add"></i> Novo Proprietário
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab control for Proprietários vs Locatários -->
+        <div class="module-tab-nav">
+          <button class="module-tab-btn active" id="tab-btn-proprietarios" data-pessoas-tab="proprietarios">Proprietários</button>
+          <button class="module-tab-btn" id="tab-btn-locatarios" data-pessoas-tab="locatarios">Locatários</button>
+        </div>
+
+        <!-- TAB CONTENT: PROPRIETÁRIOS -->
+        <div class="pessoas-tab-pane active" id="pane-proprietarios">
+          <!-- Filters -->
+          <div class="card glass filter-card">
+            <div class="filter-row">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="prop-filtro-busca">Nome ou CPF/CNPJ</label>
+                <input type="text" id="prop-filtro-busca" class="form-control" placeholder="Buscar proprietário...">
+              </div>
+              
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="prop-filtro-tipo">Tipo</label>
+                <select id="prop-filtro-tipo" class="form-control">
+                  <option value="">Todos</option>
+                  <option value="PF">Pessoa Física</option>
+                  <option value="PJ">Pessoa Jurídica</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="prop-filtro-status">Status</label>
+                <select id="prop-filtro-status" class="form-control">
+                  <option value="">Todos</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                </select>
+              </div>
+
+              <div class="filter-buttons" style="display: flex; gap: 8px;">
+                <button class="btn btn-primary" id="prop-btn-filtrar" style="height: 44px; padding: 0 20px;">Filtrar</button>
+                <button class="btn btn-secondary" id="prop-btn-limpar" style="height: 44px; padding: 0 20px; background: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">Limpar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="card glass" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
+            <div class="table-responsive">
+              <table class="app-table">
+                <thead>
+                  <tr>
+                    <th>Nome / Razão Social</th>
+                    <th>CPF / CNPJ</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th style="text-align: center;">Imóveis</th>
+                    <th>Status</th>
+                    <th class="actions-header" style="text-align: right; padding-right: 24px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="proprietarios-list-body">
+                  <tr>
+                    <td colspan="7" style="text-align:center; padding:30px;">Carregando proprietários...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid var(--color-border);">
+              <span style="color: var(--color-text-muted); font-size:13px;" id="prop-pagination-info">Mostrando 0 de 0 registros</span>
+              <div class="pagination-buttons" style="display: flex; gap: 8px;">
+                <button class="btn" id="prop-btn-prev" style="height: 36px; padding: 0 16px; font-size:12px;">Anterior</button>
+                <button class="btn" id="prop-btn-next" style="height: 36px; padding: 0 16px; font-size:12px;">Próximo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: LOCATÁRIOS -->
+        <div class="pessoas-tab-pane" id="pane-locatarios" style="display: none;">
+          <!-- Filters -->
+          <div class="card glass filter-card">
+            <div class="filter-row">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="loc-filtro-busca">Nome ou CPF/CNPJ</label>
+                <input type="text" id="loc-filtro-busca" class="form-control" placeholder="Buscar locatário...">
+              </div>
+              
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="loc-filtro-tipo">Tipo</label>
+                <select id="loc-filtro-tipo" class="form-control">
+                  <option value="">Todos</option>
+                  <option value="PF">Pessoa Física</option>
+                  <option value="PJ">Pessoa Jurídica</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="loc-filtro-status">Status</label>
+                <select id="loc-filtro-status" class="form-control">
+                  <option value="">Todos</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                </select>
+              </div>
+
+              <div class="filter-buttons" style="display: flex; gap: 8px;">
+                <button class="btn btn-primary" id="loc-btn-filtrar" style="height: 44px; padding: 0 20px;">Filtrar</button>
+                <button class="btn btn-secondary" id="loc-btn-limpar" style="height: 44px; padding: 0 20px; background: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">Limpar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="card glass" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
+            <div class="table-responsive">
+              <table class="app-table">
+                <thead>
+                  <tr>
+                    <th>Nome / Razão Social</th>
+                    <th>CPF / CNPJ</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th style="text-align: center;">Contratos</th>
+                    <th>Status</th>
+                    <th class="actions-header" style="text-align: right; padding-right: 24px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="locatarios-list-body">
+                  <tr>
+                    <td colspan="7" style="text-align:center; padding:30px;">Carregando locatários...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="table-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid var(--color-border);">
+              <span style="color: var(--color-text-muted); font-size:13px;" id="loc-pagination-info">Mostrando 0 de 0 registros</span>
+              <div class="pagination-buttons" style="display: flex; gap: 8px;">
+                <button class="btn" id="loc-btn-prev" style="height: 36px; padding: 0 16px; font-size:12px;">Anterior</button>
+                <button class="btn" id="loc-btn-next" style="height: 36px; padding: 0 16px; font-size:12px;">Próximo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR PROPRIETÁRIO -->
+  <div class="modal modal-fullpage" id="modal-proprietario">
+    <div class="modal-content glass" style="max-width: 900px; padding: 0; overflow: hidden; border: none;">
+      <!-- Header -->
+      <div class="wizard-header">
+        <div>
+          <h2 id="prop-modal-title">Novo Proprietário</h2>
+          <p id="prop-modal-subtitle">Cadastre as informações completas para listar o proprietário no sistema.</p>
+        </div>
+        <button type="button" class="btn-voltar" id="prop-btn-close-modal"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <form id="form-proprietario">
+        <input type="hidden" id="prop-id">
+
+        <!-- Wizard Layout Wrapper -->
+        <div class="wizard-layout">
+          <!-- Left Sidebar (Step wizard menu) -->
+          <div class="wizard-sidebar">
+            <ul class="wizard-steps-list">
+              <li class="wizard-step active" data-step-target="1">
+                <span class="wizard-step-number">1</span>
+                <span class="wizard-step-text">Dados Pessoais</span>
+              </li>
+              <li class="wizard-step" data-step-target="2">
+                <span class="wizard-step-number">2</span>
+                <span class="wizard-step-text">Endereço</span>
+              </li>
+              <li class="wizard-step" data-step-target="3">
+                <span class="wizard-step-number">3</span>
+                <span class="wizard-step-text">Documentos</span>
+              </li>
+              <li class="wizard-step" data-step-target="4">
+                <span class="wizard-step-number">4</span>
+                <span class="wizard-step-text">Observações</span>
+              </li>
+              <li class="wizard-step" data-step-target="5">
+                <span class="wizard-step-number">5</span>
+                <span class="wizard-step-text">Revisão</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Content Area -->
+          <div class="wizard-content">
+            <!-- Step Pane 1: Dados Pessoais -->
+            <div class="wizard-pane active" id="prop-wizard-pane-1">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-info" style="color: var(--color-primary); font-size: 18px;"></i> Dados Pessoais / Identificação
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="prop-tipo_pessoa">Tipo de Pessoa</label>
+                    <select id="prop-tipo_pessoa" class="form-control" required>
+                      <option value="PF" selected>Pessoa Física (PF)</option>
+                      <option value="PJ">Pessoa Jurídica (PJ)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="prop-status">Status</label>
+                    <select id="prop-status" class="form-control" required>
+                      <option value="ativo" selected>Ativo</option>
+                      <option value="inativo">Inativo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group" id="prop-group-nome">
+                    <label class="form-label" for="prop-nome_razao_social" id="prop-label-nome">Nome Completo *</label>
+                    <input type="text" id="prop-nome_razao_social" class="form-control" placeholder="Nome do proprietário" required>
+                  </div>
+                  <div class="form-group" id="prop-group-fantasia" style="display:none;">
+                    <label class="form-label" for="prop-nome_fantasia">Nome Fantasia</label>
+                    <input type="text" id="prop-nome_fantasia" class="form-control" placeholder="Nome fantasia">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="prop-cpf_cnpj" id="prop-label-documento">CPF *</label>
+                    <input type="text" id="prop-cpf_cnpj" class="form-control" placeholder="000.000.000-00" required>
+                  </div>
+                </div>
+
+                <!-- PF: RG completo -->
+                <div class="form-row" id="prop-group-rg" style="margin-top: 16px;">
+                  <div class="form-group" style="flex: 2;">
+                    <label class="form-label" for="prop-rg">RG</label>
+                    <input type="text" id="prop-rg" class="form-control" placeholder="RG do proprietário">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="prop-rg_orgao">Órgão</label>
+                    <input type="text" id="prop-rg_orgao" class="form-control" placeholder="Ex: SSP">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="prop-rg_uf">UF Emissor</label>
+                    <select id="prop-rg_uf" class="form-control">
+                      <option value="">Selecione</option>
+                      <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- PJ: IE e Responsável -->
+                <div class="form-row" id="prop-group-pj-row" style="margin-top: 16px; display: none;">
+                  <div class="form-group" id="prop-group-ie" style="flex: 1;">
+                    <label class="form-label" for="prop-inscricao_estadual">Inscrição Estadual</label>
+                    <input type="text" id="prop-inscricao_estadual" class="form-control" placeholder="Inscrição Estadual">
+                  </div>
+                  <div class="form-group" id="prop-group-responsavel" style="flex: 1;">
+                    <label class="form-label" for="prop-responsavel">Responsável PJ</label>
+                    <input type="text" id="prop-responsavel" class="form-control" placeholder="Nome do Responsável">
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="prop-telefone">Telefone *</label>
+                    <input type="text" id="prop-telefone" class="form-control" placeholder="(00) 00000-0000" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="prop-email">E-mail *</label>
+                    <input type="email" id="prop-email" class="form-control" placeholder="exemplo@email.com" required>
+                  </div>
+                </div>
+
+                <!-- Perfil / Dados Complementares -->
+                <div style="font-size: 14px; font-weight: 600; color: var(--color-text-main); margin-top: 24px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fi fi-rr-user" style="color: var(--color-primary); font-size: 16px;"></i> Perfil e Complementos
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="prop-data_nascimento">Data de Nascimento</label>
+                    <input type="date" id="prop-data_nascimento" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="prop-genero">Gênero</label>
+                    <select id="prop-genero" class="form-control">
+                      <option value="Não informado" selected>Não informado</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="prop-nacionalidade">Nacionalidade</label>
+                    <input type="text" id="prop-nacionalidade" class="form-control" placeholder="Ex: Brasileiro">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="prop-estado_civil">Estado Civil</label>
+                    <select id="prop-estado_civil" class="form-control">
+                      <option value="Não informado" selected>Não informado</option>
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" for="prop-profissao">Profissão</label>
+                    <input type="text" id="prop-profissao" class="form-control" placeholder="Ex: Advogado, Empresário...">
+                  </div>
+                </div>
+
+                <!-- Representante Legal (Apenas Proprietários) -->
+                <div style="font-size: 14px; font-weight: 600; color: var(--color-text-main); margin-top: 24px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fi fi-rr-users" style="color: var(--color-primary); font-size: 16px;"></i> Representante Legal (Opcional)
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="prop-representante_nome">Nome do Representante</label>
+                    <input type="text" id="prop-representante_nome" class="form-control" placeholder="Nome completo do representante">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="prop-representante_cpf">CPF do Representante</label>
+                    <input type="text" id="prop-representante_cpf" class="form-control" placeholder="000.000.000-00">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 2: Endereço -->
+            <div class="wizard-pane" id="prop-wizard-pane-2">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-marker" style="color: var(--color-primary); font-size: 18px;"></i> Endereço Residencial / Comercial
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="prop-endereco">Endereço Completo</label>
+                  <input type="text" id="prop-endereco" class="form-control" placeholder="Rua, número, complemento, bairro, cidade/UF">
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 3: Documentos -->
+            <div class="wizard-pane" id="prop-wizard-pane-3">
+              <!-- Documentos (Somente Edição) -->
+              <div class="wizard-card" id="prop-wizard-documents-card" style="margin-bottom: 20px; display: none;">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-document" style="color: var(--color-primary); font-size: 18px;"></i> Upload de Documentos
+                </div>
+                <div id="prop-wizard-document-upload-container" style="border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+                  <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:16px; align-items:end;">
+                    <div class="form-group" style="margin:0;">
+                      <label class="form-label" for="prop-wizard-doc-tipo">Tipo de Documento</label>
+                      <select id="prop-wizard-doc-tipo" class="form-control">
+                        <option value="CPF">CPF</option>
+                        <option value="RG">RG</option>
+                        <option value="Contrato Social">Contrato Social</option>
+                        <option value="Comprovante de Endereço">Comprovante de Endereço</option>
+                        <option value="Procuração">Procuração</option>
+                        <option value="Outros">Outros</option>
+                      </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                      <label class="form-label" for="prop-wizard-doc-arquivo">Arquivo</label>
+                      <input type="file" id="prop-wizard-doc-arquivo" class="form-control" style="padding-top: 10px;">
+                    </div>
+                    <button type="button" id="btn-prop-wizard-upload" class="btn btn-primary" style="height:44px;"><i class="fi fi-rr-upload"></i> Anexar</button>
+                  </div>
+                </div>
+                <div class="document-list" id="prop-wizard-documents-list">
+                  <!-- populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Informative Guides -->
+              <div class="wizard-card" id="prop-wizard-informative-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-folder" style="color: var(--color-primary); font-size: 18px;"></i> Documentos de Comprovação
+                </div>
+                <div class="info-alert">
+                  <div class="info-alert-icon">
+                    <i class="fi fi-rr-info"></i>
+                  </div>
+                  <p class="info-alert-text">
+                    Os documentos e imagens podem ser anexados agora ou posteriormente. O envio de arquivos não é obrigatório para concluir este cadastro. Após salvar, você poderá editar o registro a qualquer momento para adicionar, atualizar ou remover documentos e fotos conforme necessário.
+                  </p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-file-check" style="color:var(--color-primary);"></i> RG / CNH</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-receipt" style="color:var(--color-warning);"></i> CPF / CNPJ</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-home" style="color:var(--color-info);"></i> Comprovante Residência</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-document-signed" style="color:var(--color-error);"></i> Procuração / Contrato</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 4: Observações -->
+            <div class="wizard-pane" id="prop-wizard-pane-4">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-edit" style="color: var(--color-primary); font-size: 18px;"></i> Observações Internas
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="prop-observacoes">Observações</label>
+                  <textarea id="prop-observacoes" class="form-control" style="height: 120px; resize: vertical;" placeholder="Informações adicionais do proprietário..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 5: Revisão -->
+            <div class="wizard-pane" id="prop-wizard-pane-5">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-shield-check" style="color: var(--color-primary); font-size: 18px;"></i> Revisão das Informações
+                </div>
+                <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin: 0 0 20px 0;">
+                  Confirme as informações abaixo antes de salvar o proprietário.
+                </p>
+                <div id="prop-revisao-conteudo" style="display: flex; flex-direction: column; gap: 16px;">
+                  <!-- Dynamic Summary -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Footer -->
+        <div class="wizard-footer">
+          <button type="button" class="btn btn-secondary" id="prop-wizard-btn-prev">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="prop-wizard-btn-next" style="background-color: var(--color-primary); color: #fff; border: none; padding: 0 24px; height: 44px; font-weight: 600;">Próximo Passo <i class="fi fi-rr-arrow-right"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR LOCATÁRIO -->
+  <div class="modal modal-fullpage" id="modal-locatario">
+    <div class="modal-content glass" style="max-width: 900px; padding: 0; overflow: hidden; border: none;">
+      <!-- Header -->
+      <div class="wizard-header">
+        <div>
+          <h2 id="loc-modal-title">Novo Locatário</h2>
+          <p id="loc-modal-subtitle">Cadastre as informações completas para listar o locatário no sistema.</p>
+        </div>
+        <button type="button" class="btn-voltar" id="loc-btn-close-modal"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <form id="form-locatario">
+        <input type="hidden" id="loc-id">
+
+        <!-- Wizard Layout Wrapper -->
+        <div class="wizard-layout">
+          <!-- Left Sidebar (Step wizard menu) -->
+          <div class="wizard-sidebar">
+            <ul class="wizard-steps-list">
+              <li class="wizard-step active" data-step-target="1">
+                <span class="wizard-step-number">1</span>
+                <span class="wizard-step-text">Dados Pessoais</span>
+              </li>
+              <li class="wizard-step" data-step-target="2">
+                <span class="wizard-step-number">2</span>
+                <span class="wizard-step-text">Endereço</span>
+              </li>
+              <li class="wizard-step" data-step-target="3">
+                <span class="wizard-step-number">3</span>
+                <span class="wizard-step-text">Documentos</span>
+              </li>
+              <li class="wizard-step" data-step-target="4">
+                <span class="wizard-step-number">4</span>
+                <span class="wizard-step-text">Observações</span>
+              </li>
+              <li class="wizard-step" data-step-target="5">
+                <span class="wizard-step-number">5</span>
+                <span class="wizard-step-text">Revisão</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right Content Area -->
+          <div class="wizard-content">
+            <!-- Step Pane 1: Dados Pessoais -->
+            <div class="wizard-pane active" id="loc-wizard-pane-1">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-info" style="color: var(--color-primary); font-size: 18px;"></i> Dados Pessoais / Identificação
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="loc-tipo_pessoa">Tipo de Pessoa</label>
+                    <select id="loc-tipo_pessoa" class="form-control" required>
+                      <option value="PF" selected>Pessoa Física (PF)</option>
+                      <option value="PJ">Pessoa Jurídica (PJ)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="loc-status">Status</label>
+                    <select id="loc-status" class="form-control" required>
+                      <option value="ativo" selected>Ativo</option>
+                      <option value="inativo">Inativo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group" id="loc-group-nome">
+                    <label class="form-label" for="loc-nome_razao_social" id="loc-label-nome">Nome Completo *</label>
+                    <input type="text" id="loc-nome_razao_social" class="form-control" placeholder="Nome do locatário" required>
+                  </div>
+                  <div class="form-group" id="loc-group-fantasia" style="display:none;">
+                    <label class="form-label" for="loc-nome_fantasia">Nome Fantasia</label>
+                    <input type="text" id="loc-nome_fantasia" class="form-control" placeholder="Nome fantasia">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="loc-cpf_cnpj" id="loc-label-documento">CPF *</label>
+                    <input type="text" id="loc-cpf_cnpj" class="form-control" placeholder="000.000.000-00" required>
+                  </div>
+                </div>
+
+                <!-- PF: RG completo -->
+                <div class="form-row" id="loc-group-rg" style="margin-top: 16px;">
+                  <div class="form-group" style="flex: 2;">
+                    <label class="form-label" for="loc-rg">RG</label>
+                    <input type="text" id="loc-rg" class="form-control" placeholder="RG do locatário">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="loc-rg_orgao">Órgão</label>
+                    <input type="text" id="loc-rg_orgao" class="form-control" placeholder="Ex: SSP">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="loc-rg_uf">UF Emissor</label>
+                    <select id="loc-rg_uf" class="form-control">
+                      <option value="">Selecione</option>
+                      <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- PJ: IE e Responsável -->
+                <div class="form-row" id="loc-group-pj-row" style="margin-top: 16px; display: none;">
+                  <div class="form-group" id="loc-group-ie" style="flex: 1;">
+                    <label class="form-label" for="loc-inscricao_estadual">Inscrição Estadual</label>
+                    <input type="text" id="loc-inscricao_estadual" class="form-control" placeholder="Inscrição Estadual">
+                  </div>
+                  <div class="form-group" id="loc-group-responsavel" style="flex: 1;">
+                    <label class="form-label" for="loc-responsavel">Responsável PJ</label>
+                    <input type="text" id="loc-responsavel" class="form-control" placeholder="Nome do Responsável">
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="loc-telefone">Telefone *</label>
+                    <input type="text" id="loc-telefone" class="form-control" placeholder="(00) 00000-0000" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="loc-email">E-mail *</label>
+                    <input type="email" id="loc-email" class="form-control" placeholder="exemplo@email.com" required>
+                  </div>
+                </div>
+
+                <!-- Perfil / Dados Complementares -->
+                <div style="font-size: 14px; font-weight: 600; color: var(--color-text-main); margin-top: 24px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fi fi-rr-user" style="color: var(--color-primary); font-size: 16px;"></i> Perfil e Complementos
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="loc-data_nascimento">Data de Nascimento</label>
+                    <input type="date" id="loc-data_nascimento" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="loc-genero">Gênero</label>
+                    <select id="loc-genero" class="form-control">
+                      <option value="Não informado" selected>Não informado</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Feminino">Feminino</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="loc-nacionalidade">Nacionalidade</label>
+                    <input type="text" id="loc-nacionalidade" class="form-control" placeholder="Ex: Brasileiro">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="loc-estado_civil">Estado Civil</label>
+                    <select id="loc-estado_civil" class="form-control">
+                      <option value="Não informado" selected>Não informado</option>
+                      <option value="Solteiro(a)">Solteiro(a)</option>
+                      <option value="Casado(a)">Casado(a)</option>
+                      <option value="Divorciado(a)">Divorciado(a)</option>
+                      <option value="Viúvo(a)">Viúvo(a)</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" for="loc-profissao">Profissão</label>
+                    <input type="text" id="loc-profissao" class="form-control" placeholder="Ex: Advogado, Autônomo...">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 2: Endereço -->
+            <div class="wizard-pane" id="loc-wizard-pane-2">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-marker" style="color: var(--color-primary); font-size: 18px;"></i> Endereço Residencial / Comercial
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="loc-endereco">Endereço Completo</label>
+                  <input type="text" id="loc-endereco" class="form-control" placeholder="Rua, número, complemento, bairro, cidade/UF">
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 3: Documentos -->
+            <div class="wizard-pane" id="loc-wizard-pane-3">
+              <!-- Documentos (Somente Edição) -->
+              <div class="wizard-card" id="loc-wizard-documents-card" style="margin-bottom: 20px; display: none;">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-document" style="color: var(--color-primary); font-size: 18px;"></i> Upload de Documentos
+                </div>
+                <div id="loc-wizard-document-upload-container" style="border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+                  <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:16px; align-items:end;">
+                    <div class="form-group" style="margin:0;">
+                      <label class="form-label" for="loc-wizard-doc-tipo">Tipo de Documento</label>
+                      <select id="loc-wizard-doc-tipo" class="form-control">
+                        <option value="CPF">CPF</option>
+                        <option value="RG">RG</option>
+                        <option value="Contrato Social">Contrato Social</option>
+                        <option value="Comprovante de Endereço">Comprovante de Endereço</option>
+                        <option value="Procuração">Procuração</option>
+                        <option value="Outros">Outros</option>
+                      </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                      <label class="form-label" for="loc-wizard-doc-arquivo">Arquivo</label>
+                      <input type="file" id="loc-wizard-doc-arquivo" class="form-control" style="padding-top: 10px;">
+                    </div>
+                    <button type="button" id="btn-loc-wizard-upload" class="btn btn-primary" style="height:44px;"><i class="fi fi-rr-upload"></i> Anexar</button>
+                  </div>
+                </div>
+                <div class="document-list" id="loc-wizard-documents-list">
+                  <!-- populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Informative Guides -->
+              <div class="wizard-card" id="loc-wizard-informative-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-folder" style="color: var(--color-primary); font-size: 18px;"></i> Documentos de Comprovação
+                </div>
+                <div class="info-alert">
+                  <div class="info-alert-icon">
+                    <i class="fi fi-rr-info"></i>
+                  </div>
+                  <p class="info-alert-text">
+                    Os documentos e imagens podem ser anexados agora ou posteriormente. O envio de arquivos não é obrigatório para concluir este cadastro. Após salvar, você poderá editar o registro a qualquer momento para adicionar, atualizar ou remover documentos e fotos conforme necessário.
+                  </p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-file-check" style="color:var(--color-primary);"></i> RG / CNH</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-receipt" style="color:var(--color-warning);"></i> CPF / CNPJ</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-home" style="color:var(--color-info);"></i> Comprovante Residência</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-document-signed" style="color:var(--color-error);"></i> Procuração / Contrato</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 4: Observações -->
+            <div class="wizard-pane" id="loc-wizard-pane-4">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-edit" style="color: var(--color-primary); font-size: 18px;"></i> Observações Internas
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="loc-observacoes">Observações</label>
+                  <textarea id="loc-observacoes" class="form-control" style="height: 120px; resize: vertical;" placeholder="Informações adicionais do locatário..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 5: Revisão -->
+            <div class="wizard-pane" id="loc-wizard-pane-5">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-shield-check" style="color: var(--color-primary); font-size: 18px;"></i> Revisão das Informações
+                </div>
+                <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin: 0 0 20px 0;">
+                  Confirme as informações abaixo antes de salvar o locatário.
+                </p>
+                <div id="loc-revisao-conteudo" style="display: flex; flex-direction: column; gap: 16px;">
+                  <!-- Dynamic Summary -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Footer -->
+        <div class="wizard-footer">
+          <button type="button" class="btn btn-secondary" id="loc-wizard-btn-prev">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="loc-wizard-btn-next" style="background-color: var(--color-primary); color: #fff; border: none; padding: 0 24px; height: 44px; font-weight: 600;">Próximo Passo <i class="fi fi-rr-arrow-right"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHES DO PROPRIETÁRIO -->
+  <div class="modal modal-fullpage" id="modal-detalhes-proprietario">
+    <div class="modal-content glass" style="max-width: 880px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h3 id="prop-det-titulo">Ficha do Proprietário</h3>
+          <span class="badge badge-pf" id="prop-det-badge-tipo">PF</span>
+          <span class="badge badge-ativo" id="prop-det-badge-status">Ativo</span>
+        </div>
+        <button type="button" class="btn-voltar" id="prop-btn-close-detalhes"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="prop-det-gerais">Dados Gerais</button>
+        <button class="tab-btn" data-tab="prop-det-documentos">Documentos (<span id="prop-det-doc-count">0</span>)</button>
+        <button class="tab-btn" data-tab="prop-det-imoveis">Imóveis (<span id="prop-det-imovel-count">0</span>)</button>
+        <button class="tab-btn" data-tab="prop-det-timeline">Timeline</button>
+      </div>
+
+      <div class="tab-pane active" id="tab-prop-det-gerais">
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;" id="prop-det-label-doc">CPF</span>
+            <span id="prop-det-documento" style="font-size:15px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Telefone</span>
+            <span id="prop-det-telefone" style="font-size:14px; color:var(--color-text-main); font-weight:600;">-</span>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div id="prop-det-container-rg">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">RG</span>
+            <span id="prop-det-rg" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div id="prop-det-container-ie" style="display:none;">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Inscrição Estadual</span>
+            <span id="prop-det-ie" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div id="prop-det-container-responsavel" style="display:none;">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Responsável PJ</span>
+            <span id="prop-det-responsavel" style="font-size:14px; color:var(--color-text-main); font-weight:600;">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">E-mail</span>
+          <span id="prop-det-email" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Endereço</span>
+          <span id="prop-det-endereco" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; border-top: 1px dashed var(--color-border); padding-top: 16px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Data de Nascimento</span>
+            <span id="prop-det-data-nascimento" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Gênero</span>
+            <span id="prop-det-genero" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Nacionalidade</span>
+            <span id="prop-det-nacionalidade" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Estado Civil</span>
+            <span id="prop-det-estado-civil" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Profissão</span>
+          <span id="prop-det-profissao" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; border-top: 1px dashed var(--color-border); padding-top: 16px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Representante Legal</span>
+            <span id="prop-det-representante-nome" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">CPF Representante</span>
+            <span id="prop-det-representante-cpf" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Observações</span>
+          <p id="prop-det-observacoes" style="font-size:13px; color:var(--color-text-muted); margin:4px 0 0 0; white-space: pre-line; line-height: 1.5;">-</p>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-prop-det-documentos">
+        <div id="prop-document-upload-container" style="display: none; border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+          <form id="prop-form-upload-documento" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:16px; align-items:end;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="prop-doc-tipo">Tipo de Documento</label>
+              <select id="prop-doc-tipo" class="form-control" required>
+                <option value="CPF">CPF</option>
+                <option value="RG">RG</option>
+                <option value="Contrato Social">Contrato Social</option>
+                <option value="Comprovante de Endereço">Comprovante de Endereço</option>
+                <option value="Escritura">Escritura</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="prop-doc-arquivo">Arquivo</label>
+              <input type="file" id="prop-doc-arquivo" class="form-control" style="padding-top: 10px;" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:44px;"><i class="fi fi-rr-upload"></i> Anexar</button>
+          </form>
+        </div>
+        <div class="document-list" id="prop-det-documentos-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum documento anexado.</div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-prop-det-imoveis">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Valor Locação</th>
+              </tr>
+            </thead>
+            <tbody id="prop-det-imoveis-list-body">
+              <tr>
+                <td colspan="4" style="text-align:center; padding:20px;">Nenhum imóvel vinculado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-prop-det-timeline">
+        <div class="timeline" id="prop-det-timeline-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum histórico registrado.</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="prop-btn-fechar-detalhes">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHES DO LOCATÁRIO -->
+  <div class="modal modal-fullpage" id="modal-detalhes-locatario">
+    <div class="modal-content glass" style="max-width: 880px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h3 id="loc-det-titulo">Ficha do Locatário</h3>
+          <span class="badge badge-pf" id="loc-det-badge-tipo">PF</span>
+          <span class="badge badge-ativo" id="loc-det-badge-status">Ativo</span>
+        </div>
+        <button type="button" class="btn-voltar" id="loc-btn-close-detalhes"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="loc-det-gerais">Dados Gerais</button>
+        <button class="tab-btn" data-tab="loc-det-documentos">Documentos (<span id="loc-det-doc-count">0</span>)</button>
+        <button class="tab-btn" data-tab="loc-det-contratos">Contratos (<span id="loc-det-contrato-count">0</span>)</button>
+        <button class="tab-btn" data-tab="loc-det-imoveis">Imóveis (<span id="loc-det-imovel-count">0</span>)</button>
+        <button class="tab-btn" data-tab="loc-det-recebimentos">Recebimentos (<span id="loc-det-recebimento-count">0</span>)</button>
+        <button class="tab-btn" data-tab="loc-det-timeline">Timeline</button>
+      </div>
+
+      <div class="tab-pane active" id="tab-loc-det-gerais">
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;" id="loc-det-label-doc">CPF</span>
+            <span id="loc-det-documento" style="font-size:15px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Telefone</span>
+            <span id="loc-det-telefone" style="font-size:14px; color:var(--color-text-main); font-weight:600;">-</span>
+          </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div id="loc-det-container-rg">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">RG</span>
+            <span id="loc-det-rg" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div id="loc-det-container-ie" style="display:none;">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Inscrição Estadual</span>
+            <span id="loc-det-ie" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div id="loc-det-container-responsavel" style="display:none;">
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Responsável PJ</span>
+            <span id="loc-det-responsavel" style="font-size:14px; color:var(--color-text-main); font-weight:600;">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">E-mail</span>
+          <span id="loc-det-email" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Endereço</span>
+          <span id="loc-det-endereco" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; border-top: 1px dashed var(--color-border); padding-top: 16px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Data de Nascimento</span>
+            <span id="loc-det-data-nascimento" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Gênero</span>
+            <span id="loc-det-genero" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Nacionalidade</span>
+            <span id="loc-det-nacionalidade" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Estado Civil</span>
+            <span id="loc-det-estado-civil" style="font-size:14px; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Profissão</span>
+          <span id="loc-det-profissao" style="font-size:14px; color:var(--color-text-main);">-</span>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Observações</span>
+          <p id="loc-det-observacoes" style="font-size:13px; color:var(--color-text-muted); margin:4px 0 0 0; white-space: pre-line; line-height: 1.5;">-</p>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-loc-det-documentos">
+        <div id="loc-document-upload-container" style="display: none; border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+          <form id="loc-form-upload-documento" style="display:grid; grid-template-columns: 1fr 1fr auto; gap:16px; align-items:end;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="loc-doc-tipo">Tipo de Documento</label>
+              <select id="loc-doc-tipo" class="form-control" required>
+                <option value="CPF">CPF</option>
+                <option value="RG">RG</option>
+                <option value="CNPJ">CNPJ</option>
+                <option value="Contrato Social">Contrato Social</option>
+                <option value="Comprovante de Endereço">Comprovante de Endereço</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" for="loc-doc-arquivo">Arquivo</label>
+              <input type="file" id="loc-doc-arquivo" class="form-control" style="padding-top: 10px;" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height:44px;"><i class="fi fi-rr-upload"></i> Anexar</button>
+          </form>
+        </div>
+        <div class="document-list" id="loc-det-documentos-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum documento anexado.</div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-loc-det-contratos">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Imóvel</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Valor Mensal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="loc-det-contratos-list-body">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:20px;">Nenhum contrato associado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-loc-det-imoveis">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Valor Locação</th>
+              </tr>
+            </thead>
+            <tbody id="loc-det-imoveis-list-body">
+              <tr>
+                <td colspan="4" style="text-align:center; padding:20px;">Nenhum imóvel vinculado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-loc-det-recebimentos">
+        <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--border-radius-md); max-height: 300px; overflow-y:auto;">
+          <table class="app-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Competência</th>
+                <th>Vencimento</th>
+                <th>Previsto</th>
+                <th>Recebido</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="loc-det-recebimentos-list-body">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:20px;">Nenhum recebimento registrado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-loc-det-timeline">
+        <div class="timeline" id="loc-det-timeline-list">
+          <div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum histórico registrado.</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="loc-btn-fechar-detalhes">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/notificacoes.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/modules/pessoas.js"></script>
+</body>
+</html>

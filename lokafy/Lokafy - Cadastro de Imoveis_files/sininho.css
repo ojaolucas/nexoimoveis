@@ -1,0 +1,377 @@
+/* ============================================================
+   🔔 NOTIFICAÇÕES — LOKAFY PREMIUM 2026
+============================================================ */
+
+/* ============================
+   ÍCONE DO SINO
+============================ */
+.notif {
+  position: relative;
+  cursor: pointer;
+}
+
+.notif i {
+  font-size: 18px;
+  color: inherit;
+  transition: .25s ease;
+}
+
+.notif:hover i {
+  color: inherit;
+}
+
+
+/* ============================
+   🔴 BADGE
+============================ */
+.notif-dot {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+
+  background: #ef4444;
+  border: 2px solid #f8fafb;
+  border-radius: 999px;
+  box-shadow: 0 6px 12px rgba(239,68,68,.20);
+
+  color: #ffffff !important;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* ============================
+   📦 DROPDOWN
+============================ */
+.notif-dropdown {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 380px;
+
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid #dfe7eb;
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(15,23,42,.14);
+
+  overflow: hidden;
+  z-index: 100002 !important;
+
+  opacity: 0;
+  transform: translateY(14px) scale(.97);
+  transition: .28s ease;
+}
+
+.notif-dropdown.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+
+.notif-header strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: .02em;
+}
+
+.notif-clear-all {
+  border: 0;
+  background: transparent;
+  color: #b42323;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notif-clear-all.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.notif-clear-all:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+
+/* ============================
+   LISTA
+============================ */
+.notif-list {
+  max-height: 440px;
+  overflow-y: auto;
+  padding: 12px 14px 14px;
+}
+
+/* scrollbar */
+.notif-list::-webkit-scrollbar {
+  width: 6px;
+}
+.notif-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.notif-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* ============================
+   ITEM
+============================ */
+.notif-item {
+  position: relative;
+  padding: 16px 18px 16px 18px;
+  padding-right: 48px;
+
+  border-radius: 16px;
+  margin-bottom: 10px;
+
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+
+  cursor: pointer;
+  transition: .22s ease;
+}
+
+.notif-item:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+
+/* ============================
+   NÃO LIDA
+============================ */
+.notif-item.nao-lida {
+  background: linear-gradient(135deg, #ecfeff, #ffffff);
+  border-left: 4px solid #0f766e;
+}
+
+.notif-item.nao-lida .notif-msg {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+
+/* ============================
+   TEXTO
+============================ */
+.notif-msg {
+  font-size: 14px;
+  color: #064e3b;
+  line-height: 1.35;
+}
+
+.notif-date {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #64748b;
+  letter-spacing: .01em;
+}
+
+
+/* ============================
+   ❌ EXCLUIR
+============================ */
+.notif-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  border: none;
+
+  background: transparent;
+  color: #94a3b8;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: .2s ease;
+
+  opacity: 0;
+  transform: scale(.85);
+}
+
+.notif-item:hover .notif-close {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.notif-close:hover {
+  background: rgba(239,68,68,.14);
+  color: #ef4444;
+}
+
+.notif-close:active {
+  transform: scale(.9);
+}
+
+
+/* ============================
+   EMPTY
+============================ */
+.notif-list .empty {
+  padding: 36px 12px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ============================
+   🌙 DARK MODE
+============================ */
+:root[data-theme="dark"] .notif:hover i {
+  color: inherit;
+}
+
+:root[data-theme="dark"] .notif-dot {
+  color: #ffffff !important;
+  border-color: #182536;
+}
+
+:root[data-theme="dark"] .notif-dropdown {
+  background: rgba(17, 27, 41, 0.96);
+  box-shadow: 0 24px 70px rgba(0,0,0,.45);
+  border: 1px solid #223246;
+}
+
+:root[data-theme="dark"] .notif-list {
+  background: transparent;
+}
+
+:root[data-theme="dark"] .notif-list::-webkit-scrollbar-thumb {
+  background: #3b556e;
+}
+
+:root[data-theme="dark"] .notif-list::-webkit-scrollbar-thumb:hover {
+  background: #4c6a86;
+}
+
+:root[data-theme="dark"] .notif-item {
+  background: #111b29;
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .notif-item:hover {
+  background: #162434;
+}
+
+:root[data-theme="dark"] .notif-item.nao-lida {
+  background: linear-gradient(135deg, #173244, #111b29);
+  border-left-color: #2aa699;
+}
+
+:root[data-theme="dark"] .notif-item.nao-lida .notif-msg,
+:root[data-theme="dark"] .notif-msg {
+  color: #dbe7f5;
+}
+
+:root[data-theme="dark"] .notif-header strong {
+  color: #e5eef8;
+}
+
+:root[data-theme="dark"] .notif-clear-all {
+  color: #f87171;
+}
+
+:root[data-theme="dark"] .notif-date,
+:root[data-theme="dark"] .notif-list .empty {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .notif-close {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .notif-close:hover {
+  background: rgba(239,68,68,.2);
+  color: #f87171;
+}
+
+
+/* ======================================================
+   📱 MOBILE — NOTIFICAÇÕES (VERSÃO DEFINITIVA)
+====================================================== */
+@media (max-width: 768px) {
+
+  /* 🔔 sino */
+  .notif i {
+    font-size: 18px;
+  }
+
+  /* 🔴 badge */
+  .notif-dot {
+    top: -5px;
+    right: -5px;
+
+    min-width: 20px;
+    height: 20px;
+    line-height: 16px;
+    font-size: 10.5px;
+  }
+
+  /* 🔥 DROPDOWN COMO OVERLAY DE TELA */
+  .notif-dropdown {
+    position: fixed !important;
+
+    top: 72px;
+    left: 0 !important;
+    right: 0 !important;
+
+    width: 100vw !important;
+    max-width: 100vw !important;
+
+    padding: 0 16px;
+    box-sizing: border-box;
+
+    transform: translateY(14px) scale(.97);
+    border-radius: 0;
+
+    z-index: 99999;
+  }
+
+  .notif-dropdown.open {
+    transform: translateY(0) scale(1);
+  }
+
+  /* container interno */
+  .notif-list {
+    max-height: calc(100vh - 160px);
+    border-radius: 18px;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  :root[data-theme="dark"] .notif-list {
+    background: #111b29;
+    border: 1px solid #223246;
+  }
+
+}

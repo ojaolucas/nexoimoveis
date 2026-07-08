@@ -1,0 +1,302 @@
+/* ======================================================
+   🔔 NOTIFICAÇÕES — LOKAFY (AUTO UPDATE)
+====================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn  = document.getElementById("notifBtn");
+  const drop = document.getElementById("notifDropdown");
+  const btnClosePanel = document.getElementById("notifClosePanel");
+  const btnClearAll = document.getElementById("notifClearAll");
+
+  if (!btn || !drop) return;
+
+  carregarNotificacoes();
+
+  /* ==========================================
+     🔁 AUTO UPDATE INTELIGENTE (SEM F5)
+  ========================================== */
+  setInterval(() => {
+
+    const aberto = drop.classList.contains("open");
+
+    if (aberto) {
+      carregarNotificacoes();      // dropdown aberto → atualiza tudo
+    } else {
+      atualizarSomenteBadge();     // fechado → só badge (leve)
+    }
+
+  }, 10000); // 10s
+
+
+  /* ==========================================
+     ABRIR / FECHAR SINO
+  ========================================== */
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    btn.classList.toggle("open");
+    drop.classList.toggle("open");
+
+    // quando abrir, força atualizar lista
+    if (drop.classList.contains("open")) {
+      carregarNotificacoes();
+    }
+  });
+
+  drop.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+
+  btnClosePanel?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    btn.classList.remove("open");
+    drop.classList.remove("open");
+  });
+
+  btnClearAll?.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    const hasItems = document.querySelector("#notifList .notif-item");
+    if (!hasItems) return;
+    if (!confirm("Apagar todas as notificações?")) return;
+
+    const fd = new FormData();
+    fd.append("all", "1");
+
+    apiRequest("/configuracoes/notificacoes/api/excluir.php", {
+      method: "POST",
+      body: fd
+    })
+    .then(j => {
+      if (j.ok) {
+        carregarNotificacoes();
+      } else {
+        notifyApiError(j, "Não foi possível apagar as notificações.");
+      }
+    })
+    .catch(() => notifyApiError(null, "Erro de comunicação ao apagar notificações."));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!btn.contains(e.target) && !drop.contains(e.target)) {
+      btn.classList.remove("open");
+      drop.classList.remove("open");
+    }
+  });
+
+});
+
+function notifyApiError(payload, fallback) {
+  const req = payload?.req_id ? ` (req: ${payload.req_id})` : "";
+  const msg = payload?.erro || payload?.error || fallback;
+  if (typeof window.toastError === "function") {
+    window.toastError(`${msg}${req}`);
+    return;
+  }
+  return;
+}
+
+function apiRequest(url, options = {}) {
+  return fetch(url, { credentials: "include", ...options })
+    .then((r) => r.json().catch(() => ({ ok: false, erro: "Resposta inválida" })));
+}
+
+
+/* ======================================================
+   CLICK NAS NOTIFICAÇÕES
+====================================================== */
+document.getElementById("notifList")?.addEventListener("click", (e) => {
+
+  const item = e.target.closest(".notif-item");
+  if (!item) return;
+
+  const id = item.dataset.id;
+  if (!id) return;
+
+  /* =====================
+     EXCLUIR NOTIFICAÇÃO
+  ====================== */
+  if (e.target.classList.contains("notif-close")) {
+
+    e.stopPropagation();
+
+    const fd = new FormData();
+    fd.append("id", id);
+
+    apiRequest("/configuracoes/notificacoes/api/excluir.php", {
+      method: "POST",
+      body: fd
+    })
+    .then(j => {
+      if (j.ok) {
+        item.remove();
+        carregarNotificacoes();
+      } else {
+        notifyApiError(j, "Não foi possível excluir a notificação.");
+      }
+    })
+    .catch(() => notifyApiError(null, "Erro de comunicação ao excluir notificação."));
+
+    return;
+  }
+
+  /* =====================
+     MARCAR COMO LIDA
+  ====================== */
+  if (item.classList.contains("nao-lida")) {
+
+    const fd = new FormData();
+    fd.append("id", id);
+
+    apiRequest("/configuracoes/notificacoes/api/marcar_lida.php", {
+      method: "POST",
+      body: fd
+    })
+    .then(j => {
+      if (j.ok) {
+        item.classList.remove("nao-lida");
+        carregarNotificacoes();
+      } else {
+        notifyApiError(j, "Não foi possível marcar notificação como lida.");
+      }
+    })
+    .catch(() => notifyApiError(null, "Erro de comunicação ao marcar como lida."));
+
+  }
+
+});
+
+
+/* ======================================================
+   CARREGAR LISTA COMPLETA
+====================================================== */
+function carregarNotificacoes() {
+
+  apiRequest("/configuracoes/notificacoes/api/listar.php")
+  .then(d => {
+
+    if (!d || !d.ok) {
+      notifyApiError(d, "Falha ao carregar notificações.");
+      return;
+    }
+
+    renderizarNotificacoes(d.notificacoes || []);
+    atualizarBadge(d.nao_lidas || 0);
+
+  })
+  .catch(() => notifyApiError(null, "Erro de comunicação ao carregar notificações."));
+}
+
+
+/* ======================================================
+   🔴 ATUALIZA SOMENTE BADGE (LEVE)
+====================================================== */
+function atualizarSomenteBadge() {
+
+  apiRequest("/configuracoes/notificacoes/api/check.php")
+  .then(j => {
+    if (j.ok) {
+      atualizarBadge(j.nao_lidas || 0);
+    }
+  })
+  .catch(()=>{});
+}
+
+
+/* ======================================================
+   RENDER LISTA
+====================================================== */
+function renderizarNotificacoes(lista) {
+
+  const box = document.getElementById("notifList");
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  if (!lista.length) {
+    box.innerHTML = `<div class="empty">Sem notificações</div>`;
+    atualizarAcaoApagarTudo(false);
+    return;
+  }
+
+  lista.forEach(n => {
+
+    const div = document.createElement("div");
+    div.className = "notif-item" + (n.lida == 0 ? " nao-lida" : "");
+    div.dataset.id = n.id;
+
+    div.innerHTML = `
+      <div class="notif-content">
+        <div class="notif-msg">${n.mensagem}</div>
+        <div class="notif-date">${formatarData(n.created_at)}</div>
+      </div>
+      <button class="notif-close" type="button">×</button>
+    `;
+
+    box.appendChild(div);
+  });
+
+  atualizarAcaoApagarTudo(true);
+}
+
+
+/* ======================================================
+   BADGE NUMÉRICO
+====================================================== */
+function atualizarBadge(qtd) {
+
+  const dot = document.getElementById("notifDot");
+  if (!dot) return;
+
+  try {
+    sessionStorage.setItem("lokafy_notif_badge", String(Number(qtd) || 0));
+  } catch (_) {}
+
+  if (qtd > 0) {
+    dot.hidden = false;
+    dot.textContent = qtd > 99 ? "99+" : qtd;
+  } else {
+    dot.hidden = true;
+  }
+}
+
+function atualizarAcaoApagarTudo(visivel) {
+  const btnClearAll = document.getElementById("notifClearAll");
+  if (!btnClearAll) return;
+  btnClearAll.disabled = !visivel;
+  btnClearAll.classList.toggle("is-hidden", !visivel);
+}
+
+
+/* ======================================================
+   FORMATAR DATA
+====================================================== */
+function formatarData(data) {
+  const bruto = String(data || "").trim();
+  if (!bruto) return "-";
+
+  let dt = null;
+  const isoLike = bruto.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (isoLike) {
+    const [, ano, mes, dia, hora = "00", minuto = "00", segundo = "00"] = isoLike;
+    dt = new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hora), Number(minuto), Number(segundo));
+  } else {
+    const brLike = bruto.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (brLike) {
+      const [, dia, mes, ano, hora = "00", minuto = "00", segundo = "00"] = brLike;
+      dt = new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hora), Number(minuto), Number(segundo));
+    } else {
+      dt = new Date(bruto.replace(" ", "T"));
+    }
+  }
+
+  if (Number.isNaN(dt.getTime())) return "-";
+
+  const dataFmt = dt.toLocaleDateString("pt-BR");
+  const horaFmt = dt.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  return `${dataFmt} • ${horaFmt}`;
+}

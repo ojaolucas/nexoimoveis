@@ -1,0 +1,92 @@
+(function(window){
+  'use strict';
+  const u = window.LokafyDashboardUtils;
+
+  function renderAttention(data){
+    const a = data.attention || {};
+    const attEl = document.getElementById('attentionList');
+    if (!attEl) return;
+    const reajusteDisponivel = !!a.reajustes_disponivel;
+    const reajusteTxt = reajusteDisponivel ? `${Number(a.reajustes_pendentes_qtd || 0)} contratos aguardando reajuste` : 'Nenhum reajuste pendente';
+    const vistTxt = Number(a.vistorias_pendentes_hoje || 0) > 0 ? `${Number(a.vistorias_pendentes_hoje || 0)} vistorias pendentes para hoje` : `${Number(a.vistorias_pendentes_proximas || 0)} vistorias pendentes próximas`;
+    const items = [
+      {cls:'is-danger',ico:'fa-solid fa-triangle-exclamation',t:'Aluguéis vencidos',s:`${Number(a.aluguels_vencidos_qtd || 0)} cobranças em atraso`,v:Number(a.aluguels_vencidos_qtd || 0) > 0 ? u.money(a.aluguels_vencidos_valor || 0) : '—',l:'/faturas/'},
+      {cls:'is-warn',ico:'fa-regular fa-clock',t:'Contratos próximos do vencimento',s:`${Number(a.contratos_proximos_qtd || 0)} contratos vencem nos próximos 30 dias`,v:'',l:'/contratos/'},
+      {cls:'is-info',ico:'fa-solid fa-house-circle-exclamation',t:'Imóveis vagos',s:`${Number(a.imoveis_vagos_qtd || 0)} imóveis disponíveis para locação`,v:'',l:'/imoveis/'},
+      {cls:'is-warn',ico:'fa-solid fa-arrow-trend-up',t:'Reajustes pendentes',s:reajusteTxt,v:'',l:'/contratos/'},
+      {cls:'is-ok',ico:'fa-solid fa-clipboard-check',t:'Vistorias pendentes',s:vistTxt,v:'',l:'/vistoria/'}
+    ];
+    attEl.innerHTML = items.map(i => `<a class="lok-item ${i.cls}" href="${i.l}"><i class="${i.ico}"></i><div><strong>${u.esc(i.t)}</strong><small>${u.esc(i.s)}</small></div><span class="val">${i.v || ''}</span><span class="chev"><i class="fa-solid fa-chevron-right"></i></span></a>`).join('');
+    const pendTotal = Number(a.aluguels_vencidos_qtd || 0) + Number(a.contratos_proximos_qtd || 0) + Number(a.imoveis_vagos_qtd || 0) + Number(a.reajustes_pendentes_qtd || 0) + Number(a.vistorias_pendentes_hoje || 0);
+    const attCount = document.getElementById('attentionCount');
+    if (attCount) attCount.textContent = `${pendTotal} pendências`;
+  }
+
+  function renderDue(data){
+    const dueEl = document.getElementById('dueList');
+    if (!dueEl) return;
+    const list = Array.isArray(data.proximos_vencimentos) ? data.proximos_vencimentos.slice(0, 5) : [];
+    if (!list.length) {
+      dueEl.innerHTML = `<div class="lok-item is-ok dashboard-premium-due-item"><div class="dashboard-premium-date"><b>--</b><span>---</span></div><div class="dashboard-premium-due-main"><strong>Sem vencimentos próximos</strong><small>Sua agenda está em dia.</small></div><div class="dashboard-premium-due-side"><span class="val">&nbsp;</span><span class="lok-deadline outro">OK</span></div></div>`;
+      return;
+    }
+    dueEl.innerHTML = list.map(r => {
+      const prazo = u.labelPrazo(r.data_vencimento || '');
+      const dt = r.data_vencimento ? new Date(r.data_vencimento + 'T00:00:00') : null;
+      const dia = dt ? String(dt.getDate()).padStart(2,'0') : '--';
+      const mes = dt ? dt.toLocaleDateString('pt-BR',{month:'short'}).toUpperCase().replace('.','') : '---';
+      const value = Number(r.valor || 0) > 0 ? u.money(r.valor) : '—';
+      const cls = r.status === 'vencido' ? 'is-danger' : (prazo.cls === 'amanha' ? 'is-warn' : 'is-info');
+      return `<div class="lok-item dashboard-premium-due-item ${cls}"><div class="dashboard-premium-date"><b>${dia}</b><span>${mes}</span></div><div class="dashboard-premium-due-main"><strong>${u.esc(r.imovel || 'Imóvel não informado')}</strong><small>Inquilino: ${u.esc(r.inquilino || 'Não informado')}</small></div><div class="dashboard-premium-due-side"><span class="val">${value}</span><span class="lok-deadline ${prazo.cls}">${prazo.txt}</span></div></div>`;
+    }).join('');
+  }
+
+  function iconByMovType(tipo){
+    const t = String(tipo || '').toLowerCase();
+    if (t === 'pagamento_recebido') return {cls:'is-ok', ico:'fa-solid fa-circle-check'};
+    if (t === 'contrato_criado') return {cls:'is-info', ico:'fa-solid fa-file-signature'};
+    if (t === 'cobranca_criada') return {cls:'is-warn', ico:'fa-solid fa-paper-plane'};
+    if (t === 'vistoria_criada') return {cls:'is-info', ico:'fa-solid fa-clipboard-check'};
+    return {cls:'is-info', ico:'fa-solid fa-circle-info'};
+  }
+
+  function renderFeed(data){
+    const feedEl = document.getElementById('feedList');
+    if (!feedEl) return;
+    const list = Array.isArray(data.movimentacoes_recentes) ? data.movimentacoes_recentes.slice(0, 5) : [];
+    if (!list.length) {
+      feedEl.innerHTML = `<div class="lok-item dashboard-premium-feed-item is-ok"><i class="fa-solid fa-circle-check"></i><div><strong>Nenhuma movimentação recente</strong><small>As próximas ações aparecerão aqui em tempo real.</small></div><span class="dashboard-premium-feed-time">Agora</span></div>`;
+      return;
+    }
+    feedEl.innerHTML = list.map(m => {
+      const icon = iconByMovType(m.tipo);
+      return `<div class="lok-item dashboard-premium-feed-item ${icon.cls}"><i class="${icon.ico}"></i><div><strong>${u.esc(m.titulo || 'Movimentação')}</strong><small>${u.esc(m.subtexto || '')}</small></div><span class="dashboard-premium-feed-time">${u.esc(u.fmtDateTimeLabel(m.data_hora))}</span></div>`;
+    }).join('');
+  }
+
+  function renderFinance(data){
+    const fin = data.financeiro_resumo || {};
+    const cards = data.cards || {};
+    const receb = Number(fin.recebido || cards.valor_recebido || 0);
+    const atraso = Number(fin.atraso || cards.valor_em_atraso || 0);
+    const pend = Number(fin.pendente || cards.valor_a_receber || 0);
+    const total = receb + atraso + pend;
+    const rPct = u.pct(receb,total);
+    const pPct = u.pct(pend,total);
+    const aPct = Math.max(0, 100 - rPct - pPct);
+    const categorias = [
+      {key:'r', label:'Recebido', value:receb, pct:rPct, color:'#0f766e', cls:'is-r'},
+      {key:'p', label:'Pendente', value:pend, pct:pPct, color:'#f59e0b', cls:'is-p'},
+      {key:'a', label:'Em atraso', value:atraso, pct:aPct, color:'#ef4444', cls:'is-a'}
+    ];
+    const maxValor = Math.max(1, ...categorias.map((c) => c.value));
+    const barHeight = (v) => v <= 0 ? 18 : Math.max(18, Math.round((v / maxValor) * 170));
+    const totalText = total > 0 ? `Total no mês ${u.money(total)}` : 'Sem movimentação financeira no mês';
+    const baseText = total > 0 ? `Base do gráfico: maior categoria do mês (${u.money(maxValor)})` : 'Base do gráfico: sem valores no mês';
+    const fs = document.getElementById('financialSummary');
+    if (!fs) return;
+    fs.innerHTML = `<div class="dashboard-premium-fin-legend">${categorias.map((c) => `<div class="dashboard-premium-fin-row"><i class="dashboard-premium-fin-dot" style="background:${c.color}"></i><div><strong>${c.label}</strong><span>${c.pct}% da carteira do mês</span></div><b>${u.money(c.value)}</b></div>`).join('')}</div><div class="dashboard-premium-fin-chart"><div class="dashboard-premium-fin-bars">${categorias.map((c) => `<div class="dashboard-premium-fin-col-wrap ${c.cls}"><span class="dashboard-premium-fin-col-value">${u.money(c.value)}</span><span class="dashboard-premium-fin-col" style="height:${barHeight(c.value)}px;background:${c.color}"></span><span class="dashboard-premium-fin-col-label">${c.label}</span></div>`).join('')}</div><div class="dashboard-premium-fin-meta">${totalText} · ${baseText}</div></div>`;
+  }
+
+  window.LokafyDashboardRenderers = Object.assign(window.LokafyDashboardRenderers || {}, {renderAttention, renderDue, renderFeed, renderFinance});
+})(window);

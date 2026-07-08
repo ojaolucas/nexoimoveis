@@ -1,0 +1,61 @@
+.lk-popup-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.62);display:none;align-items:center;justify-content:center;z-index:99998;padding:16px}
+.lk-popup-backdrop.is-open{display:flex}.lk-popup-card{position:relative;width:min(92vw,560px);max-height:88vh;border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);background:#fff}.lk-popup-close{position:absolute;top:8px;right:8px;width:34px;height:34px;border:0;border-radius:999px;background:rgba(15,23,42,.78);color:#fff;cursor:pointer;font-size:18px;line-height:1;z-index:2}.lk-popup-media,.lk-popup-media-link{display:block}.lk-popup-media img{display:block;width:100%;height:auto}
+
+/* Visual polish 2026: acabamento leve sem alterar layout */
+.dashboard-premium{
+  --dp-bg:#f3f8f7;
+  --dp-border:#dfe9e7;
+  --dp-success:#0b8f72;
+  --dp-success-soft:#e4fbf4;
+}
+.dashboard-premium .lok-kpi,
+.dashboard-premium .lok-card{
+  border-color:rgba(6,47,53,.095);
+  box-shadow:0 10px 30px rgba(6,47,53,.065);
+}
+.dashboard-premium .dashboard-start-card{
+  box-shadow:0 20px 48px rgba(6,47,53,.11), 0 4px 12px rgba(15,23,42,.045);
+}
+.dashboard-premium .lok-card-head h3,
+.dashboard-premium .lok-kpi .v{
+  color:#082b31;
+}
+.dashboard-premium .lok-kpi{
+  background:linear-gradient(180deg,#ffffff 0%,#fbfefd 100%);
+}
+.dashboard-premium .lok-kpi:hover,
+.dashboard-premium .lok-item:hover,
+.dashboard-start-actions a:hover{
+  border-color:rgba(0,168,120,.28);
+  box-shadow:0 18px 38px rgba(6,47,53,.12);
+}
+.dashboard-premium .lok-card-head a,
+.dashboard-premium .lok-link-end{
+  color:#0b8f72;
+}
+.dashboard-premium .lok-card-head a:hover,
+.dashboard-premium .lok-link-end:hover{
+  color:#086b58;
+}
+.dashboard-start-actions i,
+.dashboard-premium .lok-pill{
+  background:#e4fbf4;
+  color:#0b8f72;
+}
+
+@media (max-width:1380px){
+  .dashboard-start-grid,.dashboard-start-card,.dashboard-onboarding-card,.dashboard-work-grid,.dashboard-bottom-simple{grid-template-columns:1fr;}
+  .dashboard-premium .lok-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .dashboard-work-grid > .lok-card,
+  .dashboard-bottom-simple > .lok-card{min-height:0;}
+  .dashboard-premium-fin-card .lok-fin-summary{grid-template-columns:1fr;}
+}
+@media (max-width:768px){
+  .dashboard-premium{gap:14px;}
+  .dashboard-premium .lok-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .dashboard-premium .lok-kpi{min-height:165px;padding:14px;border-radius:16px;}
+  .dashboard-premium .lok-card{padding:14px;border-radius:16px;}
+  .dashboard-start-actions{grid-template-columns:1fr;}
+  .dashboard-start-actions .dashboard-primary-action{grid-column:auto;}
+  .dashboard-start-copy h2{font-size:23px;}
+}

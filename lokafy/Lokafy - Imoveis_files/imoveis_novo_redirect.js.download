@@ -1,0 +1,49 @@
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const idEdicao = Number(params.get("id") || 0);
+  if (idEdicao > 0) {
+    window.location.replace(`/imoveis/novo/?id=${encodeURIComponent(String(idEdicao))}`);
+    return;
+  }
+
+  function abrirModalUpgrade(mensagem) {
+    const modal = document.getElementById("modalUpgrade");
+    if (!modal) {
+      toastWarning(mensagem || "Limite do plano atingido.");
+      return;
+    }
+    const txt = modal.querySelector(".upgrade-msg");
+    if (txt) txt.textContent = mensagem || "Limite do plano atingido.";
+    modal.classList.add("active");
+  }
+
+  async function validarLimiteERedirecionar() {
+    const btn = document.getElementById("btnNovoImovel");
+    if (!btn) return;
+    btn.disabled = true;
+    try {
+      const r = await fetch("/imoveis/api/verificar_limite.php", { cache: "no-store" });
+      const j = await r.json();
+      if (!j.ok) {
+        toastWarning(j.erro || "Não foi possível validar o limite do plano.");
+        return;
+      }
+      if (j.upgrade || j.pode_criar === false) {
+        abrirModalUpgrade(j.erro || "Você atingiu o limite do seu plano.");
+        return;
+      }
+      window.location.href = "/imoveis/novo/";
+    } catch (_) {
+      toastWarning("Erro ao validar limite de imóveis.");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#btnNovoImovel");
+    if (!btn) return;
+    e.preventDefault();
+    validarLimiteERedirecionar();
+  });
+})();

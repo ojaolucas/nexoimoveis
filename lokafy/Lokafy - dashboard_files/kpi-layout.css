@@ -1,0 +1,65 @@
+.dashboard-premium{
+  --dp-bg:#f5f8fb;
+  --dp-card:#ffffff;
+  --dp-border:#e7edf3;
+  --dp-title:#0f172a;
+  --dp-text:#334155;
+  --dp-muted:#64748b;
+  --dp-success:#0f766e;
+  --dp-success-soft:#d9f9f2;
+  --dp-warn:#d97706;
+  --dp-warn-soft:#fff2cf;
+  --dp-danger:#c62828;
+  --dp-danger-soft:#fee4e4;
+  --dp-info:#1d4ed8;
+  --dp-info-soft:#e5efff;
+  display:grid;
+  gap:18px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+
+.dashboard-premium .lok-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+.dashboard-premium .lok-kpi{
+  height:166px;
+  border:1px solid var(--dp-border);
+  border-radius:20px;
+  background:var(--dp-card);
+  box-shadow:0 4px 18px rgba(15,23,42,.05);
+  padding:16px 16px 14px;
+  box-sizing:border-box;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  justify-content:flex-start;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.dashboard-premium .lok-kpi:hover{
+  border-color:#d7e4ef;
+  box-shadow:0 8px 22px rgba(15,23,42,.07);
+  transform:translateY(-1px);
+}
+.dashboard-premium-kpi-top{display:flex;justify-content:flex-start;align-items:center;gap:8px;flex-shrink:0;}
+.dashboard-premium-kpi-icon{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-size:18px;border:1px solid transparent;
+  flex-shrink:0;
+}
+.dashboard-premium-kpi-icon.is-success{background:var(--dp-success-soft);color:var(--dp-success);border-color:#b7efe3;}
+.dashboard-premium-kpi-icon.is-danger{background:var(--dp-danger-soft);color:var(--dp-danger);border-color:#f8c4c4;}
+.dashboard-premium-kpi-icon.is-warn{background:var(--dp-warn-soft);color:var(--dp-warn);border-color:#ffe3aa;}
+.dashboard-premium-kpi-icon.is-info{background:var(--dp-info-soft);color:var(--dp-info);border-color:#cbdcff;}
+.dashboard-premium .lok-kpi h4{margin:0;color:var(--dp-muted);font-size:13px;font-weight:600;line-height:1.15;}
+.dashboard-premium .lok-kpi .v{font-size:32px;line-height:1;font-weight:800;color:var(--dp-title);letter-spacing:-.02em;margin:0;}
+.dashboard-premium .lok-kpi .s{font-size:14px;font-weight:700;color:var(--dp-text);line-height:1.15;min-height:16px;}
+.dashboard-premium .lok-kpi .f{font-size:12px;font-weight:700;color:var(--dp-muted);line-height:1.15;margin-top:auto;}
+.dashboard-premium .lok-kpi .f.dashboard-premium-kpi-nowrap{
+  white-space:normal;
+  font-size:12px;
+  line-height:1.1;
+}
+.dashboard-premium .lok-kpi .f.is-danger{color:var(--dp-danger);}
+.dashboard-premium .lok-progress{height:6px;border-radius:999px;background:#e9eff5;overflow:hidden;margin-top:auto;flex-shrink:0;}
+.dashboard-premium .lok-progress span{display:block;height:100%;background:linear-gradient(90deg,#10b981,#0f766e);}

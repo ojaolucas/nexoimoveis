@@ -21,16 +21,20 @@ router.get('/dashboard', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, '../../views/dashboard/index.html'));
 });
 
-// Other HTML pages (they will be served similarly)
-const modules = [
-  'usuarios', 'proprietarios', 'locatarios', 'imoveis', 
-  'contratos', 'recebimentos', 'despesas', 'manutencoes', 
-  'vistorias', 'relatorios', 'auditoria', 'calendario', 'notificacoes'
-];
+// Redirects for legacy routes
+router.get('/proprietarios', requireAuth, (req, res) => res.redirect('/pessoas'));
+router.get('/locatarios', requireAuth, (req, res) => res.redirect('/pessoas'));
+router.get('/contratos', requireAuth, (req, res) => res.redirect('/imoveis'));
+router.get('/recebimentos', requireAuth, (req, res) => res.redirect('/imoveis'));
+router.get('/despesas', requireAuth, (req, res) => res.redirect('/imoveis'));
+router.get('/manutencoes', requireAuth, (req, res) => res.redirect('/imoveis'));
+router.get('/vistorias', requireAuth, (req, res) => res.redirect('/imoveis'));
+
+// Active modules views
+const modules = ['usuarios', 'imoveis', 'pessoas', 'relatorios', 'auditoria', 'calendario', 'notificacoes'];
 
 modules.forEach(mod => {
   router.get(`/${mod}`, requireAuth, (req, res) => {
-    // Views are structured in folders, e.g. views/usuarios/index.html
     res.sendFile(path.join(__dirname, `../../views/${mod}/index.html`));
   });
 });

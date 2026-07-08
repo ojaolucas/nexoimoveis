@@ -1,0 +1,31 @@
+window.imoveisListarState = window.imoveisListarState || {
+  listaImoveis: [],
+  listaFiltrada: [],
+  paginaAtual: 1,
+  itensPorPagina: 20,
+  eventosTabelaConfigurados: false
+};
+
+function somenteEndereco(titulo, tipo = "") {
+  if (!titulo || typeof titulo !== "string") return "";
+  let texto = String(titulo).trim();
+  const tipoTexto = String(tipo || "").trim();
+
+  if (tipoTexto) {
+    const tipoEscapado = tipoTexto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    texto = texto.replace(new RegExp(`^${tipoEscapado}\\s*[-–—]\\s*`, "i"), "").trim();
+  }
+
+  return texto
+    .replace(/^(Apartamento|Casa|Kitnet|Sala|Sobrado|Loja|Terreno|Comercial)\s*[-–—]\s*/i, "")
+    .trim();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

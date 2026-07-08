@@ -1,0 +1,190 @@
+(function(window, document){
+  'use strict';
+
+  const utils = window.LokafyDashboardUtils;
+  const renderers = window.LokafyDashboardRenderers || {};
+
+  function emptyState(){
+    return {cards:{}, financeiro_resumo:{}, attention:{}, proximos_vencimentos:[], movimentacoes_recentes:[]};
+  }
+
+  function renderDashboard(data){
+    const kpiEl = document.getElementById('lokKpiGrid');
+    if (kpiEl && renderers.buildKpis) kpiEl.innerHTML = renderers.buildKpis(data);
+    if (renderers.renderAttention) renderers.renderAttention(data);
+    if (renderers.renderDue) renderers.renderDue(data);
+    if (renderers.renderFeed) renderers.renderFeed(data);
+    if (renderers.renderFinance) renderers.renderFinance(data);
+  }
+
+  function initPopup(){
+    const root = document.getElementById('lkDashboardPopup');
+    if (!root) return;
+    const closeBtn = root.querySelector('.lk-popup-close');
+    const imageEl = root.querySelector('.lk-popup-media img');
+    const sessionKey = 'lk_popup_closed:' + ((imageEl && imageEl.getAttribute('src')) || window.location.pathname);
+    const delay = Number(root.dataset.delay || 0);
+    const auto = Number(root.dataset.autoClose || 0);
+    let timer = null;
+    try {
+      if (window.sessionStorage && window.sessionStorage.getItem(sessionKey) === '1') return;
+    } catch (_) {}
+    function close(){
+      root.classList.remove('is-open');
+      if (timer) { clearTimeout(timer); timer = null; }
+      try { if (window.sessionStorage) window.sessionStorage.setItem(sessionKey, '1'); } catch (_) {}
+    }
+    function open(){ root.classList.add('is-open'); if (auto > 0) timer = setTimeout(close, auto * 1000); }
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    root.addEventListener('click', e => { if (e.target === root) close(); });
+    setTimeout(open, Math.max(0, delay) * 1000);
+  }
+
+  function fetchDashboard(){
+    return fetch('/dashboard/api/dashboard.php', {cache:'no-store'})
+      .then(async (r) => {
+        const text = await r.text();
+        try {
+          return JSON.parse(text);
+        } catch (_) {
+          return {ok:false, erro:'Resposta inválida da API'};
+        }
+      });
+  }
+
+  function onboardingConfig(){
+    return [
+      {
+        key: 'proprietario',
+        title: 'Cadastrar proprietário',
+        desc: 'Comece pelo responsável do imóvel.',
+        href: '/proprietarios/novo/',
+        icon: 'fa-regular fa-address-book'
+      },
+      {
+        key: 'inquilino',
+        title: 'Cadastrar inquilino',
+        desc: 'Adicione quem vai ocupar o imóvel.',
+        href: '/inquilinos/novo/',
+        icon: 'fa-solid fa-user-check'
+      },
+      {
+        key: 'imovel',
+        title: 'Cadastrar imóvel',
+        desc: 'Conecte o imóvel à operação.',
+        href: '/imoveis/novo/',
+        icon: 'fa-regular fa-building'
+      },
+      {
+        key: 'contrato',
+        title: 'Criar contrato',
+        desc: 'Formalize a locação e regras de cobrança.',
+        href: '/contratos/novo/',
+        icon: 'fa-solid fa-file-contract'
+      },
+      {
+        key: 'gateway',
+        title: 'Ativar cobrança automática',
+        desc: 'Conecte recebimentos para gerar e baixar cobranças.',
+        href: '/configuracoes/recebimentos_automaticos/',
+        icon: 'fa-solid fa-plug-circle-check'
+      }
+    ];
+  }
+
+  function routeForOnboardingStep(key){
+    const step = onboardingConfig().find(item => item.key === key);
+    return step ? step.href : '/dashboard/';
+  }
+
+  function initOnboarding(){
+    const root = document.getElementById('dashboardOnboardingFloat');
+    if (!root) return;
+    const list = document.getElementById('dashboardOnboardingList');
+    const cta = document.getElementById('dashboardOnboardingCta');
+    const txt = document.getElementById('dashboardOnboardingProgressText');
+    const miniProgress = document.getElementById('dashboardOnboardingMiniProgress');
+    const bar = document.getElementById('dashboardOnboardingProgressBar');
+    const collapse = document.getElementById('dashboardOnboardingCollapse');
+    const mini = document.getElementById('dashboardOnboardingMini');
+    const storageKey = 'lokafy_dashboard_onboarding_collapsed';
+
+    if (!root.dataset.bound) {
+      root.dataset.bound = '1';
+      if (collapse) {
+        collapse.addEventListener('click', () => {
+          root.classList.add('is-collapsed');
+          try { window.localStorage.setItem(storageKey, '1'); } catch (_) {}
+        });
+      }
+      if (mini) {
+        mini.addEventListener('click', () => {
+          root.classList.remove('is-collapsed');
+          try { window.localStorage.setItem(storageKey, '0'); } catch (_) {}
+        });
+      }
+    }
+
+    fetch('/dashboard/api/onboarding_status.php', {cache: 'no-store'})
+      .then(r => r.json())
+      .then((j) => {
+        if (!j || !j.ok || !j.dashboard_show) {
+          root.hidden = true;
+          return;
+        }
+
+        const stepsState = j.dashboard_steps || {};
+        const completed = Number(j.dashboard_completed || 0);
+        const total = Number(j.dashboard_total || 5) || 5;
+        const next = String(j.dashboard_next || '');
+        const pct = Math.max(0, Math.min(100, Math.round((completed / total) * 100)));
+        const config = onboardingConfig();
+
+        if (txt) txt.textContent = `${completed} de ${total} concluídos`;
+        if (miniProgress) miniProgress.textContent = `${completed}/${total}`;
+        if (bar) bar.style.width = `${pct}%`;
+
+        if (list) {
+          list.innerHTML = config.map((item, index) => {
+            const done = !!stepsState[item.key];
+            const isNext = !done && item.key === next;
+            return `
+              <a class="dashboard-onboarding-row ${done ? 'is-done' : ''} ${isNext ? 'is-next' : ''}" href="${item.href}">
+                <span class="dashboard-onboarding-mark">${done ? '<i class="fa-solid fa-check"></i>' : String(index + 1)}</span>
+                <i class="${item.icon}"></i>
+                <span><strong>${item.title}</strong><small>${item.desc}</small></span>
+              </a>
+            `;
+          }).join('');
+        }
+
+        if (cta) {
+          cta.href = routeForOnboardingStep(next);
+          const current = config.find(item => item.key === next);
+          cta.querySelector('span').textContent = current ? current.title : 'Abrir dashboard';
+        }
+
+        try {
+          root.classList.toggle('is-collapsed', window.localStorage.getItem(storageKey) === '1');
+        } catch (_) {}
+        root.hidden = false;
+      })
+      .catch(() => {
+        root.hidden = true;
+      });
+  }
+
+  function init(){
+    if (!document.querySelector('.lok-dashboard-main')) return;
+    const fallback = emptyState();
+    renderDashboard(fallback);
+    fetchDashboard()
+      .then(j => renderDashboard(j && j.ok ? utils.apiData(j) : fallback))
+      .catch(() => renderDashboard(fallback));
+    initPopup();
+    initOnboarding();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true}); else init();
+  document.addEventListener('lokafy:page-ready', init);
+})(window, document);

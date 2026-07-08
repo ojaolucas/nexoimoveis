@@ -45,7 +45,7 @@ async function buscarPorId(id, responsavelUser = null, ip = null) {
 }
 
 async function cadastrar(userData, responsavelUser, ip) {
-  const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status } = userData;
+  const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao } = userData;
 
   // 1. Common validations
   if (!nome_razao_social || nome_razao_social.trim() === '') {
@@ -106,7 +106,14 @@ async function cadastrar(userData, responsavelUser, ip) {
     email: email.trim(),
     endereco: endereco ? endereco.trim() : null,
     observacoes: observacoes ? observacoes.trim() : null,
-    status: status || 'ativo'
+    status: status || 'ativo',
+    data_nascimento: data_nascimento ? data_nascimento : null,
+    rg_orgao: rg_orgao ? rg_orgao.trim() : null,
+    rg_uf: rg_uf ? rg_uf.trim() : null,
+    genero: genero || 'Não informado',
+    nacionalidade: nacionalidade ? nacionalidade.trim() : null,
+    estado_civil: estado_civil || 'Não informado',
+    profissao: profissao ? profissao.trim() : null
   });
 
   // 5. Audit log
@@ -123,7 +130,7 @@ async function cadastrar(userData, responsavelUser, ip) {
 }
 
 async function atualizar(id, userData, responsavelUser, ip) {
-  const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status } = userData;
+  const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao } = userData;
 
   // 1. Common validations
   if (!nome_razao_social || nome_razao_social.trim() === '') {
@@ -180,7 +187,14 @@ async function atualizar(id, userData, responsavelUser, ip) {
     email: email.trim(),
     endereco: endereco ? endereco.trim() : null,
     observacoes: observacoes ? observacoes.trim() : null,
-    status
+    status,
+    data_nascimento: data_nascimento ? data_nascimento : null,
+    rg_orgao: rg_orgao ? rg_orgao.trim() : null,
+    rg_uf: rg_uf ? rg_uf.trim() : null,
+    genero: genero || 'Não informado',
+    nacionalidade: nacionalidade ? nacionalidade.trim() : null,
+    estado_civil: estado_civil || 'Não informado',
+    profissao: profissao ? profissao.trim() : null
   });
 
   if (!updated) throw new Error('Locatário não encontrado.');

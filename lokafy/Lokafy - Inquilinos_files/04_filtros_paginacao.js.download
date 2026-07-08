@@ -1,0 +1,70 @@
+function aplicarFiltros() {
+  const state = window.inquilinosTabelaState;
+  const busca = document.getElementById("filtroBusca")?.value.toLowerCase() || "";
+  const filtroContrato = document.getElementById("filtroContrato")?.value || "";
+  const filtroImovel = document.getElementById("filtroImovel")?.value || "";
+  atualizarBadgeFiltros(busca, filtroContrato, filtroImovel);
+
+  state.listaFiltrada = state.listaInquilinos.filter(i => {
+    const texto = `${i.nome || ""} ${i.email || ""} ${i.cpf_cnpj || i.cpf || ""} ${i.razao_social || ""} ${i.representante_legal_nome || ""} ${i.representante_legal_cpf || ""} ${i.representante_legal_cargo || ""} ${i.telefone || ""} ${i.rg_numero || ""} ${i.contrato_codigo || ""} ${i.imovel_titulo || ""} ${i.imovel_complemento || ""} ${i.nacionalidade || ""}`.toLowerCase();
+    if (busca && !texto.includes(busca)) return false;
+    if (filtroContrato === "com" && !i.contrato_id) return false;
+    if (filtroContrato === "sem" && i.contrato_id) return false;
+    const temImovel = Boolean(i.imovel_id || (i.imovel_titulo && String(i.imovel_titulo).trim()));
+    if (filtroImovel === "com" && !temImovel) return false;
+    if (filtroImovel === "sem" && temImovel) return false;
+    return true;
+  });
+
+  state.paginaAtual = 1;
+  renderTabela(state.listaFiltrada);
+}
+
+function atualizarBadgeFiltros(busca, filtroContrato, filtroImovel) {
+  const badge = document.getElementById("filtrosAtivosBadge");
+  if (!badge) return;
+  let ativos = 0;
+  if ((busca || "").trim()) ativos += 1;
+  if (filtroContrato) ativos += 1;
+  if (filtroImovel) ativos += 1;
+  badge.textContent = `${ativos} ativo${ativos === 1 ? "" : "s"}`;
+}
+
+function limparFiltros() {
+  const busca = document.getElementById("filtroBusca");
+  const contrato = document.getElementById("filtroContrato");
+  const imovel = document.getElementById("filtroImovel");
+  if (busca) busca.value = "";
+  if (contrato) contrato.value = "";
+  if (imovel) imovel.value = "";
+  aplicarFiltros();
+}
+
+function configurarFiltrosPaginacaoInquilinos() {
+  const state = window.inquilinosTabelaState;
+  document.getElementById("filtroBusca")?.addEventListener("input", aplicarFiltros);
+  document.getElementById("filtroContrato")?.addEventListener("change", aplicarFiltros);
+  document.getElementById("filtroImovel")?.addEventListener("change", aplicarFiltros);
+  document.getElementById("btnLimparFiltros")?.addEventListener("click", limparFiltros);
+
+  document.getElementById("itensPorPagina")?.addEventListener("change", e => {
+    state.itensPorPagina = Math.max(1, parseInt(e.target.value || "20", 10));
+    state.paginaAtual = 1;
+    renderTabela(state.listaFiltrada);
+  });
+
+  document.getElementById("btnPaginaAnterior")?.addEventListener("click", () => {
+    if (state.paginaAtual > 1) {
+      state.paginaAtual -= 1;
+      renderTabela(state.listaFiltrada);
+    }
+  });
+
+  document.getElementById("btnProximaPagina")?.addEventListener("click", () => {
+    const totalPaginas = Math.max(1, Math.ceil(state.listaFiltrada.length / state.itensPorPagina));
+    if (state.paginaAtual < totalPaginas) {
+      state.paginaAtual += 1;
+      renderTabela(state.listaFiltrada);
+    }
+  });
+}

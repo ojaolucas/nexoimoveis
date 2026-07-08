@@ -1,0 +1,63 @@
+function carregarImoveis() {
+  const state = window.imoveisListarState;
+  const tbody = document.getElementById("tbodyImoveis");
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr class="loading-state">
+      <td colspan="4">Carregando imóveis...</td>
+    </tr>
+  `;
+
+  fetch("/imoveis/api/imoveis_listar.php")
+    .then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(j => {
+      if (!j.ok) throw new Error("Resposta inválida");
+
+      atualizarCardsImoveis(j);
+      state.listaImoveis = Array.isArray(j.imoveis) ? j.imoveis : [];
+      state.listaFiltrada = [...state.listaImoveis];
+      state.paginaAtual = 1;
+
+      document
+        .querySelectorAll(".filters input, .filters select, #itensPorPagina")
+        .forEach(el => (el.disabled = false));
+
+      renderTabelaPaginada();
+    })
+    .catch(err => {
+      state.listaImoveis = [];
+      state.listaFiltrada = [];
+      state.paginaAtual = 1;
+      renderErroCarregarImoveis(tbody);
+      atualizarPaginacaoInfo(0, 0, 0);
+      atualizarControlesPaginacao(0);
+    });
+}
+
+function atualizarCardsImoveis(payload) {
+  const totalImoveisEl = document.getElementById("totalImoveis");
+  const imoveisOcupadosEl = document.getElementById("imoveisOcupados");
+  const imoveisDisponiveisEl = document.getElementById("imoveisDisponiveis");
+
+  if (totalImoveisEl) totalImoveisEl.innerText = payload.total ?? 0;
+  if (imoveisOcupadosEl) imoveisOcupadosEl.innerText = payload.ocupados ?? 0;
+  if (imoveisDisponiveisEl) imoveisDisponiveisEl.innerText = payload.disponiveis ?? 0;
+}
+
+function renderErroCarregarImoveis(tbody) {
+  tbody.innerHTML = `
+    <tr class="empty-state">
+      <td colspan="4">
+        <div class="empty-box">
+          <span class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+          <h4>Não foi possível carregar os imóveis</h4>
+          <p>Tente atualizar a página em instantes.</p>
+        </div>
+      </td>
+    </tr>
+  `;
+}

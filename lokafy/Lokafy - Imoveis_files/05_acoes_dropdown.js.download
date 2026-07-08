@@ -1,0 +1,63 @@
+function configurarAcoesImoveis() {
+  document.addEventListener("click", e => {
+    const btnMore = e.target.closest(".imoveis-page .btn-more");
+    if (btnMore) {
+      const menu = btnMore.closest(".actions-menu");
+      document.querySelectorAll(".imoveis-page .actions-menu.open").forEach(m => m !== menu && m.classList.remove("open"));
+      menu?.classList.toggle("open");
+      return;
+    }
+
+    if (!e.target.closest(".imoveis-page .actions-menu")) {
+      document.querySelectorAll(".imoveis-page .actions-menu.open").forEach(m => m.classList.remove("open"));
+    }
+
+    if (e.target.closest("#btnPaginaAnterior")) {
+      paginaAnteriorImoveis();
+      return;
+    }
+
+    if (e.target.closest("#btnProximaPagina")) {
+      proximaPaginaImoveis();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    const el = e.target.closest(".btn-ver, .btn-editar, .btn-duplicar, .btn-criar-contrato, .btn-excluir, .btn-ver-contrato, .btn-ver-despesas");
+    if (!el) return;
+
+    document.querySelectorAll(".imoveis-page .actions-menu.open").forEach(m => m.classList.remove("open"));
+
+    if (el.classList.contains("btn-ver") || el.classList.contains("btn-editar")) {
+      window.location.href = `/imoveis/novo/?id=${encodeURIComponent(String(el.dataset.id || ""))}`;
+      return;
+    }
+
+    if (el.classList.contains("btn-duplicar")) {
+      window.location.href = `/imoveis/novo/?duplicar_id=${encodeURIComponent(String(el.dataset.id || ""))}`;
+      return;
+    }
+
+    if (el.classList.contains("btn-criar-contrato")) {
+      window.location.href = el.dataset.url || "/contratos/novo/";
+      return;
+    }
+
+    if (el.classList.contains("btn-excluir")) {
+      excluirImovel(el.dataset.id);
+      return;
+    }
+
+    if (el.classList.contains("btn-ver-contrato")) {
+      const contratoId = Number(el.dataset.contrato || 0);
+      if (contratoId > 0) {
+        window.location.href = `/contratos/novo/?id=${encodeURIComponent(String(contratoId))}`;
+      }
+      return;
+    }
+
+    if (el.classList.contains("btn-ver-despesas")) {
+      window.location.href = `/despesas/?imovel_id=${encodeURIComponent(String(el.dataset.id || ""))}`;
+    }
+  });
+}

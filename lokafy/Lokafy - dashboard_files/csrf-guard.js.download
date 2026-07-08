@@ -1,0 +1,82 @@
+(function () {
+  const cfg = window.LOKAFY_CSRF || {};
+  const csrfToken = String(cfg.token || '').trim();
+  const csrfByNamespace = (cfg.byNamespace && typeof cfg.byNamespace === 'object') ? cfg.byNamespace : {};
+  csrfByNamespace.app = csrfByNamespace.app || csrfToken;
+  const safeMethods = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
+
+  function namespaceByPath(pathname) {
+    const path = String(pathname || '');
+    if (path.startsWith('/configuracoes/integracoes/')) return 'integracoes';
+    if (path.startsWith('/faturas/')) return 'faturas';
+    if (path.startsWith('/despesas/')) return 'despesas';
+    if (path.startsWith('/configuracoes/perfil/')) return 'perfil';
+    if (path.startsWith('/contratos/')) return 'contratos';
+    if (path.startsWith('/consultas/')) return 'consultas';
+    if (path.startsWith('/imoveis/')) return 'imoveis';
+    if (path.startsWith('/vistoria/')) return 'vistoria';
+    if (path.startsWith('/negativacao/')) return 'negativacao';
+    return 'app';
+  }
+
+  function toHeaders(inputHeaders) {
+    try {
+      return new Headers(inputHeaders || {});
+    } catch (_) {
+      return new Headers();
+    }
+  }
+
+  if (csrfToken && !window.__lkFetchCsrfPatched) {
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      try {
+        const request = input instanceof Request ? input : null;
+        const method = String((init && init.method) || (request ? request.method : 'GET') || 'GET').toUpperCase();
+        const url = new URL(request ? request.url : String(input), window.location.href);
+
+        if (url.origin === window.location.origin && !safeMethods.has(method)) {
+          const headers = toHeaders((init && init.headers) || (request ? request.headers : undefined));
+          const ns = namespaceByPath(url.pathname);
+          headers.set('X-CSRF-Token', csrfByNamespace[ns] || csrfToken);
+          headers.set('X-Requested-With', 'XMLHttpRequest');
+
+          if (request) {
+            return nativeFetch(new Request(request, { headers }));
+          }
+
+          const nextInit = Object.assign({}, init || {}, { headers });
+          return nativeFetch(input, nextInit);
+        }
+      } catch (_) {}
+
+      return nativeFetch(input, init);
+    };
+    window.__lkFetchCsrfPatched = true;
+  }
+
+  if (csrfToken && !window.__lkFormCsrfPatched) {
+    document.addEventListener('submit', function (event) {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      const method = String(form.method || 'get').toUpperCase();
+      if (method !== 'POST') return;
+      if (form.querySelector('input[name="_csrf"]')) return;
+
+      let ns = 'app';
+      try {
+        const actionUrl = new URL(form.getAttribute('action') || window.location.href, window.location.href);
+        if (actionUrl.origin === window.location.origin) {
+          ns = namespaceByPath(actionUrl.pathname);
+        }
+      } catch (_) {}
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = '_csrf';
+      input.value = String(csrfByNamespace[ns] || csrfToken || '');
+      form.appendChild(input);
+    }, true);
+    window.__lkFormCsrfPatched = true;
+  }
+})();

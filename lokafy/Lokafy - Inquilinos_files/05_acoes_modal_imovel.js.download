@@ -1,0 +1,83 @@
+function configurarAcoesInquilinos() {
+  document.getElementById("tabelaInquilinos")?.addEventListener("click", e => {
+    const btnMore = e.target.closest(".btn-more");
+    if (btnMore) {
+      const menu = btnMore.closest(".actions-menu");
+      document.querySelectorAll(".inquilinos-page .actions-menu.open").forEach(m => m !== menu && m.classList.remove("open"));
+      menu?.classList.toggle("open");
+      return;
+    }
+
+    const alvo = e.target.closest("[data-action][data-id]");
+    if (!alvo) return;
+    document.querySelectorAll(".inquilinos-page .actions-menu.open").forEach(m => m.classList.remove("open"));
+
+    const id = alvo.dataset.id;
+    const action = alvo.dataset.action;
+    if (action === "edit") {
+      window.location.href = `/inquilinos/novo/?id=${encodeURIComponent(id)}`;
+      return;
+    }
+    if (action === "delete") excluirInquilino(id);
+  });
+
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".inquilinos-page .actions-menu")) {
+      document.querySelectorAll(".inquilinos-page .actions-menu.open").forEach(m => m.classList.remove("open"));
+    }
+  });
+}
+
+function abrirModalImovelInquilino(nome, imovel, contrato, imovelId, imovelStatus) {
+  const modal = document.getElementById("modalImovelInquilino");
+  const titulo = document.getElementById("tituloModalImovelInquilino");
+  const body = document.getElementById("conteudoModalImovelInquilino");
+  if (!modal || !titulo || !body) return;
+
+  const status = String(imovelStatus || "").toLowerCase();
+  const statusLabel = status === "ocupado" ? "Ocupado" : "Disponível";
+  const statusClass = status === "ocupado" ? "ocupado" : "disponivel";
+  const botaoVerImovel = imovelId
+    ? `<div style="margin-top:10px;"><button class="imoveis-link btn-ir-imovel-inq" data-imovel-id="${escapeHtml(imovelId)}">Ver imóvel</button></div>`
+    : "";
+
+  titulo.innerText = `Imóvel de ${nome || "inquilino"}`;
+  body.innerHTML = `
+    <article class="imovel-item">
+      <div class="imovel-item-topo"><strong>Status do imóvel</strong><span class="imovel-status-chip ${statusClass}">${statusLabel}</span></div>
+      <p>${escapeHtml(imovel || "Imóvel não informado")}</p>
+      <small>Contrato: ${escapeHtml(contrato || "Sem contrato")}</small>
+      ${botaoVerImovel}
+    </article>
+  `;
+  modal.classList.add("active");
+}
+
+function fecharModalImovelInquilino() {
+  document.getElementById("modalImovelInquilino")?.classList.remove("active");
+}
+
+function configurarModalImovelInquilino() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-ver-imovel-inq");
+    if (btn) {
+      abrirModalImovelInquilino(btn.dataset.nome, btn.dataset.imovel, btn.dataset.contrato, btn.dataset.imovelId, btn.dataset.imovelStatus);
+      return;
+    }
+
+    const btnIrImovel = e.target.closest(".btn-ir-imovel-inq");
+    if (btnIrImovel) {
+      const id = Number(btnIrImovel.dataset.imovelId || 0);
+      if (id) window.location.href = `/imoveis/?id=${id}`;
+      return;
+    }
+
+    if (e.target.closest("#fecharModalImovelInquilino")) {
+      fecharModalImovelInquilino();
+      return;
+    }
+
+    const modal = document.getElementById("modalImovelInquilino");
+    if (modal && e.target === modal) fecharModalImovelInquilino();
+  });
+}

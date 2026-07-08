@@ -1,0 +1,1770 @@
+.inquilinos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  --inq-bg-a: #f8fafc;
+  --inq-bg-b: #eef4f7;
+  --inq-surface: rgba(255, 255, 255, 0.86);
+  --inq-border: rgba(148, 163, 184, 0.24);
+  --inq-text: #0f172a;
+  --inq-muted: #64748b;
+  --inq-accent: #0f766e;
+  --inq-shadow: 0 20px 45px rgba(15, 23, 42, 0.1);
+  position: relative;
+  padding: 4px;
+}
+
+.inquilinos-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(15, 118, 110, 0.12), transparent 38%),
+    radial-gradient(circle at 88% 2%, rgba(14, 165, 233, 0.09), transparent 34%),
+    linear-gradient(160deg, var(--inq-bg-a), var(--inq-bg-b));
+  z-index: -1;
+}
+
+.inquilinos-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  border: 1px solid var(--inq-border);
+  background: var(--inq-surface);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 20px 22px;
+  box-shadow: var(--inq-shadow);
+}
+
+.inquilinos-page .page-header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inquilinos-page .page-header-copy .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--inq-accent);
+}
+
+.inquilinos-page .page-header-copy h2 {
+  margin: 0;
+  font-size: clamp(21px, 2vw, 28px);
+  line-height: 1.1;
+  color: var(--inq-text);
+  font-weight: 800;
+}
+
+.inquilinos-page .page-header-copy p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--inq-muted);
+}
+
+.inquilinos-page .btn-primary {
+  background: linear-gradient(135deg, #0f766e 0%, #0b5f5a 52%, #164e63 100%);
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid #0a4b45;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(13,77,71,.28);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+
+.inquilinos-page .btn-primary:hover {
+  box-shadow: 0 18px 34px rgba(13,77,71,.3);
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+  text-decoration: none;
+}
+
+.inquilinos-page .btn-primary:focus,
+.inquilinos-page .btn-primary:focus-visible,
+.inquilinos-page .btn-primary:active,
+.inquilinos-page .btn-primary:visited {
+  color: #fff;
+  text-decoration: none;
+}
+
+.inquilinos-page .btn-secondary {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.inquilinos-page .btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.inquilinos-page .cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.inquilinos-page .card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #dbe3eb;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  overflow: hidden;
+}
+
+.inquilinos-page .card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: #0f766e;
+}
+
+.inquilinos-page .card:hover {
+  border-color: #c9d5e2;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+}
+
+.inquilinos-page .card:nth-child(2)::before {
+  background: #166534;
+}
+
+.inquilinos-page .card:nth-child(3)::before {
+  background: #b45309;
+}
+
+.inquilinos-page .card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: #f6fafb;
+  border: 1px solid #dce8eb;
+  color: #0b5f5a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inquilinos-page .card-icon i {
+  width: 21px;
+  height: 21px;
+  display: block;
+  stroke-width: 2.1;
+}
+
+.inquilinos-page .card-info span {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.inquilinos-page .card-info strong {
+  display: block;
+  font-size: 31px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  margin: 2px 0;
+  letter-spacing: -0.01em;
+}
+
+.inquilinos-page .card-info small {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.inquilinos-page .filters-wrap {
+  border: 1px solid var(--inq-border);
+  border-radius: 16px;
+  background: var(--inq-surface);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  padding: 14px;
+}
+
+.inquilinos-page .filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.inquilinos-page .filters-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.inquilinos-page .filters-title i {
+  width: 16px;
+  height: 16px;
+  color: #0f766e;
+}
+
+.inquilinos-page .filters-title small {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f766e;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.inquilinos-page .btn-filter-clear {
+  border: 1px solid #dbe3ed;
+  background: #fff;
+  color: #334155;
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.inquilinos-page .btn-filter-clear i {
+  width: 14px;
+  height: 14px;
+}
+
+.inquilinos-page .btn-filter-clear:hover {
+  border-color: #c5d1de;
+  background: #f8fafc;
+}
+
+.inquilinos-page .filters {
+  display: flex;
+  gap: 12px;
+}
+
+.inquilinos-page .filters .field {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.inquilinos-page .filters .field.with-icon i,
+.inquilinos-page .filters .field.with-icon svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: #64748b;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.inquilinos-page .filters input,
+.inquilinos-page .filters select {
+  background: var(--inq-surface);
+  border: 1px solid var(--inq-border);
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border .2s, box-shadow .2s;
+  color: var(--inq-text);
+  backdrop-filter: blur(7px);
+  width: 100%;
+  min-height: 42px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.inquilinos-page .filters .field.with-icon input,
+.inquilinos-page .filters .field.with-icon select {
+  padding-left: 40px;
+}
+
+.inquilinos-page .filters .field.with-icon select {
+  padding-right: 34px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #64748b 50%),
+    linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.inquilinos-page .filters input:focus,
+.inquilinos-page .filters select:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(11,95,90,.12);
+}
+
+.inquilinos-page .filters input {
+  flex: 1;
+}
+
+.inquilinos-page .table-card {
+  background: var(--inq-surface);
+  border-radius: 20px;
+  overflow: visible;
+  border: 1px solid var(--inq-border);
+  box-shadow: var(--inq-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.inquilinos-page .table-head {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--inq-border);
+  background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.62));
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.inquilinos-page .table-head h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--inq-text);
+  letter-spacing: -0.01em;
+}
+
+.inquilinos-page .table-head span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.inquilinos-page .table-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inquilinos-page .table-head-actions label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.inquilinos-page .table-head-actions select {
+  border: 1px solid #d1dbe7;
+  border-radius: 10px;
+  height: 34px;
+  padding: 0 26px 0 10px;
+  background: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #64748b 50%),
+    linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% - 2px),
+    calc(100% - 9px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.inquilinos-page .table-wrap {
+  overflow: visible;
+  max-height: none;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #6cb8b2 #e6f4f2;
+}
+
+@media (max-width: 1200px) {
+  .inquilinos-page .table-wrap {
+    min-height: 420px;
+  }
+}
+
+.inquilinos-page table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 0;
+}
+
+.inquilinos-page th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: #475569;
+  padding: 14px 18px;
+  white-space: nowrap;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: -33px;
+  z-index: 5;
+}
+
+.inquilinos-page td {
+  padding: 14px 18px;
+  font-size: 14px;
+  border-top: 1px solid #edf2f7;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.inquilinos-page tbody tr:hover {
+  background: #f1f5f9;
+}
+
+.inquilinos-page .status {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inquilinos-page .status.ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.inquilinos-page .status.warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.inquilinos-page .col-acoes {
+  width: 140px;
+}
+
+.inquilinos-page .actions {
+  display: flex;
+  gap: 12px;
+}
+
+.inquilinos-page .actions i {
+  cursor: pointer;
+  color: #64748b;
+  transition: .2s;
+}
+
+.inquilinos-page .actions i:hover {
+  color: var(--verde);
+}
+
+.inquilinos-page .table-footer {
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--inq-border);
+  background: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.7));
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.inquilinos-page .table-footer small {
+  color: #64748b;
+}
+
+.inquilinos-page .table-footer-actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.inquilinos-page .table-footer-actions button {
+  border: 1px solid #d5dfea;
+  background: #f8fbfe;
+  color: #0f172a;
+  border-radius: 10px;
+  height: 34px;
+  padding: 0 13px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.inquilinos-page .table-footer-actions button:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #c5d4e3;
+}
+
+.inquilinos-page .table-footer-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inquilinos-page .table-empty {
+  width: min(560px, 100%);
+  margin: 22px auto 8px;
+  text-align: center;
+  padding: 22px 18px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.inquilinos-page .table-empty .empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  color: #0f766e;
+  font-size: 20px;
+}
+
+.inquilinos-page .table-empty h4 {
+  margin: 2px 0 0;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.inquilinos-page .table-empty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.inquilinos-page .table-empty p strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.inquilinos-page .inq-grid-v2 tbody tr.empty-state-row td {
+  padding: 48px 20px !important;
+  text-align: center !important;
+  border-bottom: none !important;
+}
+
+.inquilinos-page .inq-grid-v2 .table-empty-inline {
+  margin: 0 auto;
+}
+
+@media (max-width: 980px) {
+  .inquilinos-page .page-header {
+    padding: 16px;
+    border-radius: 16px;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .inquilinos-page .page-header-copy h2 {
+    font-size: 22px;
+  }
+
+  .inquilinos-page .page-header-copy p {
+    font-size: 12px;
+  }
+
+  .inquilinos-page .page-header .btn-primary {
+    width: 100%;
+  }
+
+  .inquilinos-page .table-wrap {
+    min-height: 0;
+  }
+
+  .inquilinos-page .filters {
+    flex-direction: column;
+  }
+
+  .inquilinos-page .filters-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inquilinos-page .btn-filter-clear {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .inquilinos-page .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .inquilinos-page table {
+    min-width: 0;
+  }
+
+  .inquilinos-page thead {
+    display: none;
+  }
+
+  .inquilinos-page tbody tr {
+    display: block;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 12px;
+  }
+
+  .inquilinos-page .inq-grid-v2 tbody tr.empty-state-row {
+    display: table-row;
+    border-bottom: none;
+    padding: 0;
+  }
+
+  .inquilinos-page tbody td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border: none;
+    padding: 6px 0;
+  }
+
+  .inquilinos-page tbody td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .inquilinos-page .inq-grid-v2 tbody tr.empty-state-row td {
+    display: table-cell;
+    padding: 32px 14px !important;
+  }
+
+  .inquilinos-page .inq-grid-v2 tbody tr.empty-state-row td::before {
+    content: none !important;
+  }
+
+  .inquilinos-page .actions {
+    justify-content: flex-end;
+  }
+
+  .inquilinos-page .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ================= TABELA V2 (PADRÃO) ================= */
+.inquilinos-page .inq-table-v2{
+  border:1px solid var(--inq-border);
+  border-radius:20px;
+  box-shadow: var(--inq-shadow);
+  overflow:visible !important;
+}
+
+.inquilinos-page .inq-grid-v2{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+  min-width:0;
+}
+
+.inquilinos-page .inq-grid-v2 thead th{
+  position:sticky;
+  top:-33px;
+  z-index:5;
+  background:#f4f8fb;
+  color:#334155;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding:13px 18px;
+  border-bottom:1px solid #dce6f0;
+}
+
+.inquilinos-page .inq-grid-v2 thead th:first-child{
+  border-top-left-radius:16px;
+}
+
+.inquilinos-page .inq-grid-v2 thead th:last-child{
+  border-top-right-radius:16px;
+}
+
+.inquilinos-page .inq-grid-v2 tbody td{
+  padding:16px 18px;
+  color:#1e293b;
+  font-size:14px;
+  border-bottom:1px solid #e7eef5;
+  vertical-align:middle;
+}
+
+.inquilinos-page .inq-grid-v2 tbody tr:last-child td{
+  border-bottom:none;
+}
+
+.inquilinos-page .inq-grid-v2 tbody tr:nth-child(even){
+  background: rgba(248, 250, 252, .72);
+}
+
+.inquilinos-page .inq-grid-v2 tbody tr:hover{
+  background:rgba(219, 234, 254, .42);
+}
+
+.inquilinos-page .h-id,
+.inquilinos-page .inq-grid-v2 .fx-id{ width:52px; min-width:52px; text-align:center; color:#94a3b8; font-size:12px; font-weight:600; }
+.inquilinos-page .h-nome,
+.inquilinos-page .fx-nome{ width:25%; text-align:left; }
+.inquilinos-page .h-telefone,
+.inquilinos-page .fx-telefone{ width:16%; text-align:left; }
+.inquilinos-page .h-documentos,
+.inquilinos-page .fx-documentos{ width:29%; text-align:left; }
+.inquilinos-page .h-imovel,
+.inquilinos-page .fx-imovel{ width:15%; text-align:center; }
+.inquilinos-page .h-acoes,
+.inquilinos-page .fx-acoes{ width:12%; text-align:center; white-space:nowrap; }
+
+.inquilinos-page .fx-nome,
+.inquilinos-page .fx-telefone,
+.inquilinos-page .fx-imovel{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.inquilinos-page .fx-documentos{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.inquilinos-page .fx-imovel{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  text-align:center;
+}
+
+.inquilinos-page .imoveis-link{
+  height:32px;
+  max-width:140px;
+  padding:0 11px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:6px;
+  font-size:11.5px;
+  font-weight:700;
+  color:#0f766e;
+  background:#eefbf8;
+  border:1px solid rgba(15,118,110,.22);
+  cursor:pointer;
+}
+
+.inquilinos-page .imoveis-link-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.inquilinos-page .imoveis-link:hover{
+  background:#d1fae5;
+}
+
+.modal-imovel-inquilino .btn-ir-imovel-inq{
+  height:30px;
+  padding:0 12px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:700;
+  color:#0f5d56;
+  background:#f7fbfa;
+  border:1px solid #cfe3df;
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.modal-imovel-inquilino .btn-ir-imovel-inq:hover{
+  background:#eaf5f3;
+  border-color:#b7d7d1;
+  color:#0c4d47;
+}
+
+.inquilinos-page .fx-acoes{
+  padding-right:12px !important;
+}
+
+.inquilinos-page .fx-main{
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  color:#0f172a;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.inquilinos-page .inq-nome-stack{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  min-width:0;
+}
+
+.inquilinos-page .inq-nome-content{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.inquilinos-page .inq-nome-extra{
+  font-size:11.5px;
+  color:#64748b;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.inquilinos-page .inq-nome-icon{
+  font-size:12px;
+  color:#0f766e;
+  opacity:.92;
+  flex:0 0 auto;
+}
+
+.inquilinos-page .inq-tel-stack{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  min-width:0;
+}
+
+.inquilinos-page .inq-tel-content{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+
+.inquilinos-page .inq-tel-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.inquilinos-page .inq-tel-icon{
+  font-size:12px;
+  color:#0f766e;
+  opacity:.92;
+  flex:0 0 14px;
+  width:14px;
+  text-align:center;
+}
+
+.inquilinos-page .inq-tel-value{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  color:#475569;
+}
+
+.inquilinos-page .inq-tel-email{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  color:#64748b;
+}
+
+.inquilinos-page .inq-imovel-stack{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+}
+
+.inquilinos-page .inq-imovel-empty{
+  font-size:12.5px;
+  color:#94a3b8;
+}
+
+.inquilinos-page .inq-doc-list{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  min-width:0;
+  white-space:normal;
+  overflow:hidden;
+}
+
+.inquilinos-page .inq-doc-block{
+  display:flex;
+  align-items:center;
+  min-width:0;
+}
+
+.inquilinos-page .inq-doc-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  white-space:nowrap;
+  font-size:12px;
+  line-height:1.25;
+  color:#334155;
+}
+
+.inquilinos-page .inq-doc-label{
+  font-size:11px;
+  font-weight:700;
+  color:#64748b;
+  letter-spacing:.02em;
+  flex:0 0 auto;
+}
+
+.inquilinos-page .inq-doc-icon{
+  font-size:12px;
+  color:#0f766e;
+  opacity:.9;
+  flex:0 0 auto;
+}
+
+.inquilinos-page .inq-doc-value{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#475569;
+}
+
+.inquilinos-page .inq-contrato-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:92px;
+  min-height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.inquilinos-page .inq-contrato-badge.ok{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.inquilinos-page .inq-contrato-badge.warn{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.inquilinos-page .icon-btn{
+  width:auto;
+  height:auto;
+  border:none;
+  border-radius:0;
+  background:transparent;
+  color:#64748b;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  margin-left:12px;
+  padding:0;
+}
+
+.inquilinos-page .icon-btn:first-child{
+  margin-left:0;
+}
+
+.inquilinos-page .icon-btn:hover{
+  color:#0f766e;
+}
+
+.inquilinos-page .icon-btn.danger:hover{
+  color:#dc2626;
+}
+
+.inquilinos-page .icon-btn i{
+  font-size:15px;
+}
+
+/* ================= AÇÕES DROPDOWN ================= */
+.inquilinos-page .fx-acoes{
+  position:relative;
+  overflow:visible !important;
+}
+
+.inquilinos-page .fx-acoes .actions-menu{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.inquilinos-page .fx-acoes .btn-more{
+  background:#f8fbfe;
+  border:1px solid #d7e2ec;
+  padding:7px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  color:#475569;
+  font-size:14px;
+  transition:background .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease;
+}
+
+.inquilinos-page .fx-acoes .btn-more:hover{
+  background:#ffffff;
+  color:#0f172a;
+  border-color:#c4d3e2;
+  box-shadow:0 8px 18px rgba(15,23,42,.12);
+  transform:translateY(-1px);
+}
+
+.inquilinos-page .fx-acoes .dropdown{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  min-width:210px;
+  background:#ffffff;
+  border:1px solid #d7e2ec;
+  border-radius:12px;
+  padding:4px;
+  display:none;
+  flex-direction:column;
+  box-shadow:0 20px 40px rgba(15,23,42,.20);
+  z-index:9999;
+  opacity:0;
+  transform:translateY(-6px);
+  transition:opacity .18s ease, transform .18s ease;
+}
+
+.inquilinos-page .fx-acoes .actions-menu.open .dropdown{
+  display:flex;
+  opacity:1;
+  transform:translateY(0);
+}
+
+.inquilinos-page .fx-acoes .dropdown button{
+  background:transparent;
+  border:none;
+  padding:10px 14px;
+  font-size:13px;
+  font-weight:600;
+  text-align:left;
+  border-radius:10px;
+  cursor:pointer;
+  color:#334155;
+  transition:background .15s ease, color .15s ease;
+}
+
+.inquilinos-page .fx-acoes .dropdown button:hover{
+  background:#f8fafc;
+}
+
+.inquilinos-page .fx-acoes .dropdown .danger{
+  color:#dc2626;
+}
+
+.inquilinos-page .fx-acoes .dropdown .danger:hover{
+  background:#fef2f2;
+}
+
+.inquilinos-page .table-wrap::-webkit-scrollbar{
+  height:10px;
+  width:10px;
+}
+
+.inquilinos-page .table-wrap::-webkit-scrollbar-track{
+  background:#e6f4f2;
+  border-radius:999px;
+}
+
+.inquilinos-page .table-wrap::-webkit-scrollbar-thumb{
+  background:#6cb8b2;
+  border-radius:999px;
+}
+
+.inquilinos-page .table-wrap::-webkit-scrollbar-thumb:hover{
+  background:#4ea49c;
+}
+
+.modal-imovel-inquilino{
+  position:fixed;
+  inset:0;
+  background:rgba(2, 6, 23, 0.45);
+  display:none;
+  z-index:1100;
+}
+
+.modal-imovel-inquilino.active{
+  display:block;
+}
+
+.modal-imovel-box{
+  width:min(680px, calc(100vw - 24px));
+  height:100vh;
+  background:#fff;
+  border-radius:0 16px 16px 0;
+  border:1px solid #e8eef5;
+  border-left:none;
+  box-shadow:20px 0 40px rgba(2, 6, 23, 0.2);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .22s ease;
+}
+
+.modal-imovel-inquilino.active .modal-imovel-box{
+  transform:translateX(0);
+}
+
+.modal-imovel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px 16px;
+  border-bottom:1px solid #edf2f7;
+}
+
+.modal-imovel-header h3{
+  margin:0;
+  font-size:16px;
+  color:#0f172a;
+}
+
+.modal-imovel-close{
+  width:34px;
+  height:34px;
+  border:1px solid #dbe3ed;
+  border-radius:10px;
+  background:#fff;
+  color:#334155;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.modal-imovel-close:hover{
+  border-color:#0b5f5a;
+  color:#0b5f5a;
+  background:#f0fdfa;
+}
+
+.modal-imovel-body{
+  padding:14px;
+  overflow:auto;
+}
+
+.modal-imovel-body .imovel-item{
+  border:1px solid #e8eef5;
+  border-radius:12px;
+  padding:10px 12px;
+  background:#fff;
+}
+
+.modal-imovel-body .imovel-item p{
+  margin:0 0 6px;
+  font-size:14px;
+  color:#0f172a;
+}
+
+.modal-imovel-body .imovel-item small{
+  color:#64748b;
+}
+
+.modal-imovel-body .imovel-item .imovel-item-topo{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.modal-imovel-body .imovel-status-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:24px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.modal-imovel-body .imovel-status-chip.ocupado{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.modal-imovel-body .imovel-status-chip.disponivel{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+:root[data-theme="dark"] .inquilinos-page .card,
+:root[data-theme="dark"] .inquilinos-page .table-card,
+:root[data-theme="dark"] .inquilinos-page .inq-table-v2 {
+  background: #111b29;
+  border-color: #223246;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] .inquilinos-page .card {
+  background: #111b29;
+  border-color: #2b3f56;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+}
+
+:root[data-theme="dark"] .inquilinos-page .card:hover {
+  border-color: #3a5471;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] .inquilinos-page .card-icon {
+  background: #162434;
+  border-color: #2d425a;
+  color: #7dd3ca;
+}
+
+:root[data-theme="dark"] .inquilinos-page .card-info strong {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .inquilinos-page .card::before {
+  background: #214958;
+}
+
+:root[data-theme="dark"] .inquilinos-page .card-icon {
+  background: #162434;
+  border-color: #2a4b60;
+  color: #7dd3ca;
+}
+
+:root[data-theme="dark"] .inquilinos-page .card-info span,
+:root[data-theme="dark"] .inquilinos-page .card-info small,
+:root[data-theme="dark"] .inquilinos-page .table-head span,
+:root[data-theme="dark"] .inquilinos-page .table-head-actions label,
+:root[data-theme="dark"] .inquilinos-page th,
+:root[data-theme="dark"] .inquilinos-page tbody td::before,
+:root[data-theme="dark"] .inquilinos-page .table-footer small {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .card-info strong,
+:root[data-theme="dark"] .inquilinos-page .table-head h3,
+:root[data-theme="dark"] .inquilinos-page td,
+:root[data-theme="dark"] .inquilinos-page .fx-main,
+:root[data-theme="dark"] .inquilinos-page .table-footer-actions button {
+  color: #e2e8f0 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters input,
+:root[data-theme="dark"] .inquilinos-page .filters select,
+:root[data-theme="dark"] .inquilinos-page .table-head-actions select,
+:root[data-theme="dark"] .inquilinos-page .table-footer-actions button {
+  background: #22364d;
+  border-color: #3a5a78;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters-wrap {
+  background: #111b29;
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters-title {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters-title i,
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon i,
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon svg {
+  color: #7dd3ca;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #a8bfd8 50%),
+    linear-gradient(135deg, #a8bfd8 50%, transparent 50%);
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters-title small {
+  color: #86efac;
+  background: rgba(22, 163, 74, 0.2);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
+:root[data-theme="dark"] .inquilinos-page .btn-filter-clear {
+  background: #22364d;
+  border-color: #3a5a78;
+  color: #d7e5f5;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters input::placeholder{
+  color:#a6b9cf;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters select option,
+:root[data-theme="dark"] .inquilinos-page .table-head-actions select option{
+  background:#22364d;
+  color:#e2e8f0;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-head-actions select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #a8bfd8 50%),
+    linear-gradient(135deg, #a8bfd8 50%, transparent 50%);
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-head,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 thead th,
+:root[data-theme="dark"] .inquilinos-page .table-footer {
+  background: #162434;
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 tbody td,
+:root[data-theme="dark"] .inquilinos-page tbody tr,
+:root[data-theme="dark"] .inquilinos-page td {
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .inquilinos-page tbody tr:hover,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 tbody tr:hover {
+  background: #1a2d40;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 tbody tr:nth-child(even){
+  background: rgba(22, 36, 52, .55);
+}
+
+:root[data-theme="dark"] .inquilinos-page .icon-btn,
+:root[data-theme="dark"] .inquilinos-page .actions i {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .inquilinos-page .icon-btn:hover,
+:root[data-theme="dark"] .inquilinos-page .actions i:hover {
+  color: #7dd3ca;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .btn-more{
+  background:#22364d;
+  border-color:#3a5a78;
+  color:#d7e5f5;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .btn-more:hover{
+  background:#2a4563;
+  color:#f1f5f9;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown{
+  background:#162434;
+  border-color:#2d425a;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown button{
+  color:#d7e5f5;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown button:hover{
+  background:#22364d;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown .danger{
+  color:#fca5a5;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown .danger:hover{
+  background:#402534;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-contrato-badge.ok {
+  background: rgba(22, 163, 74, 0.22);
+  color: #86efac;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-contrato-badge.warn {
+  background: rgba(234, 179, 8, 0.22);
+  color: #fde68a;
+}
+
+:root[data-theme="dark"] .inquilinos-page .imoveis-link{
+  background: rgba(22, 163, 74, 0.22);
+  color: #86efac;
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
+:root[data-theme="dark"] .inquilinos-page .imoveis-link:hover{
+  background: rgba(22, 163, 74, 0.3);
+}
+
+:root[data-theme="dark"] .modal-imovel-inquilino .btn-ir-imovel-inq{
+  background:#22364d;
+  border-color:#3a5a78;
+  color:#d7e5f5;
+}
+
+:root[data-theme="dark"] .modal-imovel-inquilino .btn-ir-imovel-inq:hover{
+  background:#2a4563;
+  border-color:#4f7092;
+  color:#f1f5f9;
+}
+
+:root[data-theme="dark"] .modal-imovel-box,
+:root[data-theme="dark"] .modal-imovel-body .imovel-item{
+  background:#111b29;
+  border-color:#223246;
+}
+
+:root[data-theme="dark"] .modal-imovel-header,
+:root[data-theme="dark"] .modal-imovel-close{
+  background:#162434;
+  border-color:#223246;
+}
+
+:root[data-theme="dark"] .modal-imovel-header h3,
+:root[data-theme="dark"] .modal-imovel-body .imovel-item p{
+  color:#e2e8f0;
+}
+
+:root[data-theme="dark"] .modal-imovel-body .imovel-item small{
+  color:#94a3b8;
+}
+
+:root[data-theme="dark"] .modal-imovel-body .imovel-status-chip.ocupado{
+  background:rgba(22, 163, 74, 0.22);
+  color:#86efac;
+}
+
+:root[data-theme="dark"] .modal-imovel-body .imovel-status-chip.disponivel{
+  background:rgba(234, 179, 8, 0.22);
+  color:#fde68a;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-empty .empty-icon {
+  background: #12313b;
+  border-color: #25525f;
+  color: #6ee7d7;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-empty h4,
+:root[data-theme="dark"] .inquilinos-page .table-empty p strong {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-empty p {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-doc-item {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-nome-extra {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-nome-icon {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-tel-icon {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-tel-value {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-imovel-empty {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-doc-label {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-doc-icon {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-doc-value {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-wrap {
+  background: #111b29;
+  color-scheme: dark;
+  scrollbar-color: #3d6d8a #142638;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-wrap::-webkit-scrollbar-track {
+  background: #142638;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-wrap::-webkit-scrollbar-thumb {
+  background: #3d6d8a;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #4f7f9d;
+}
+
+:root[data-theme="dark"] .inquilinos-page::before {
+  background:
+    radial-gradient(circle at 8% 10%, rgba(45, 212, 191, 0.1), transparent 38%),
+    radial-gradient(circle at 88% 2%, rgba(125, 211, 252, 0.08), transparent 34%),
+    linear-gradient(160deg, #0b1320, #0f1b2c);
+}
+
+:root[data-theme="dark"] .inquilinos-page .page-header {
+  background: rgba(17, 27, 41, .88);
+  border-color: #223246;
+}
+
+:root[data-theme="dark"] .inquilinos-page .page-header-copy .eyebrow {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .inquilinos-page .page-header-copy h2 {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .inquilinos-page .page-header-copy p {
+  color: #94a3b8;
+}
+
+/* Icones coloridos nos cards de resumo (inquilinos-page) */
+.inquilinos-page .cards .card:nth-child(1) .card-icon{background:linear-gradient(145deg,#eff6ff,#dbeafe);border-color:#bfdbfe;color:#1d4ed8}
+.inquilinos-page .cards .card:nth-child(2) .card-icon{background:linear-gradient(145deg,#ecfdf5,#dcfce7);border-color:#bbf7d0;color:#15803d}
+.inquilinos-page .cards .card:nth-child(3) .card-icon{background:linear-gradient(145deg,#fff7ed,#ffedd5);border-color:#fed7aa;color:#c2410c}
+:root[data-theme="dark"] .inquilinos-page .cards .card:nth-child(1) .card-icon{background:rgba(59,130,246,.2);border-color:rgba(147,197,253,.45);color:#93c5fd}
+:root[data-theme="dark"] .inquilinos-page .cards .card:nth-child(2) .card-icon{background:rgba(34,197,94,.18);border-color:rgba(134,239,172,.4);color:#86efac}
+:root[data-theme="dark"] .inquilinos-page .cards .card:nth-child(3) .card-icon{background:rgba(249,115,22,.2);border-color:rgba(253,186,116,.45);color:#fdba74}
+
+/* Ajuste final dark mode - inquilinos */
+:root[data-theme="dark"] .inquilinos-page {
+  color: #e5edf7;
+}
+
+:root[data-theme="dark"] .inquilinos-page .page-header,
+:root[data-theme="dark"] .inquilinos-page .filters-wrap,
+:root[data-theme="dark"] .inquilinos-page .table-card,
+:root[data-theme="dark"] .inquilinos-page .inq-table-v2 {
+  background: linear-gradient(180deg, rgba(17, 27, 41, .96), rgba(13, 22, 35, .96)) !important;
+  border-color: rgba(63, 88, 116, .72) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .34) !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters-title,
+:root[data-theme="dark"] .inquilinos-page .filters-title span,
+:root[data-theme="dark"] .inquilinos-page .table-head h3,
+:root[data-theme="dark"] .inquilinos-page .page-header-copy h2 {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .page-header-copy p,
+:root[data-theme="dark"] .inquilinos-page .table-head span,
+:root[data-theme="dark"] .inquilinos-page .table-head-actions label,
+:root[data-theme="dark"] .inquilinos-page .table-footer small,
+:root[data-theme="dark"] .inquilinos-page .inq-nome-extra,
+:root[data-theme="dark"] .inquilinos-page .inq-doc-label,
+:root[data-theme="dark"] .inquilinos-page .inq-imovel-empty {
+  color: #9fb0c5 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters input,
+:root[data-theme="dark"] .inquilinos-page .filters select,
+:root[data-theme="dark"] .inquilinos-page .table-head-actions select {
+  background-color: #142235 !important;
+  border-color: #34506c !important;
+  color: #e5edf7 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters input::placeholder {
+  color: #8fa3bc !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon i,
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon svg,
+:root[data-theme="dark"] .inquilinos-page .filters-title i {
+  color: #5eead4 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .btn-filter-clear,
+:root[data-theme="dark"] .inquilinos-page .table-footer-actions button,
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .btn-more {
+  background: #16283d !important;
+  border-color: #365673 !important;
+  color: #dbeafe !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .btn-filter-clear:hover,
+:root[data-theme="dark"] .inquilinos-page .table-footer-actions button:hover:not(:disabled),
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .btn-more:hover {
+  background: #1d344f !important;
+  border-color: #4b6f91 !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-head,
+:root[data-theme="dark"] .inquilinos-page .table-footer,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 thead th {
+  background: #142235 !important;
+  border-color: #263b52 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2,
+:root[data-theme="dark"] .inquilinos-page .table-wrap {
+  background: #0f1a2a !important;
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 tbody tr {
+  background: #111d2e !important;
+  border-color: #263b52 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 tbody tr:nth-child(even) {
+  background: #132237 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 tbody tr:hover {
+  background: #1b314a !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 th,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 td,
+:root[data-theme="dark"] .inquilinos-page .fx-main,
+:root[data-theme="dark"] .inquilinos-page .inq-tel-value,
+:root[data-theme="dark"] .inquilinos-page .inq-doc-value {
+  color: #e5edf7 !important;
+  border-color: #263b52 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .h-id,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 .fx-id,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 thead th,
+:root[data-theme="dark"] .inquilinos-page tbody td::before {
+  color: #9fb0c5 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .inq-doc-item {
+  background: rgba(20, 34, 53, .72) !important;
+  border-color: rgba(61, 88, 116, .7) !important;
+  color: #dbeafe !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown {
+  background: #111d2e !important;
+  border-color: #365673 !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .42) !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown button {
+  color: #e5edf7 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .fx-acoes .dropdown button:hover {
+  background: #1b314a !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-empty,
+:root[data-theme="dark"] .inquilinos-page .inq-grid-v2 .table-empty-inline {
+  background: transparent !important;
+  color: #e5edf7 !important;
+}
+
+/* Correção final dos selects no dark mode */
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon select,
+:root[data-theme="dark"] .inquilinos-page .table-head-actions select {
+  background-color: #142235 !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #cbd5e1 50%),
+    linear-gradient(135deg, #cbd5e1 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 13px) calc(50% - 2px) !important;
+  background-size: 5px 5px, 5px 5px !important;
+  background-repeat: no-repeat !important;
+  border: 1px solid #34506c !important;
+  color: #f1f5f9 !important;
+  color-scheme: dark !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .filters .field.with-icon select {
+  padding-left: 40px !important;
+  padding-right: 42px !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page .table-head-actions select {
+  min-width: 86px !important;
+  padding-right: 36px !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page #filtroContrato,
+:root[data-theme="dark"] .inquilinos-page #filtroImovel,
+:root[data-theme="dark"] .inquilinos-page #itensPorPagina {
+  background-color: #142235 !important;
+  border-color: #34506c !important;
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .inquilinos-page #filtroContrato option,
+:root[data-theme="dark"] .inquilinos-page #filtroImovel option,
+:root[data-theme="dark"] .inquilinos-page #itensPorPagina option {
+  background: #142235 !important;
+  color: #f1f5f9 !important;
+}

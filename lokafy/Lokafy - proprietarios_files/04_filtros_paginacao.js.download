@@ -1,0 +1,120 @@
+function aplicarFiltrosProprietarios(atualizarCards = true) {
+  const state = window.proprietariosTabelaState;
+  if (!state) return;
+
+  const busca = (document.getElementById('filtroBusca')?.value || '').toLowerCase();
+  const filtroImovel = document.getElementById('filtroImovel')?.value || '';
+  const filtroContrato = document.getElementById('filtroContrato')?.value || '';
+
+  const filtrados = state.listaOriginal.filter((p) => {
+    const texto = [
+      p.nome,
+      p.telefone,
+      p.cpf_cnpj,
+      p.cpf_cnpj_busca,
+      p.rg_numero,
+      p.rg_numero_busca,
+      p.razao_social,
+      p.representante_legal_nome,
+      p.representante_legal_cpf,
+      p.representante_legal_cpf_busca,
+      p.representante_legal_cargo
+    ].join(' ').toLowerCase();
+    if (!texto.includes(busca)) return false;
+
+    const totalImoveis = Number(p.total_imoveis || 0);
+    const totalContratos = Number(p.total_contratos || 0);
+    if (filtroImovel === 'com' && totalImoveis <= 0) return false;
+    if (filtroImovel === 'sem' && totalImoveis > 0) return false;
+    if (filtroContrato === 'com' && totalContratos <= 0) return false;
+    if (filtroContrato === 'sem' && totalContratos > 0) return false;
+    return true;
+  });
+
+  state.listaFiltrada = filtrados;
+  atualizarBadgeFiltrosProprietarios();
+  if (atualizarCards) atualizarCardsProprietarios(filtrados);
+  renderizarTabelaProprietarios(filtrados);
+}
+
+function atualizarBadgeFiltrosProprietarios() {
+  const badge = document.getElementById('filtrosAtivosBadge');
+  if (!badge) return;
+
+  const busca = (document.getElementById('filtroBusca')?.value || '').trim();
+  const imovel = document.getElementById('filtroImovel')?.value || '';
+  const contrato = document.getElementById('filtroContrato')?.value || '';
+  let ativos = 0;
+  if (busca) ativos += 1;
+  if (imovel) ativos += 1;
+  if (contrato) ativos += 1;
+  badge.textContent = `${ativos} ativo${ativos === 1 ? '' : 's'}`;
+}
+
+function limparFiltrosProprietarios() {
+  const busca = document.getElementById('filtroBusca');
+  const imovel = document.getElementById('filtroImovel');
+  const contrato = document.getElementById('filtroContrato');
+  if (busca) busca.value = '';
+  if (imovel) imovel.value = '';
+  if (contrato) contrato.value = '';
+
+  const state = window.proprietariosTabelaState;
+  state.paginaAtual = 1;
+  aplicarFiltrosProprietarios(true);
+}
+
+function atualizarPaginacaoProprietarios(inicio, fim, total) {
+  const info = document.getElementById('paginacaoInfoProprietarios');
+  const btnPrev = document.getElementById('btnPaginaAnteriorProprietarios');
+  const btnNext = document.getElementById('btnProximaPaginaProprietarios');
+  const state = window.proprietariosTabelaState;
+  if (!info || !btnPrev || !btnNext || !state) return;
+
+  const totalPaginas = Math.max(1, Math.ceil(total / state.itensPorPagina));
+  info.textContent = !total ? 'Mostrando 0 de 0 proprietários' : `Mostrando ${inicio}-${fim} de ${total} proprietários`;
+  btnPrev.disabled = state.paginaAtual <= 1;
+  btnNext.disabled = state.paginaAtual >= totalPaginas;
+}
+
+function configurarFiltrosPaginacaoProprietarios() {
+  const busca = document.getElementById('filtroBusca');
+  const imovel = document.getElementById('filtroImovel');
+  const contrato = document.getElementById('filtroContrato');
+  const limpar = document.getElementById('btnLimparFiltros');
+  const itens = document.getElementById('itensPorPaginaProprietarios');
+  const prev = document.getElementById('btnPaginaAnteriorProprietarios');
+  const next = document.getElementById('btnProximaPaginaProprietarios');
+
+  busca?.addEventListener('input', () => {
+    window.proprietariosTabelaState.paginaAtual = 1;
+    aplicarFiltrosProprietarios(true);
+  });
+  [imovel, contrato].forEach((el) => el?.addEventListener('change', () => {
+    window.proprietariosTabelaState.paginaAtual = 1;
+    aplicarFiltrosProprietarios(true);
+  }));
+  limpar?.addEventListener('click', limparFiltrosProprietarios);
+
+  itens?.addEventListener('change', (e) => {
+    const valor = Number(e.target.value);
+    const state = window.proprietariosTabelaState;
+    state.itensPorPagina = Number.isFinite(valor) && valor > 0 ? valor : 20;
+    state.paginaAtual = 1;
+    renderizarTabelaProprietarios(state.listaFiltrada);
+  });
+
+  prev?.addEventListener('click', () => {
+    const state = window.proprietariosTabelaState;
+    state.paginaAtual -= 1;
+    renderizarTabelaProprietarios(state.listaFiltrada);
+  });
+
+  next?.addEventListener('click', () => {
+    const state = window.proprietariosTabelaState;
+    state.paginaAtual += 1;
+    renderizarTabelaProprietarios(state.listaFiltrada);
+  });
+
+  atualizarBadgeFiltrosProprietarios();
+}

@@ -90,3 +90,88 @@
   border-top: 1px solid var(--color-border);
   padding-top: 16px;
 }
+
+/* ==========================================
+   Fullpage modal overrides to mimic Lokafy pages
+   ========================================== */
+
+.modal.modal-fullpage {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: var(--color-bg-base) !important;
+  z-index: 95 !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+  backdrop-filter: none !important;
+}
+
+.modal.modal-fullpage.active {
+  display: block !important;
+}
+
+.modal-fullpage .modal-content {
+  background-color: var(--color-bg-base) !important;
+  background: var(--color-bg-base) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  max-width: 100% !important;
+  width: calc(100vw - var(--sidebar-width)) !important;
+  margin-left: var(--sidebar-width) !important;
+  min-height: 100vh !important;
+  padding: 40px 60px !important;
+  box-shadow: none !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+/* Sidebar collapsed state modal width adjustment */
+.app-layout.sidebar-collapsed .modal-fullpage .modal-content {
+  width: calc(100vw - var(--sidebar-collapsed-width)) !important;
+  margin-left: var(--sidebar-collapsed-width) !important;
+}
+
+/* Button "Voltar" */
+.btn-voltar {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.btn-voltar:hover {
+  background-color: var(--color-bg-base-light);
+  border-color: var(--color-text-muted);
+}
+
+/* Hide background overlay for fullpage modal */
+.modal-fullpage::before {
+  display: none !important;
+}
+
+/* Reset max-height on wizard content within fullpage modals */
+.modal-fullpage .wizard-content {
+  max-height: none !important;
+  background-color: var(--color-bg-base) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-fullpage .modal-content {
+    width: 100vw !important;
+    margin-left: 0 !important;
+    padding: 20px !important;
+  }
+}

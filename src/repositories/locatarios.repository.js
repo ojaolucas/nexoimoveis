@@ -34,25 +34,33 @@ async function existsCpfCnpj(cpfCnpj, excludeId = null) {
 }
 
 async function create(loc) {
-  const { codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status } = loc;
+  const { codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao } = loc;
   const query = `
-    INSERT INTO locatarios (codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    INSERT INTO locatarios (codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
     RETURNING *
   `;
-  const result = await db.query(query, [codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status || 'ativo']);
+  const result = await db.query(query, [
+    codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status || 'ativo',
+    data_nascimento || null, rg_orgao || null, rg_uf || null, genero || 'Não informado', nacionalidade || null, estado_civil || 'Não informado', profissao || null
+  ]);
   return result.rows[0];
 }
 
 async function update(id, loc) {
-  const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status } = loc;
+  const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao } = loc;
   const query = `
     UPDATE locatarios
-    SET tipo_pessoa = $1, nome_razao_social = $2, nome_fantasia = $3, cpf_cnpj = $4, rg = $5, inscricao_estadual = $6, responsavel = $7, telefone = $8, email = $9, endereco = $10, observacoes = $11, status = $12, atualizado_em = CURRENT_TIMESTAMP
-    WHERE id = $13
+    SET tipo_pessoa = $1, nome_razao_social = $2, nome_fantasia = $3, cpf_cnpj = $4, rg = $5, inscricao_estadual = $6, responsavel = $7, telefone = $8, email = $9, endereco = $10, observacoes = $11, status = $12,
+        data_nascimento = $13, rg_orgao = $14, rg_uf = $15, genero = $16, nacionalidade = $17, estado_civil = $18, profissao = $19, atualizado_em = CURRENT_TIMESTAMP
+    WHERE id = $20
     RETURNING *
   `;
-  const result = await db.query(query, [tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status || 'ativo', id]);
+  const result = await db.query(query, [
+    tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status || 'ativo',
+    data_nascimento || null, rg_orgao || null, rg_uf || null, genero || 'Não informado', nacionalidade || null, estado_civil || 'Não informado', profissao || null,
+    id
+  ]);
   return result.rows[0];
 }
 

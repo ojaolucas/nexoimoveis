@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)https://app.lokafy.com.br/dashboard/ -->
+<html lang="pt-BR" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style data-merge-styles="true"></style>
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lokafy</title>
+<meta name="csrf-token" content="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+    <meta name="csrf-token-integracoes" content="4402a7e47a967f8c4ed6963ca105d35b79897285ac60d597ef064b925f9f57fa">
+    <meta name="csrf-token-faturas" content="fc2af940c8e3f61ba02cb536e1eab0e732eb539c6bf4dfde84dea2a5857fa077">
+    <meta name="csrf-token-perfil" content="5ae8322e23cb81b0896a14c3f28913e1cef50f33334dcdeb38aac49ed5bb4ffc">
+    <meta name="csrf-token-contratos" content="4514f542b25a36ba193e5c1794bcac6f2a6e93aabf1eed675c69abb92a4d82f8">
+    <meta name="csrf-token-consultas" content="f0e7d33f3f2030a4e8fc6b6d24f84fd50139c3c2f1563e632f3b5aaff7af3e70">
+    <meta name="csrf-token-imoveis" content="8487f66b1bbdd684f6760b87c4e16fe12685128489979523faeab9143d90b4b4">
+    <meta name="csrf-token-despesas" content="697908c552fbcd9df8ed79bbec532d6c1280f396cb4a9e3c2d6d5e736fe6caf6">
+    <meta name="csrf-token-vistoria" content="ba01e874234bb1130839191d1f2060aa17d16344fa95dba3cba91b44e99ec0e5">
+    <meta name="csrf-token-negativacao" content="5718ad2da60fde2f3b6c06e2dd3483d451be0d4053360d331bfc38e576f33ab2">
+  
+<link rel="icon" href="https://app.lokafy.com.br/imagens/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="https://app.lokafy.com.br/imagens/favicon-512.png">
+<link rel="manifest" href="https://app.lokafy.com.br/manifest.json">
+<meta name="theme-color" content="#0c2f2b">
+
+<link href="./Lokafy - dashboard_files/inter.css" rel="stylesheet">
+<link rel="stylesheet" href="./Lokafy - dashboard_files/all.min.css" as="style" onload="this.onload=null;this.rel=&#39;stylesheet&#39;">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+
+<script>
+  window.LOKAFY_CSRF = {
+    token: "9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a",
+    byNamespace: {"app":"9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a","integracoes":"4402a7e47a967f8c4ed6963ca105d35b79897285ac60d597ef064b925f9f57fa","faturas":"fc2af940c8e3f61ba02cb536e1eab0e732eb539c6bf4dfde84dea2a5857fa077","perfil":"5ae8322e23cb81b0896a14c3f28913e1cef50f33334dcdeb38aac49ed5bb4ffc","contratos":"4514f542b25a36ba193e5c1794bcac6f2a6e93aabf1eed675c69abb92a4d82f8","consultas":"f0e7d33f3f2030a4e8fc6b6d24f84fd50139c3c2f1563e632f3b5aaff7af3e70","imoveis":"8487f66b1bbdd684f6760b87c4e16fe12685128489979523faeab9143d90b4b4","despesas":"697908c552fbcd9df8ed79bbec532d6c1280f396cb4a9e3c2d6d5e736fe6caf6","vistoria":"ba01e874234bb1130839191d1f2060aa17d16344fa95dba3cba91b44e99ec0e5","negativacao":"5718ad2da60fde2f3b6c06e2dd3483d451be0d4053360d331bfc38e576f33ab2"}  };
+</script>
+<script src="./Lokafy - dashboard_files/csrf-guard.js.download"></script>
+
+<script>
+  (function () {
+    const iconMap = {
+      "activity": "fa-solid fa-wave-square",
+      "arrow-up-down": "fa-solid fa-arrow-up-wide-short",
+      "badge-check": "fa-regular fa-circle-check",
+      "ban": "fa-solid fa-ban",
+      "building-2": "fa-solid fa-building",
+      "calendar": "fa-regular fa-calendar",
+      "calendar-days": "fa-regular fa-calendar-days",
+      "calendar-range": "fa-solid fa-calendar-week",
+      "camera": "fa-solid fa-camera",
+      "circle-dot": "fa-regular fa-circle-dot",
+      "clock-3": "fa-regular fa-clock",
+      "file-check-2": "fa-solid fa-file-circle-check",
+      "file-signature": "fa-solid fa-file-signature",
+      "file-text": "fa-regular fa-file-lines",
+      "hourglass": "fa-solid fa-hourglass-half",
+      "image": "fa-regular fa-image",
+      "list-checks": "fa-solid fa-list-check",
+      "lock": "fa-solid fa-lock",
+      "lock-open": "fa-solid fa-lock-open",
+      "pen-line": "fa-solid fa-pen",
+      "search": "fa-solid fa-magnifying-glass",
+      "shield-check": "fa-solid fa-shield-halved",
+      "sliders-horizontal": "fa-solid fa-sliders",
+      "tags": "fa-solid fa-tags",
+      "triangle-alert": "fa-solid fa-triangle-exclamation",
+      "user-round-x": "fa-solid fa-user-xmark",
+      "users": "fa-solid fa-users",
+      "wallet": "fa-solid fa-wallet",
+      "wallet-cards": "fa-solid fa-wallet",
+      "calendar-check": "fa-regular fa-calendar-check",
+      "x": "fa-solid fa-xmark"
+    };
+
+    function applyLucideFallback(root) {
+      const scope = root || document;
+      scope.querySelectorAll("i[data-lucide]").forEach(function (el) {
+        if (el.dataset.lkLucideFallbackApplied === "1") return;
+        const key = String(el.getAttribute("data-lucide") || "").trim();
+        const faClass = iconMap[key] || "fa-regular fa-circle";
+        el.className = faClass;
+        el.removeAttribute("data-lucide");
+        el.dataset.lkLucideFallbackApplied = "1";
+      });
+    }
+
+    window.applyLucideFallback = applyLucideFallback;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      applyLucideFallback(document);
+    });
+
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (!(node instanceof Element)) return;
+          if (node.matches && node.matches("i[data-lucide]")) {
+            applyLucideFallback(node.parentElement || document);
+            return;
+          }
+          if (node.querySelector) applyLucideFallback(node);
+        });
+      });
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>
+
+<link rel="stylesheet" href="./Lokafy - dashboard_files/menu.css">
+<link rel="stylesheet" href="./Lokafy - dashboard_files/sub_configuracoes.css">
+<script>
+  (function () {
+    try {
+      var tema = localStorage.getItem("lokafy_theme");
+      if (tema === "dark" || tema === "light") {
+        document.documentElement.setAttribute("data-theme", tema);
+      }
+    } catch (_) {}
+  })();
+</script>
+
+</head>
+
+<body cz-shortcut-listen="true">
+
+<!-- LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  
+<aside class="sidebar sidebar-v2" id="sidebar">
+  <button class="sidebar-toggle-fixed sb-toggle" id="sidebarToggleBtn" type="button" aria-label="Alternar menu" aria-expanded="true" data-bound-sidebar-toggle="1">
+    <i class="fa-solid fa-bars-staggered"></i>
+  </button>
+
+  <div class="sidebar-header sb-header">
+    <a href="https://app.lokafy.com.br/dashboard/" class="logo sb-logo" data-bound-sidebar-logo-reset="1">
+      <img src="./Lokafy - dashboard_files/lokabranco.png" alt="Lokafy" width="300" height="300">
+    </a>
+          <a href="https://app.lokafy.com.br/checkout/" class="sb-trial-badge" title="Abrir cobrança do plano">
+        <span class="sb-trial-badge-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+        <span class="sb-trial-badge-copy">
+          <strong>Seu teste grátis acaba em 7 dias</strong>
+                  </span>
+      </a>
+      </div>
+
+  <nav class="sb-nav" id="sidebarNav" aria-label="Menu principal" data-bound-sidebar-scroll="1">
+    <details class="sb-group" data-group="atalhos" open="" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span class="sb-label">Início</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/dashboard/" class="sb-link sb-sub-link active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span class="sb-label">Dashboard</span>
+                  </a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="analises" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-chart-column"></i>
+          <span class="sb-label">Análises</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/relatorios/" class="sb-link sb-sub-link "><i class="fa-solid fa-chart-pie"></i><span class="sb-label">Relatórios</span></a>
+        <a href="https://app.lokafy.com.br/consultas/" class="sb-link sb-sub-link "><i class="fa-solid fa-magnifying-glass-chart"></i><span class="sb-label">Análise de Crédito</span></a>
+      </div>
+    </details>
+
+    <details class="sb-group" data-group="cadastros" open="" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-address-book"></i>
+          <span class="sb-label">Cadastros</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/inquilinos/" class="sb-link sb-sub-link "><i class="fa-solid fa-users"></i><span class="sb-label">Inquilinos</span></a>
+        <a href="https://app.lokafy.com.br/proprietarios/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-tie"></i><span class="sb-label">Proprietários</span></a>
+        <a href="https://app.lokafy.com.br/imoveis/" class="sb-link sb-sub-link "><i class="fa-solid fa-building"></i><span class="sb-label">Imóveis</span></a>
+        <a href="https://app.lokafy.com.br/fiadores/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-shield"></i><span class="sb-label">Fiadores</span></a>
+        <a href="https://app.lokafy.com.br/procuradores/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-pen"></i><span class="sb-label">Procuradores</span></a>
+      </div>
+    </details>
+
+    <details class="sb-group" data-group="operacao" open="" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-key"></i>
+          <span class="sb-label">Locação</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+                <a href="https://app.lokafy.com.br/contratos/" class="sb-link sb-sub-link "><i class="fa-solid fa-file-contract"></i><span class="sb-label">Contratos</span></a>
+        <a href="https://app.lokafy.com.br/faturas/" class="sb-link sb-sub-link "><i class="fa-solid fa-receipt"></i><span class="sb-label">Faturas</span></a>
+        <a href="https://app.lokafy.com.br/despesas/" class="sb-link sb-sub-link "><i class="fa-solid fa-screwdriver-wrench"></i><span class="sb-label">Despesas</span></a>
+        <a href="https://app.lokafy.com.br/assinaturas/" class="sb-link sb-sub-link "><i class="fa-solid fa-signature"></i><span class="sb-label">Assinaturas</span></a>
+        <a href="https://app.lokafy.com.br/vistoria/" class="sb-link sb-sub-link "><i class="fa-solid fa-clipboard-check"></i><span class="sb-label">Vistoria</span></a>
+        <a href="https://app.lokafy.com.br/negativacao/" class="sb-link sb-sub-link "><i class="fa-solid fa-triangle-exclamation"></i><span class="sb-label">Negativação</span></a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="integracoes" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span class="sb-label">Integrações</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/configuracoes/recebimentos_automaticos/" class="sb-link sb-sub-link "><i class="fa-solid fa-money-bill-transfer"></i><span class="sb-label">Cobranças Automáticas</span></a>
+        <a href="https://app.lokafy.com.br/whatsapp/" class="sb-link sb-sub-link "><i class="fa-brands fa-whatsapp"></i><span class="sb-label">WhatsApp</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/webhook/" class="sb-link sb-sub-link "><i class="fa-solid fa-code-branch"></i><span class="sb-label">Webhook</span></a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="configuracoes" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-gear"></i>
+          <span class="sb-label">Configurações</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/configuracoes/perfil/" class="sb-link sb-sub-link "><i class="fa-solid fa-user"></i><span class="sb-label">Perfil</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/plano/" class="sb-link sb-sub-link "><i class="fa-solid fa-credit-card"></i><span class="sb-label">Plano e cobrança</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/usuarios/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-group"></i><span class="sb-label">Usuários</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/mensagens_automaticas/" class="sb-link sb-sub-link "><i class="fa-solid fa-message"></i><span class="sb-label">Mensagens</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/modelos_de_contratos/" class="sb-link sb-sub-link "><i class="fa-solid fa-file-lines"></i><span class="sb-label">Modelos de contrato</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/indices_de_inflacao/" class="sb-link sb-sub-link "><i class="fa-solid fa-percent"></i><span class="sb-label">Índices de inflação</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/notificacoes/" class="sb-link sb-sub-link "><i class="fa-solid fa-bell"></i><span class="sb-label">Notificações</span></a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="ajuda" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-circle-question"></i>
+          <span class="sb-label">Ajuda</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://wa.me/5511926508927?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20no%20Lokafy." target="_blank" rel="noopener noreferrer" class="sb-link sb-sub-link"><i class="fa-solid fa-headset"></i><span class="sb-label">Suporte</span></a>
+        <a href="https://app.lokafy.com.br/tutorial/" class="sb-link sb-sub-link "><i class="fa-solid fa-circle-play"></i><span class="sb-label">Tutorial</span></a>
+      </div>
+    </details>
+  </nav>
+
+  <!-- Créditos removidos -->
+
+  <script>
+    (function () {
+      try {
+        var groupsKey = "lokafy:sidebar-groups-open";
+        var sidebar = document.getElementById("sidebar");
+        var nav = document.getElementById("sidebarNav");
+        if (!sidebar || !nav) return;
+
+        var saved = {};
+        try {
+          var rawGroups = localStorage.getItem(groupsKey);
+          saved = rawGroups ? JSON.parse(rawGroups) : {};
+        } catch (_) {
+          saved = {};
+        }
+
+        sidebar.querySelectorAll("details.sb-group[data-group]").forEach(function (details) {
+          var group = String(details.dataset.group || "").trim();
+          if (!group) return;
+
+          var hasActive = !!details.querySelector(".sb-link.active");
+          var hasSaved = Object.prototype.hasOwnProperty.call(saved, group);
+          if (hasActive) {
+            details.open = true;
+            return;
+          }
+          if (hasSaved) {
+            details.open = !!saved[group];
+          }
+        });
+
+        var raw = sessionStorage.getItem("lokafy:sidebar-scroll-top");
+        if (raw === null) return;
+        var top = Number(raw);
+        if (!Number.isFinite(top) || top <= 0) return;
+        nav.scrollTop = top;
+      } catch (_) {}
+    })();
+  </script>
+</aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="main">
+
+      <!-- TOPBAR -->
+      
+<script>
+  window.LOKAFY = window.LOKAFY || {};
+  window.LOKAFY.plano = "lokafy20";
+</script>
+
+<!-- TOP BAR -->
+<header class="topbar">
+
+  <div class="topbar-left">
+    <span class="topbar-icon" hidden="" aria-hidden="true">
+      <i class=""></i>
+    </span>
+    <div class="topbar-text">
+
+      <span class="topbar-title">
+        Boa noite, João      </span>
+
+              <span class="topbar-desc">
+          Acompanhe receitas, contratos e ocupação dos imóveis em tempo real.        </span>
+      
+    </div>
+  </div>
+
+  <div class="top-right">
+
+    <!-- 🌗 Tema -->
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema" data-bound-theme="1">
+      <i class="fa-regular fa-moon" id="themeToggleIcon" aria-hidden="true"></i>
+      <span id="themeToggleLabel">Dark</span>
+    </button>
+
+    <!-- 🔔 Notificações -->
+    <div class="notif" id="notifBtn">
+      <i class="fa-regular fa-bell"></i>
+      <span class="notif-dot" id="notifDot" hidden="">0</span>
+      <script>
+        (function () {
+          try {
+            var cache = sessionStorage.getItem("lokafy_notif_badge");
+            if (cache === null) return;
+            var qtd = Number(cache);
+            var dot = document.getElementById("notifDot");
+            if (!dot) return;
+            if (qtd > 0) {
+              dot.hidden = false;
+              dot.textContent = qtd > 99 ? "99+" : String(qtd);
+            } else {
+              dot.hidden = true;
+            }
+          } catch (_) {}
+        })();
+      </script>
+
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <strong>Notificações</strong>
+          <button type="button" class="notif-clear-all is-hidden" id="notifClearAll" disabled="">Apagar tudo</button>
+        </div>
+        <div class="notif-list" id="notifList"><div class="empty">Sem notificações</div></div>
+      </div>
+    </div>
+
+    <!-- 👤 Menu do Cliente -->
+    <div class="user-menu" id="userMenu">
+      <div class="avatar" id="topAvatar" style="background-image: none;">JL</div>
+      <script>
+        (function () {
+          try {
+            var cached = sessionStorage.getItem('lokafy_top_avatar');
+            var el = document.getElementById('topAvatar');
+            if (!cached || !el) return;
+            el.style.backgroundImage = "url('" + cached.replace(/'/g, "\\'") + "')";
+            el.textContent = '';
+          } catch (_) {}
+        })();
+      </script>
+      <i class="fa-solid fa-chevron-down"></i>
+
+      <div class="dropdown">
+        <a href="https://app.lokafy.com.br/configuracoes/perfil/">Meu perfil</a>
+        <hr>
+        <form method="post" action="https://app.lokafy.com.br/login/api/logout.php" class="logout-form">
+          <input type="hidden" name="_csrf" value="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+          <button type="submit" class="logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+
+<link rel="stylesheet" href="./Lokafy - dashboard_files/sininho.css">
+<script src="./Lokafy - dashboard_files/sininho.js.download"></script>
+
+      <!-- CONTEÚDO SPA -->
+      <div class="content">
+          <div id="appContent" data-topbar-title="Boa noite, João" data-topbar-desc="Acompanhe receitas, contratos e ocupação dos imóveis em tempo real.">
+              <link rel="stylesheet" href="./Lokafy - dashboard_files/kpi-layout.css">
+<link rel="stylesheet" href="./Lokafy - dashboard_files/cards-lists.css">
+<link rel="stylesheet" href="./Lokafy - dashboard_files/dashboard-simple.css">
+<link rel="stylesheet" href="./Lokafy - dashboard_files/popup-polish-responsive.css">
+<link rel="stylesheet" href="./Lokafy - dashboard_files/dashboard.css">
+
+<div class="lok-dashboard-main dashboard-premium">
+
+    <section class="lok-kpi-grid dashboard-premium-kpi-grid" id="lokKpiGrid"><article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-info"><i class="fa-regular fa-calendar-check"></i></span></div><h4>Vencem hoje</h4><div class="v">0</div><div class="s">R$&nbsp;0,00</div><div class="f">Vencimentos de hoje</div></article><article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-danger"><i class="fa-solid fa-triangle-exclamation"></i></span></div><h4>Em atraso</h4><div class="v">0</div><div class="s">R$&nbsp;0,00</div><div class="f dashboard-premium-kpi-nowrap ">Sem atraso</div></article><article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-success"><i class="fa-solid fa-arrow-trend-up"></i></span></div><h4>Recebido no mês</h4><div class="s">R$&nbsp;0,00</div><div class="f">Recebido este mês</div><div class="lok-progress"><span style="width:100%"></span></div></article><article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-success"><i class="fa-regular fa-file-lines"></i></span></div><h4>Contratos ativos</h4><div class="v">0</div><div class="s">0 imóveis ocupados</div><div class="f">0 novos este mês</div></article></section>
+
+    <section class="dashboard-work-grid">
+      <article class="lok-card dashboard-premium-card dashboard-premium-attention-card">
+        <div class="lok-card-head"><h3>Central de atenção</h3><span class="lok-pill" id="attentionCount">0 pendências</span></div>
+        <div id="attentionList" class="lok-action-list dashboard-premium-action-list"><a class="lok-item is-danger" href="https://app.lokafy.com.br/faturas/"><i class="fa-solid fa-triangle-exclamation"></i><div><strong>Aluguéis vencidos</strong><small>0 cobranças em atraso</small></div><span class="val">—</span><span class="chev"><i class="fa-solid fa-chevron-right"></i></span></a><a class="lok-item is-warn" href="https://app.lokafy.com.br/contratos/"><i class="fa-regular fa-clock"></i><div><strong>Contratos próximos do vencimento</strong><small>0 contratos vencem nos próximos 30 dias</small></div><span class="val"></span><span class="chev"><i class="fa-solid fa-chevron-right"></i></span></a><a class="lok-item is-info" href="https://app.lokafy.com.br/imoveis/"><i class="fa-solid fa-house-circle-exclamation"></i><div><strong>Imóveis vagos</strong><small>0 imóveis disponíveis para locação</small></div><span class="val"></span><span class="chev"><i class="fa-solid fa-chevron-right"></i></span></a><a class="lok-item is-warn" href="https://app.lokafy.com.br/contratos/"><i class="fa-solid fa-arrow-trend-up"></i><div><strong>Reajustes pendentes</strong><small>0 contratos aguardando reajuste</small></div><span class="val"></span><span class="chev"><i class="fa-solid fa-chevron-right"></i></span></a><a class="lok-item is-ok" href="https://app.lokafy.com.br/vistoria/"><i class="fa-solid fa-clipboard-check"></i><div><strong>Vistorias pendentes</strong><small>0 vistorias pendentes próximas</small></div><span class="val"></span><span class="chev"><i class="fa-solid fa-chevron-right"></i></span></a></div>
+        <a class="lok-link-end" href="https://app.lokafy.com.br/faturas/">Ver cobranças</a>
+      </article>
+
+      <article class="lok-card dashboard-premium-card dashboard-premium-due-card">
+        <div class="lok-card-head"><h3>Próximos vencimentos</h3><a href="https://app.lokafy.com.br/faturas/">Ver agenda</a></div>
+        <div id="dueList" class="lok-due-list dashboard-premium-due-list"><div class="lok-item is-ok dashboard-premium-due-item"><div class="dashboard-premium-date"><b>--</b><span>---</span></div><div class="dashboard-premium-due-main"><strong>Sem vencimentos próximos</strong><small>Sua agenda está em dia.</small></div><div class="dashboard-premium-due-side"><span class="val">&nbsp;</span><span class="lok-deadline outro">OK</span></div></div></div>
+        <a class="lok-link-end" href="https://app.lokafy.com.br/faturas/">Ver todos os vencimentos</a>
+      </article>
+    </section>
+
+    <section class="dashboard-bottom-simple">
+      <article class="lok-card dashboard-premium-card dashboard-premium-fin-card">
+        <div class="lok-card-head"><h3>Resumo financeiro do mês</h3><a href="https://app.lokafy.com.br/relatorios/">Ver relatório</a></div>
+        <div id="financialSummary" class="lok-fin-summary"><div class="dashboard-premium-fin-legend"><div class="dashboard-premium-fin-row"><i class="dashboard-premium-fin-dot" style="background:#0f766e"></i><div><strong>Recebido</strong><span>0% da carteira do mês</span></div><b>R$&nbsp;0,00</b></div><div class="dashboard-premium-fin-row"><i class="dashboard-premium-fin-dot" style="background:#f59e0b"></i><div><strong>Pendente</strong><span>0% da carteira do mês</span></div><b>R$&nbsp;0,00</b></div><div class="dashboard-premium-fin-row"><i class="dashboard-premium-fin-dot" style="background:#ef4444"></i><div><strong>Em atraso</strong><span>100% da carteira do mês</span></div><b>R$&nbsp;0,00</b></div></div><div class="dashboard-premium-fin-chart"><div class="dashboard-premium-fin-bars"><div class="dashboard-premium-fin-col-wrap is-r"><span class="dashboard-premium-fin-col-value">R$&nbsp;0,00</span><span class="dashboard-premium-fin-col" style="height:18px;background:#0f766e"></span><span class="dashboard-premium-fin-col-label">Recebido</span></div><div class="dashboard-premium-fin-col-wrap is-p"><span class="dashboard-premium-fin-col-value">R$&nbsp;0,00</span><span class="dashboard-premium-fin-col" style="height:18px;background:#f59e0b"></span><span class="dashboard-premium-fin-col-label">Pendente</span></div><div class="dashboard-premium-fin-col-wrap is-a"><span class="dashboard-premium-fin-col-value">R$&nbsp;0,00</span><span class="dashboard-premium-fin-col" style="height:18px;background:#ef4444"></span><span class="dashboard-premium-fin-col-label">Em atraso</span></div></div><div class="dashboard-premium-fin-meta">Sem movimentação financeira no mês · Base do gráfico: sem valores no mês</div></div></div>
+      </article>
+
+      <article class="lok-card dashboard-premium-card dashboard-premium-feed-card">
+        <div class="lok-card-head"><h3>Últimas movimentações</h3><a href="https://app.lokafy.com.br/faturas/">Ver todas</a></div>
+        <div id="feedList" class="lok-feed-list dashboard-premium-feed-list"><div class="lok-item dashboard-premium-feed-item is-ok"><i class="fa-solid fa-circle-check"></i><div><strong>Nenhuma movimentação recente</strong><small>As próximas ações aparecerão aqui em tempo real.</small></div><span class="dashboard-premium-feed-time">Agora</span></div></div>
+      </article>
+    </section>
+
+    <aside class="dashboard-onboarding-float is-collapsed" id="dashboardOnboardingFloat" aria-label="Primeiros passos" data-bound="1">
+      <button class="dashboard-onboarding-mini" id="dashboardOnboardingMini" type="button" aria-label="Abrir primeiros passos">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Primeiros passos</span>
+        <b id="dashboardOnboardingMiniProgress">1/5</b>
+      </button>
+      <div class="dashboard-onboarding-panel">
+        <div class="dashboard-onboarding-head">
+          <div>
+            <span>Primeiros passos</span>
+            <strong>Comece sua operação</strong>
+          </div>
+          <button id="dashboardOnboardingCollapse" type="button" aria-label="Recolher primeiros passos">
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+        </div>
+        <div class="dashboard-onboarding-progress">
+          <span id="dashboardOnboardingProgressText">1 de 5 concluídos</span>
+          <div class="dashboard-onboarding-progress-track"><i id="dashboardOnboardingProgressBar" style="width: 20%;"></i></div>
+        </div>
+        <div class="dashboard-onboarding-list" id="dashboardOnboardingList">
+              <a class="dashboard-onboarding-row  is-next" href="https://app.lokafy.com.br/proprietarios/novo/">
+                <span class="dashboard-onboarding-mark">1</span>
+                <i class="fa-regular fa-address-book"></i>
+                <span><strong>Cadastrar proprietário</strong><small>Comece pelo responsável do imóvel.</small></span>
+              </a>
+            
+              <a class="dashboard-onboarding-row is-done " href="https://app.lokafy.com.br/inquilinos/novo/">
+                <span class="dashboard-onboarding-mark"><i class="fa-solid fa-check"></i></span>
+                <i class="fa-solid fa-user-check"></i>
+                <span><strong>Cadastrar inquilino</strong><small>Adicione quem vai ocupar o imóvel.</small></span>
+              </a>
+            
+              <a class="dashboard-onboarding-row  " href="https://app.lokafy.com.br/imoveis/novo/">
+                <span class="dashboard-onboarding-mark">3</span>
+                <i class="fa-regular fa-building"></i>
+                <span><strong>Cadastrar imóvel</strong><small>Conecte o imóvel à operação.</small></span>
+              </a>
+            
+              <a class="dashboard-onboarding-row  " href="https://app.lokafy.com.br/contratos/novo/">
+                <span class="dashboard-onboarding-mark">4</span>
+                <i class="fa-solid fa-file-contract"></i>
+                <span><strong>Criar contrato</strong><small>Formalize a locação e regras de cobrança.</small></span>
+              </a>
+            
+              <a class="dashboard-onboarding-row  " href="https://app.lokafy.com.br/configuracoes/recebimentos_automaticos/">
+                <span class="dashboard-onboarding-mark">5</span>
+                <i class="fa-solid fa-plug-circle-check"></i>
+                <span><strong>Ativar cobrança automática</strong><small>Conecte recebimentos para gerar e baixar cobranças.</small></span>
+              </a>
+            </div>
+        <a class="dashboard-onboarding-cta" id="dashboardOnboardingCta" href="https://app.lokafy.com.br/proprietarios/novo/">
+          <span>Cadastrar proprietário</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </aside>
+</div>
+
+<script src="./Lokafy - dashboard_files/utils.js.download"></script>
+<script src="./Lokafy - dashboard_files/kpis.js.download"></script>
+<script src="./Lokafy - dashboard_files/panels.js.download"></script>
+<script src="./Lokafy - dashboard_files/dashboard.js.download"></script>
+
+              <!-- router injeta aqui -->
+          </div>
+      </div>
+
+  </main>
+
+</div>
+
+
+
+<!-- MODAL TRIAL EXPIRADO -->
+<div class="trial-exp-overlay" id="modalTrialExpirado" hidden="">
+  <div class="trial-exp-box">
+    <div class="trial-exp-logo-wrap">
+      <img src="./Lokafy - dashboard_files/lokaverde-login.webp" alt="Lokafy" width="256" height="256">
+    </div>
+    <div class="trial-exp-icon">
+      <i class="fa-solid fa-hourglass-end"></i>
+    </div>
+    <h2 class="trial-exp-title">Seu período de trial encerrou</h2>
+    <p class="trial-exp-desc">
+      Para continuar usando o Lokafy sem interrupções, escolha um plano e finalize a assinatura.
+    </p>
+    <a href="https://app.lokafy.com.br/checkout/" class="trial-exp-btn" data-exp-action="checkout" data-no-loading="1">
+      <i class="fa-solid fa-rocket"></i>
+      Ir para checkout
+    </a>
+    <form method="post" action="https://app.lokafy.com.br/login/api/logout.php" class="trial-exp-logout-form" data-no-loading="1">
+      <input type="hidden" name="_csrf" value="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+      <button type="submit" class="trial-exp-fechar" data-exp-action="logout">Sair da conta</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL PLANO VENCIDO -->
+<div class="trial-exp-overlay" id="modalPlanoVencido" hidden="">
+  <div class="trial-exp-box">
+    <div class="trial-exp-logo-wrap">
+      <img src="./Lokafy - dashboard_files/lokaverde-login.webp" alt="Lokafy" width="256" height="256">
+    </div>
+    <div class="trial-exp-icon">
+      <i class="fa-solid fa-calendar-xmark"></i>
+    </div>
+    <h2 class="trial-exp-title">Seu plano venceu</h2>
+    <p class="trial-exp-desc">
+      Seu plano expirou e o acesso completo foi suspenso.<br>
+      Regularize para continuar usando o Lokafy sem bloqueios.
+    </p>
+    <a href="https://app.lokafy.com.br/checkout/" class="trial-exp-btn" data-exp-action="checkout" data-no-loading="1">
+      <i class="fa-solid fa-rotate-right"></i>
+      Abrir cobrança
+    </a>
+    <form method="post" action="https://app.lokafy.com.br/login/api/logout.php" class="trial-exp-logout-form" data-no-loading="1">
+      <input type="hidden" name="_csrf" value="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+      <button type="submit" class="trial-exp-fechar" data-exp-action="logout">Sair da conta</button>
+    </form>
+  </div>
+</div>
+
+<script>
+window.LOKAFY_EXPIRED_MODAL = {
+  trialExpirado: false,
+  planoVencido: false};
+
+document.addEventListener('click', function (ev) {
+  const btn = ev.target.closest('[data-exp-action]');
+  if (!btn) return;
+  ev.preventDefault();
+  const box = btn.closest('.trial-exp-box');
+  if (!box) return;
+  const title = box.querySelector('.trial-exp-title');
+  const desc = box.querySelector('.trial-exp-desc');
+  const isCheckout = btn.getAttribute('data-exp-action') === 'checkout';
+
+  box.querySelectorAll('[data-exp-action]').forEach((el) => {
+    el.style.pointerEvents = 'none';
+    el.style.opacity = '.75';
+  });
+
+  if (isCheckout) {
+    btn.lastChild.textContent = ' Abrindo checkout...';
+  } else {
+    btn.textContent = 'Saindo...';
+  }
+
+  if (btn.getAttribute('data-exp-action') === 'checkout') {
+    if (title) title.textContent = 'Redirecionando para o checkout...';
+    if (desc) desc.textContent = 'Você será direcionado para regularizar sua assinatura agora.';
+    window.location.href = btn.getAttribute('href') || '/checkout/';
+  } else {
+    if (title) title.textContent = 'Saindo da conta...';
+    if (desc) desc.textContent = 'Estamos encerrando sua sessão com segurança.';
+    const form = btn.closest('form');
+    if (form) {
+      setTimeout(() => {
+        if (typeof form.requestSubmit === 'function') form.requestSubmit(btn);
+        else form.submit();
+      }, 260);
+      return;
+    }
+  }
+});
+</script>
+
+<script src="./Lokafy - dashboard_files/menu.js.download"></script>
+<script src="./Lokafy - dashboard_files/router.js.download"></script>
+<script src="./Lokafy - dashboard_files/nav_feedback_desktop.js.download"></script>
+
+<script defer="" src="./Lokafy - dashboard_files/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;9ba7b1c5141342559eb0d8e1d47b7466&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+</body></html>

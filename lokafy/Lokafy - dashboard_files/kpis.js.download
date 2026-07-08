@@ -1,0 +1,32 @@
+(function(window){
+  'use strict';
+  const u = window.LokafyDashboardUtils;
+
+  function buildKpis(data){
+    const cards = data.cards || {};
+    const fin = data.financeiro_resumo || {};
+    const contratosAtivos = Number(cards.contratos_ativos || 0);
+    const contratosNovosMes = Number(cards.contratos_novos_mes || 0);
+    const imoveisOcupados = Number(cards.imoveis_ocupados || 0);
+    const receb = Number(fin.recebido || cards.valor_recebido || 0);
+    const atrasoValor = Number(cards.atraso_total_valor || cards.valor_em_atraso || 0);
+    const vencHojeValor = Number(cards.vencem_hoje_valor || 0);
+    const vencHojeQtd = Number(cards.vencem_hoje_qtd || 0);
+    const vencOntemQtd = Number(cards.vencem_ontem_qtd || 0);
+    const atrasoQtd = Number(cards.atraso_total_qtd || 0);
+    const meta = Number(fin.meta_mensal || 0);
+    const metaDisponivel = !!fin.meta_disponivel && meta > 0;
+    const metaPct = metaDisponivel ? u.pct(receb, meta) : 0;
+    const deltaHoje = vencOntemQtd > 0 ? `${Math.round(((vencHojeQtd - vencOntemQtd) / vencOntemQtd) * 100)}% vs ontem` : 'Vencimentos de hoje';
+    const atrasoTxt = atrasoQtd > 0 ? `${atrasoQtd} em atraso` : 'Sem atraso';
+
+    return [
+      `<article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-info"><i class="fa-regular fa-calendar-check"></i></span></div><h4>Vencem hoje</h4><div class="v">${u.num(vencHojeQtd)}</div><div class="s">${u.money(vencHojeValor)}</div><div class="f">${deltaHoje}</div></article>`,
+      `<article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-danger"><i class="fa-solid fa-triangle-exclamation"></i></span></div><h4>Em atraso</h4><div class="v">${u.num(atrasoQtd)}</div><div class="s">${u.money(atrasoValor)}</div><div class="f dashboard-premium-kpi-nowrap ${atrasoQtd > 0 ? 'is-danger' : ''}">${atrasoTxt}</div></article>`,
+      `<article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-success"><i class="fa-solid fa-arrow-trend-up"></i></span></div><h4>Recebido no mês</h4><div class="s">${u.money(receb)}</div><div class="f">${metaDisponivel ? `${metaPct}% da meta` : 'Recebido este mês'}</div><div class="lok-progress"><span style="width:${metaDisponivel ? metaPct : 100}%"></span></div></article>`,
+      `<article class="lok-kpi"><div class="dashboard-premium-kpi-top"><span class="dashboard-premium-kpi-icon is-success"><i class="fa-regular fa-file-lines"></i></span></div><h4>Contratos ativos</h4><div class="v">${u.num(contratosAtivos)}</div><div class="s">${u.num(imoveisOcupados)} imóveis ocupados</div><div class="f">${contratosNovosMes} novos este mês</div></article>`
+    ].join('');
+  }
+
+  window.LokafyDashboardRenderers = Object.assign(window.LokafyDashboardRenderers || {}, {buildKpis});
+})(window);

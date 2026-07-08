@@ -1,0 +1,60 @@
+window.proprietariosTabelaState = window.proprietariosTabelaState || {
+  listaOriginal: [],
+  listaFiltrada: [],
+  paginaAtual: 1,
+  itensPorPagina: 20
+};
+
+function onlyDigits(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function maskCpfCnpj(value) {
+  if (String(value || '').includes('*')) return String(value || '');
+  const digits = onlyDigits(value);
+  if (digits.length === 11) return `${digits.slice(0, 3)}.***.***-${digits.slice(-2)}`;
+  if (digits.length === 14) return `${digits.slice(0, 2)}.***.***/****-${digits.slice(-2)}`;
+  return value || '-';
+}
+
+function formatRG(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return 'Não informado';
+  if (raw.includes('*')) return raw;
+
+  const d = onlyDigits(value);
+  if (!d) return 'Não informado';
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 1)}${'*'.repeat(Math.max(1, d.length - 2))}${d.slice(-1)}`;
+  return `${d.slice(0, 2)}${'*'.repeat(Math.max(1, d.length - 4))}${d.slice(-2)}`;
+}
+
+function formatEmail(value) {
+  const email = String(value || '').trim();
+  if (!email || !email.includes('@')) return 'Não informado';
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return 'Não informado';
+  const localMask = local.length <= 2 ? `${local.charAt(0) || '*'}***` : `${local.slice(0, 2)}***`;
+  return `${localMask}@${domain}`;
+}
+
+function maskTelefoneExibicao(value) {
+  const d = onlyDigits(value);
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 3)}****-**${d.slice(-2)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 3)}***-**${d.slice(-2)}`;
+  return 'Não informado';
+}
+
+function setText(id, valor) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = valor;
+}

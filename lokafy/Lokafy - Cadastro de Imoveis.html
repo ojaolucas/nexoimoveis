@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)https://app.lokafy.com.br/imoveis/novo/ -->
+<html lang="pt-BR" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style data-merge-styles="true"></style>
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lokafy</title>
+<meta name="csrf-token" content="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+    <meta name="csrf-token-integracoes" content="4402a7e47a967f8c4ed6963ca105d35b79897285ac60d597ef064b925f9f57fa">
+    <meta name="csrf-token-faturas" content="fc2af940c8e3f61ba02cb536e1eab0e732eb539c6bf4dfde84dea2a5857fa077">
+    <meta name="csrf-token-perfil" content="5ae8322e23cb81b0896a14c3f28913e1cef50f33334dcdeb38aac49ed5bb4ffc">
+    <meta name="csrf-token-contratos" content="4514f542b25a36ba193e5c1794bcac6f2a6e93aabf1eed675c69abb92a4d82f8">
+    <meta name="csrf-token-consultas" content="f0e7d33f3f2030a4e8fc6b6d24f84fd50139c3c2f1563e632f3b5aaff7af3e70">
+    <meta name="csrf-token-imoveis" content="8487f66b1bbdd684f6760b87c4e16fe12685128489979523faeab9143d90b4b4">
+    <meta name="csrf-token-despesas" content="697908c552fbcd9df8ed79bbec532d6c1280f396cb4a9e3c2d6d5e736fe6caf6">
+    <meta name="csrf-token-vistoria" content="ba01e874234bb1130839191d1f2060aa17d16344fa95dba3cba91b44e99ec0e5">
+    <meta name="csrf-token-negativacao" content="5718ad2da60fde2f3b6c06e2dd3483d451be0d4053360d331bfc38e576f33ab2">
+  
+<link rel="icon" href="https://app.lokafy.com.br/imagens/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="https://app.lokafy.com.br/imagens/favicon-512.png">
+<link rel="manifest" href="https://app.lokafy.com.br/manifest.json">
+<meta name="theme-color" content="#0c2f2b">
+
+<link href="./Lokafy - Cadastro de Imoveis_files/inter.css" rel="stylesheet">
+<link rel="stylesheet" href="./Lokafy - Cadastro de Imoveis_files/all.min.css" as="style" onload="this.onload=null;this.rel=&#39;stylesheet&#39;">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+
+<script>
+  window.LOKAFY_CSRF = {
+    token: "9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a",
+    byNamespace: {"app":"9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a","integracoes":"4402a7e47a967f8c4ed6963ca105d35b79897285ac60d597ef064b925f9f57fa","faturas":"fc2af940c8e3f61ba02cb536e1eab0e732eb539c6bf4dfde84dea2a5857fa077","perfil":"5ae8322e23cb81b0896a14c3f28913e1cef50f33334dcdeb38aac49ed5bb4ffc","contratos":"4514f542b25a36ba193e5c1794bcac6f2a6e93aabf1eed675c69abb92a4d82f8","consultas":"f0e7d33f3f2030a4e8fc6b6d24f84fd50139c3c2f1563e632f3b5aaff7af3e70","imoveis":"8487f66b1bbdd684f6760b87c4e16fe12685128489979523faeab9143d90b4b4","despesas":"697908c552fbcd9df8ed79bbec532d6c1280f396cb4a9e3c2d6d5e736fe6caf6","vistoria":"ba01e874234bb1130839191d1f2060aa17d16344fa95dba3cba91b44e99ec0e5","negativacao":"5718ad2da60fde2f3b6c06e2dd3483d451be0d4053360d331bfc38e576f33ab2"}  };
+</script>
+<script src="./Lokafy - Cadastro de Imoveis_files/csrf-guard.js.download"></script>
+
+<script>
+  (function () {
+    const iconMap = {
+      "activity": "fa-solid fa-wave-square",
+      "arrow-up-down": "fa-solid fa-arrow-up-wide-short",
+      "badge-check": "fa-regular fa-circle-check",
+      "ban": "fa-solid fa-ban",
+      "building-2": "fa-solid fa-building",
+      "calendar": "fa-regular fa-calendar",
+      "calendar-days": "fa-regular fa-calendar-days",
+      "calendar-range": "fa-solid fa-calendar-week",
+      "camera": "fa-solid fa-camera",
+      "circle-dot": "fa-regular fa-circle-dot",
+      "clock-3": "fa-regular fa-clock",
+      "file-check-2": "fa-solid fa-file-circle-check",
+      "file-signature": "fa-solid fa-file-signature",
+      "file-text": "fa-regular fa-file-lines",
+      "hourglass": "fa-solid fa-hourglass-half",
+      "image": "fa-regular fa-image",
+      "list-checks": "fa-solid fa-list-check",
+      "lock": "fa-solid fa-lock",
+      "lock-open": "fa-solid fa-lock-open",
+      "pen-line": "fa-solid fa-pen",
+      "search": "fa-solid fa-magnifying-glass",
+      "shield-check": "fa-solid fa-shield-halved",
+      "sliders-horizontal": "fa-solid fa-sliders",
+      "tags": "fa-solid fa-tags",
+      "triangle-alert": "fa-solid fa-triangle-exclamation",
+      "user-round-x": "fa-solid fa-user-xmark",
+      "users": "fa-solid fa-users",
+      "wallet": "fa-solid fa-wallet",
+      "wallet-cards": "fa-solid fa-wallet",
+      "calendar-check": "fa-regular fa-calendar-check",
+      "x": "fa-solid fa-xmark"
+    };
+
+    function applyLucideFallback(root) {
+      const scope = root || document;
+      scope.querySelectorAll("i[data-lucide]").forEach(function (el) {
+        if (el.dataset.lkLucideFallbackApplied === "1") return;
+        const key = String(el.getAttribute("data-lucide") || "").trim();
+        const faClass = iconMap[key] || "fa-regular fa-circle";
+        el.className = faClass;
+        el.removeAttribute("data-lucide");
+        el.dataset.lkLucideFallbackApplied = "1";
+      });
+    }
+
+    window.applyLucideFallback = applyLucideFallback;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      applyLucideFallback(document);
+    });
+
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (!(node instanceof Element)) return;
+          if (node.matches && node.matches("i[data-lucide]")) {
+            applyLucideFallback(node.parentElement || document);
+            return;
+          }
+          if (node.querySelector) applyLucideFallback(node);
+        });
+      });
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>
+
+<link rel="stylesheet" href="./Lokafy - Cadastro de Imoveis_files/menu.css">
+<link rel="stylesheet" href="./Lokafy - Cadastro de Imoveis_files/sub_configuracoes.css">
+<script>
+  (function () {
+    try {
+      var tema = localStorage.getItem("lokafy_theme");
+      if (tema === "dark" || tema === "light") {
+        document.documentElement.setAttribute("data-theme", tema);
+      }
+    } catch (_) {}
+  })();
+</script>
+
+</head>
+
+<body cz-shortcut-listen="true">
+
+<!-- LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  
+<aside class="sidebar sidebar-v2" id="sidebar">
+  <button class="sidebar-toggle-fixed sb-toggle" id="sidebarToggleBtn" type="button" aria-label="Alternar menu" aria-expanded="true" data-bound-sidebar-toggle="1">
+    <i class="fa-solid fa-bars-staggered"></i>
+  </button>
+
+  <div class="sidebar-header sb-header">
+    <a href="https://app.lokafy.com.br/dashboard/" class="logo sb-logo" data-bound-sidebar-logo-reset="1">
+      <img src="./Lokafy - Cadastro de Imoveis_files/lokabranco.png" alt="Lokafy" width="300" height="300">
+    </a>
+          <a href="https://app.lokafy.com.br/checkout/" class="sb-trial-badge" title="Abrir cobrança do plano">
+        <span class="sb-trial-badge-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+        <span class="sb-trial-badge-copy">
+          <strong>Seu teste grátis acaba em 7 dias</strong>
+                  </span>
+      </a>
+      </div>
+
+  <nav class="sb-nav" id="sidebarNav" aria-label="Menu principal" data-bound-sidebar-scroll="1">
+    <details class="sb-group" data-group="atalhos" open="" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span class="sb-label">Início</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/dashboard/" class="sb-link sb-sub-link ">
+          <i class="fa-solid fa-chart-line"></i>
+          <span class="sb-label">Dashboard</span>
+                  </a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="analises" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-chart-column"></i>
+          <span class="sb-label">Análises</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/relatorios/" class="sb-link sb-sub-link "><i class="fa-solid fa-chart-pie"></i><span class="sb-label">Relatórios</span></a>
+        <a href="https://app.lokafy.com.br/consultas/" class="sb-link sb-sub-link "><i class="fa-solid fa-magnifying-glass-chart"></i><span class="sb-label">Análise de Crédito</span></a>
+      </div>
+    </details>
+
+    <details class="sb-group" data-group="cadastros" open="" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-address-book"></i>
+          <span class="sb-label">Cadastros</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/inquilinos/" class="sb-link sb-sub-link "><i class="fa-solid fa-users"></i><span class="sb-label">Inquilinos</span></a>
+        <a href="https://app.lokafy.com.br/proprietarios/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-tie"></i><span class="sb-label">Proprietários</span></a>
+        <a href="https://app.lokafy.com.br/imoveis/" class="sb-link sb-sub-link active"><i class="fa-solid fa-building"></i><span class="sb-label">Imóveis</span></a>
+        <a href="https://app.lokafy.com.br/fiadores/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-shield"></i><span class="sb-label">Fiadores</span></a>
+        <a href="https://app.lokafy.com.br/procuradores/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-pen"></i><span class="sb-label">Procuradores</span></a>
+      </div>
+    </details>
+
+    <details class="sb-group" data-group="operacao" open="" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-key"></i>
+          <span class="sb-label">Locação</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+                <a href="https://app.lokafy.com.br/contratos/" class="sb-link sb-sub-link "><i class="fa-solid fa-file-contract"></i><span class="sb-label">Contratos</span></a>
+        <a href="https://app.lokafy.com.br/faturas/" class="sb-link sb-sub-link "><i class="fa-solid fa-receipt"></i><span class="sb-label">Faturas</span></a>
+        <a href="https://app.lokafy.com.br/despesas/" class="sb-link sb-sub-link "><i class="fa-solid fa-screwdriver-wrench"></i><span class="sb-label">Despesas</span></a>
+        <a href="https://app.lokafy.com.br/assinaturas/" class="sb-link sb-sub-link "><i class="fa-solid fa-signature"></i><span class="sb-label">Assinaturas</span></a>
+        <a href="https://app.lokafy.com.br/vistoria/" class="sb-link sb-sub-link "><i class="fa-solid fa-clipboard-check"></i><span class="sb-label">Vistoria</span></a>
+        <a href="https://app.lokafy.com.br/negativacao/" class="sb-link sb-sub-link "><i class="fa-solid fa-triangle-exclamation"></i><span class="sb-label">Negativação</span></a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="integracoes" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span class="sb-label">Integrações</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/configuracoes/recebimentos_automaticos/" class="sb-link sb-sub-link "><i class="fa-solid fa-money-bill-transfer"></i><span class="sb-label">Cobranças Automáticas</span></a>
+        <a href="https://app.lokafy.com.br/whatsapp/" class="sb-link sb-sub-link "><i class="fa-brands fa-whatsapp"></i><span class="sb-label">WhatsApp</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/webhook/" class="sb-link sb-sub-link "><i class="fa-solid fa-code-branch"></i><span class="sb-label">Webhook</span></a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="configuracoes" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-gear"></i>
+          <span class="sb-label">Configurações</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://app.lokafy.com.br/configuracoes/perfil/" class="sb-link sb-sub-link "><i class="fa-solid fa-user"></i><span class="sb-label">Perfil</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/plano/" class="sb-link sb-sub-link "><i class="fa-solid fa-credit-card"></i><span class="sb-label">Plano e cobrança</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/usuarios/" class="sb-link sb-sub-link "><i class="fa-solid fa-user-group"></i><span class="sb-label">Usuários</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/mensagens_automaticas/" class="sb-link sb-sub-link "><i class="fa-solid fa-message"></i><span class="sb-label">Mensagens</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/modelos_de_contratos/" class="sb-link sb-sub-link "><i class="fa-solid fa-file-lines"></i><span class="sb-label">Modelos de contrato</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/indices_de_inflacao/" class="sb-link sb-sub-link "><i class="fa-solid fa-percent"></i><span class="sb-label">Índices de inflação</span></a>
+        <a href="https://app.lokafy.com.br/configuracoes/notificacoes/" class="sb-link sb-sub-link "><i class="fa-solid fa-bell"></i><span class="sb-label">Notificações</span></a>
+      </div>
+    </details>
+
+        <details class="sb-group" data-group="ajuda" data-bound-group-toggle="1">
+      <summary class="sb-group-trigger">
+        <span class="sb-group-main">
+          <i class="fa-solid fa-circle-question"></i>
+          <span class="sb-label">Ajuda</span>
+        </span>
+        <i class="fa-solid fa-chevron-down sb-group-arrow"></i>
+      </summary>
+      <div class="sb-submenu">
+        <a href="https://wa.me/5511926508927?text=Ol%C3%A1%2C%20preciso%20de%20suporte%20no%20Lokafy." target="_blank" rel="noopener noreferrer" class="sb-link sb-sub-link"><i class="fa-solid fa-headset"></i><span class="sb-label">Suporte</span></a>
+        <a href="https://app.lokafy.com.br/tutorial/" class="sb-link sb-sub-link "><i class="fa-solid fa-circle-play"></i><span class="sb-label">Tutorial</span></a>
+      </div>
+    </details>
+  </nav>
+
+  <!-- Créditos removidos -->
+
+  <script>
+    (function () {
+      try {
+        var groupsKey = "lokafy:sidebar-groups-open";
+        var sidebar = document.getElementById("sidebar");
+        var nav = document.getElementById("sidebarNav");
+        if (!sidebar || !nav) return;
+
+        var saved = {};
+        try {
+          var rawGroups = localStorage.getItem(groupsKey);
+          saved = rawGroups ? JSON.parse(rawGroups) : {};
+        } catch (_) {
+          saved = {};
+        }
+
+        sidebar.querySelectorAll("details.sb-group[data-group]").forEach(function (details) {
+          var group = String(details.dataset.group || "").trim();
+          if (!group) return;
+
+          var hasActive = !!details.querySelector(".sb-link.active");
+          var hasSaved = Object.prototype.hasOwnProperty.call(saved, group);
+          if (hasActive) {
+            details.open = true;
+            return;
+          }
+          if (hasSaved) {
+            details.open = !!saved[group];
+          }
+        });
+
+        var raw = sessionStorage.getItem("lokafy:sidebar-scroll-top");
+        if (raw === null) return;
+        var top = Number(raw);
+        if (!Number.isFinite(top) || top <= 0) return;
+        nav.scrollTop = top;
+      } catch (_) {}
+    })();
+  </script>
+</aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="main">
+
+      <!-- TOPBAR -->
+      
+<script>
+  window.LOKAFY = window.LOKAFY || {};
+  window.LOKAFY.plano = "lokafy20";
+</script>
+
+<!-- TOP BAR -->
+<header class="topbar">
+
+  <div class="topbar-left">
+    <span class="topbar-icon" hidden="" aria-hidden="true">
+      <i class=""></i>
+    </span>
+    <div class="topbar-text">
+
+      <span class="topbar-title">
+        Novo imóvel      </span>
+
+      
+    </div>
+  </div>
+
+  <div class="top-right">
+
+    <!-- 🌗 Tema -->
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema" data-bound-theme="1">
+      <i class="fa-regular fa-moon" id="themeToggleIcon" aria-hidden="true"></i>
+      <span id="themeToggleLabel">Dark</span>
+    </button>
+
+    <!-- 🔔 Notificações -->
+    <div class="notif" id="notifBtn">
+      <i class="fa-regular fa-bell"></i>
+      <span class="notif-dot" id="notifDot" hidden="">0</span>
+      <script>
+        (function () {
+          try {
+            var cache = sessionStorage.getItem("lokafy_notif_badge");
+            if (cache === null) return;
+            var qtd = Number(cache);
+            var dot = document.getElementById("notifDot");
+            if (!dot) return;
+            if (qtd > 0) {
+              dot.hidden = false;
+              dot.textContent = qtd > 99 ? "99+" : String(qtd);
+            } else {
+              dot.hidden = true;
+            }
+          } catch (_) {}
+        })();
+      </script>
+
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <strong>Notificações</strong>
+          <button type="button" class="notif-clear-all is-hidden" id="notifClearAll" disabled="">Apagar tudo</button>
+        </div>
+        <div class="notif-list" id="notifList"><div class="empty">Sem notificações</div></div>
+      </div>
+    </div>
+
+    <!-- 👤 Menu do Cliente -->
+    <div class="user-menu" id="userMenu">
+      <div class="avatar" id="topAvatar" style="background-image: none;">JL</div>
+      <script>
+        (function () {
+          try {
+            var cached = sessionStorage.getItem('lokafy_top_avatar');
+            var el = document.getElementById('topAvatar');
+            if (!cached || !el) return;
+            el.style.backgroundImage = "url('" + cached.replace(/'/g, "\\'") + "')";
+            el.textContent = '';
+          } catch (_) {}
+        })();
+      </script>
+      <i class="fa-solid fa-chevron-down"></i>
+
+      <div class="dropdown">
+        <a href="https://app.lokafy.com.br/configuracoes/perfil/">Meu perfil</a>
+        <hr>
+        <form method="post" action="https://app.lokafy.com.br/login/api/logout.php" class="logout-form">
+          <input type="hidden" name="_csrf" value="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+          <button type="submit" class="logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+
+<link rel="stylesheet" href="./Lokafy - Cadastro de Imoveis_files/sininho.css">
+<script src="./Lokafy - Cadastro de Imoveis_files/sininho.js.download"></script>
+
+      <!-- CONTEÚDO SPA -->
+      <div class="content">
+          <div id="appContent" data-topbar-title="Novo imóvel" data-topbar-desc="">
+              <link rel="stylesheet" href="./Lokafy - Cadastro de Imoveis_files/aviso.css">
+<link rel="stylesheet" href="./Lokafy - Cadastro de Imoveis_files/page.css">
+
+<script>
+(function () {
+  try {
+    var key = 'lokafy:sidebar-collapsed';
+    if (localStorage.getItem(key) === null) {
+      localStorage.setItem(key, '1');
+    }
+  } catch (_) {}
+})();
+</script>
+
+<section class="imv-page">
+  <header class="imv-mobile-top">
+    <a class="imv-mobile-back" href="https://app.lokafy.com.br/imoveis/" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <strong>Novo imóvel</strong>
+    <span aria-hidden="true"></span>
+  </header>
+
+  <header class="imv-header">
+    <div>
+      <h1 id="tituloPagina">Novo imóvel</h1>
+      <p id="subtituloPagina">Cadastre o imóvel com os dados principais e complete as configurações quando precisar.</p>
+    </div>
+    <a class="imv-back" href="https://app.lokafy.com.br/imoveis/">Voltar</a>
+  </header>
+
+  <form id="imovelNovoForm" class="imv-form" novalidate="">
+    <input type="hidden" id="imovel_id" name="id">
+    <input type="hidden" id="imovel_codigo" name="codigo">
+    <input type="hidden" id="imovel_cidade_ibge" name="cidade_ibge">
+
+    <section class="imv-section">
+      <div class="imv-section-title">
+        <span>Proprietário</span>
+        <div>
+          <h2>Quem é o dono?</h2>
+          <p>Escolha o proprietário principal do imóvel.</p>
+        </div>
+      </div>
+      <label class="imv-field">
+          <span>Proprietário *</span>
+        <select id="imovel_proprietario" name="proprietario_id"><option value="">Selecione o proprietário</option><option value="200">Espedita Maria</option></select>
+      </label>
+    </section>
+
+    <section class="imv-section">
+      <div class="imv-section-title">
+        <span>Tipo e status</span>
+        <div>
+          <h2>Qual o tipo e status do imóvel?</h2>
+          <p>Informe se ele é casa, apartamento, sala etc., e se está disponível ou ocupado.</p>
+        </div>
+      </div>
+      <div class="imv-grid imv-grid-2">
+        <label class="imv-field">
+          <span>Tipo do imóvel *</span>
+          <select id="imovel_tipo" name="tipo">
+            <option value="">Selecione</option>
+            <option>Casa</option>
+            <option>Apartamento</option>
+            <option>Kitnet</option>
+            <option>Sala comercial</option>
+            <option>Prédio comercial</option>
+            <option>Comercial</option>
+            <option>Outro</option>
+          </select>
+        </label>
+        <label class="imv-field">
+          <span>Situação</span>
+          <select id="imovel_status" name="status">
+            <option value="disponivel">Disponível</option>
+            <option value="ocupado">Ocupado</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="imv-section">
+      <div class="imv-section-title">
+        <span>Endereço</span>
+        <div>
+          <h2>Onde fica?</h2>
+          <p>Digite o CEP e clique em buscar para preencher o endereço.</p>
+        </div>
+      </div>
+      <div class="imv-grid imv-grid-address">
+        <label class="imv-field imv-cep-field">
+          <span>CEP *</span>
+          <div class="imv-cep-wrap">
+            <input type="text" id="imovel_cep" name="cep" autocomplete="off" placeholder="00000-000">
+            <button type="button" id="cepSearchBtn" class="imv-cep-btn" aria-label="Buscar endereço pelo CEP" title="Buscar endereço pelo CEP">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            </button>
+          </div>
+        </label>
+        <label class="imv-field imv-street-field"><span>Rua *</span><input type="text" id="imovel_rua" name="rua"></label>
+        <label class="imv-field"><span>Número *</span><input type="text" id="imovel_numero" name="numero"></label>
+        <label class="imv-field"><span>Complemento</span><input type="text" id="imovel_complemento" name="complemento"></label>
+        <label class="imv-field"><span>Bairro *</span><input type="text" id="imovel_bairro" name="bairro"></label>
+        <label class="imv-field"><span>Cidade *</span><input type="text" id="imovel_cidade" name="cidade"></label>
+        <label class="imv-field imv-uf-field"><span>UF *</span><input type="text" id="imovel_uf" name="uf" maxlength="2"></label>
+      </div>
+    </section>
+
+    <section class="imv-section">
+      <div class="imv-section-title">
+        <span>Características</span>
+        <div>
+          <h2>Características do imóvel</h2>
+          <p>Detalhes que ajudam na busca, na descrição e na filtragem do imóvel.</p>
+        </div>
+      </div>
+      <div class="imv-grid imv-grid-3">
+        <label class="imv-field">
+          <span>Quartos</span>
+          <input type="number" id="imovel_quartos" name="quartos" min="0" step="1" inputmode="numeric" placeholder="0">
+        </label>
+        <label class="imv-field">
+          <span>Banheiros</span>
+          <input type="number" id="imovel_banheiros" name="banheiros" min="0" step="1" inputmode="numeric" placeholder="0">
+        </label>
+        <label class="imv-field">
+          <span>Vagas de garagem</span>
+          <input type="number" id="imovel_vagas_garagem" name="vagas_garagem" min="0" step="1" inputmode="numeric" placeholder="0">
+        </label>
+      </div>
+      <div class="imv-grid imv-grid-2" style="margin-top:14px;">
+        <label class="imv-field">
+          <span>Tamanho (m²)</span>
+          <input type="number" id="imovel_area_m2" name="area_m2" min="0" step="0.01" inputmode="decimal" placeholder="0,00">
+        </label>
+        <label class="imv-field">
+          <span>Mobiliado</span>
+          <select id="imovel_mobiliado" name="mobiliado">
+            <option value="">Não informado</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="imv-section" id="moradorSection" hidden="">
+      <div class="imv-section-title">
+        <span>Moradia</span>
+        <div>
+          <h2>Quem vai morar?</h2>
+          <p>Depois do endereço preenchido, o sistema tenta encontrar automaticamente um inquilino cadastrado nesse endereço.</p>
+        </div>
+      </div>
+      <label class="imv-field">
+        <span>Morador deste imóvel</span>
+        <select id="imovel_inquilino_moradia" name="inquilino_moradia_id"><option value="">Nenhum inquilino encontrado</option><option value="403">João Lucas de Assis Lins - Rua São Caetano - 22 - Benedito Bentes - Maceió/AL</option></select>
+        <small class="imv-field-help" id="moradorHelp"></small>
+      </label>
+    </section>
+
+    <section class="imv-section">
+      <div class="imv-section-title">
+        <span>Extras</span>
+        <div>
+          <h2>Informações extras</h2>
+          <p>Use para organizar melhor o imóvel. Pode deixar em branco.</p>
+        </div>
+      </div>
+      <div class="imv-grid imv-grid-2">
+        <label class="imv-field">
+          <span>Condomínio</span>
+          <input type="text" id="imovel_condominio" name="condominio" placeholder="Se houver">
+        </label>
+        <label class="imv-field">
+          <span>Aceita pet</span>
+          <select id="imovel_aceita_pet" name="aceita_pet">
+            <option value="">Não informado</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="imv-section imv-section-cluster">
+      <div id="detalhesWrap" class="imv-extra-list">
+        <article class="imv-extra-card">
+          <div class="imv-extra-head">
+            <div>
+              <span class="imv-extra-eyebrow">Administração</span>
+              <h3>Segundo proprietário</h3>
+            </div>
+            <p>Use quando o imóvel tem mais de um dono.</p>
+            <button type="button" class="imv-mini-btn" id="toggleSecundarioBtn" data-add-text="Adicionar">Adicionar</button>
+          </div>
+          <label class="imv-field opt-collapse is-hidden" id="secundarioWrap">
+            <span>Proprietário secundário</span>
+            <select id="imovel_proprietario_secundario" name="proprietario_id_secundario"><option value="">Sem 2º proprietário</option><option value="200">Espedita Maria</option></select>
+          </label>
+        </article>
+
+        <article class="imv-extra-card">
+          <div class="imv-extra-head">
+            <div>
+              <span class="imv-extra-eyebrow">Administração</span>
+              <h3>Registro do imóvel</h3>
+            </div>
+            <p>Inscrição municipal, matrícula ou número de registro.</p>
+            <button type="button" class="imv-mini-btn" id="toggleRegistroBtn" data-add-text="Adicionar">Adicionar</button>
+          </div>
+          <div class="imv-grid imv-grid-2 opt-collapse is-hidden" id="registroWrap">
+            <label class="imv-field"><span>Inscrição municipal</span><input type="text" id="imovel_inscricao_municipal" name="inscricao_municipal"></label>
+            <label class="imv-field"><span>Número de registro</span><input type="text" id="imovel_registro" name="registro_imovel"></label>
+          </div>
+        </article>
+
+        <article class="imv-extra-card">
+          <div class="imv-extra-head">
+            <div>
+              <span class="imv-extra-eyebrow">Administração</span>
+              <h3>Água e energia</h3>
+            </div>
+            <p>Guarde companhias e códigos de ligação.</p>
+            <button type="button" class="imv-mini-btn" id="toggleCompanhiasBtn" data-add-text="Adicionar">Adicionar</button>
+          </div>
+          <div class="opt-collapse is-hidden" id="companhiasWrap">
+            <div class="imv-subgroup">
+              <strong>Energia</strong>
+              <div class="imv-grid imv-grid-3">
+                <label class="imv-field"><span>Companhia</span><input type="text" id="imovel_energia_companhia" name="energia_companhia"></label>
+                <label class="imv-field"><span>Nome do código</span><input type="text" id="imovel_energia_codigo_nome" name="energia_codigo_nome"></label>
+                <label class="imv-field"><span>Número</span><input type="text" id="imovel_energia_codigo_numero" name="energia_codigo_numero"></label>
+              </div>
+            </div>
+            <div class="imv-subgroup">
+              <strong>Água</strong>
+              <div class="imv-grid imv-grid-3">
+                <label class="imv-field"><span>Companhia</span><input type="text" id="imovel_agua_companhia" name="agua_companhia"></label>
+                <label class="imv-field"><span>Nome do código</span><input type="text" id="imovel_agua_codigo_nome" name="agua_codigo_nome"></label>
+                <label class="imv-field"><span>Número</span><input type="text" id="imovel_agua_codigo_numero" name="agua_codigo_numero"></label>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="imv-section imv-section-cluster">
+      <div class="imv-extra-list">
+        <article class="imv-extra-card">
+          <div class="imv-extra-head">
+            <div>
+              <span class="imv-extra-eyebrow">Cobrança</span>
+              <h3>Pix específico</h3>
+            </div>
+            <p>Quando este imóvel recebe em uma chave diferente do Pix padrão.</p>
+            <button type="button" class="imv-mini-btn" id="togglePixRecebedorBtn" data-add-text="Adicionar">Adicionar</button>
+          </div>
+          <div class="opt-collapse is-hidden" id="pixRecebedorWrap">
+            <label class="imv-field">
+              <span>Recebedor Pix</span>
+              <select id="imovel_pix_recebedor" name="pix_recebedor_id"><option value="">Usar Pix padrão da conta</option></select>
+            </label>
+          </div>
+        </article>
+
+        <article class="imv-extra-card">
+          <div class="imv-extra-head">
+            <div>
+              <span class="imv-extra-eyebrow">Cobrança</span>
+              <h3>IPTU</h3>
+            </div>
+            <p>Para controlar, cobrar ou repassar IPTU.</p>
+            <button type="button" class="imv-mini-btn" id="toggleIptuBtn" data-add-text="Adicionar">Adicionar</button>
+          </div>
+          <div class="imv-grid imv-grid-2 opt-collapse is-hidden" id="iptuWrap">
+            <label class="imv-field"><span>Valor total</span><input type="text" id="imovel_iptu_valor_total" name="iptu_valor_total" inputmode="decimal"></label>
+            <label class="imv-field"><span>Tipo</span><select id="imovel_iptu_tipo" name="iptu_tipo"><option value="">Selecione</option><option value="avista">À vista</option><option value="parcelado">Parcelado</option></select></label>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="imv-actions" id="acoesCriar" style="display: flex;">
+      <a class="imv-btn imv-btn-secondary" href="https://app.lokafy.com.br/imoveis/" id="cancelBtn">Cancelar</a>
+      <button type="submit" class="imv-btn imv-btn-light" id="saveAnotherBtn" data-submit-mode="save_another">Salvar e criar outro</button>
+      <button type="submit" class="imv-btn imv-btn-light" id="saveDuplicateBtn" data-submit-mode="save_duplicate">Salvar e duplicar</button>
+      <button type="submit" class="imv-btn imv-btn-primary" id="submitBtn" data-submit-mode="save">Salvar imóvel</button>
+    </footer>
+
+    <footer class="imv-actions" id="acoesEditar" style="display:none;">
+      <a class="imv-btn imv-btn-secondary" href="https://app.lokafy.com.br/imoveis/">Cancelar</a>
+      <button type="submit" class="imv-btn imv-btn-primary" id="submitEditBtn" data-submit-mode="save">Salvar alterações</button>
+    </footer>
+  </form>
+</section>
+
+<script src="./Lokafy - Cadastro de Imoveis_files/aviso.js.download"></script>
+<script src="./Lokafy - Cadastro de Imoveis_files/page.js.download"></script>
+              <!-- router injeta aqui -->
+          </div>
+      </div>
+
+  </main>
+
+</div>
+
+
+
+<!-- MODAL TRIAL EXPIRADO -->
+<div class="trial-exp-overlay" id="modalTrialExpirado" hidden="">
+  <div class="trial-exp-box">
+    <div class="trial-exp-logo-wrap">
+      <img src="./Lokafy - Cadastro de Imoveis_files/lokaverde-login.webp" alt="Lokafy" width="256" height="256">
+    </div>
+    <div class="trial-exp-icon">
+      <i class="fa-solid fa-hourglass-end"></i>
+    </div>
+    <h2 class="trial-exp-title">Seu período de trial encerrou</h2>
+    <p class="trial-exp-desc">
+      Para continuar usando o Lokafy sem interrupções, escolha um plano e finalize a assinatura.
+    </p>
+    <a href="https://app.lokafy.com.br/checkout/" class="trial-exp-btn" data-exp-action="checkout" data-no-loading="1">
+      <i class="fa-solid fa-rocket"></i>
+      Ir para checkout
+    </a>
+    <form method="post" action="https://app.lokafy.com.br/login/api/logout.php" class="trial-exp-logout-form" data-no-loading="1">
+      <input type="hidden" name="_csrf" value="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+      <button type="submit" class="trial-exp-fechar" data-exp-action="logout">Sair da conta</button>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL PLANO VENCIDO -->
+<div class="trial-exp-overlay" id="modalPlanoVencido" hidden="">
+  <div class="trial-exp-box">
+    <div class="trial-exp-logo-wrap">
+      <img src="./Lokafy - Cadastro de Imoveis_files/lokaverde-login.webp" alt="Lokafy" width="256" height="256">
+    </div>
+    <div class="trial-exp-icon">
+      <i class="fa-solid fa-calendar-xmark"></i>
+    </div>
+    <h2 class="trial-exp-title">Seu plano venceu</h2>
+    <p class="trial-exp-desc">
+      Seu plano expirou e o acesso completo foi suspenso.<br>
+      Regularize para continuar usando o Lokafy sem bloqueios.
+    </p>
+    <a href="https://app.lokafy.com.br/checkout/" class="trial-exp-btn" data-exp-action="checkout" data-no-loading="1">
+      <i class="fa-solid fa-rotate-right"></i>
+      Abrir cobrança
+    </a>
+    <form method="post" action="https://app.lokafy.com.br/login/api/logout.php" class="trial-exp-logout-form" data-no-loading="1">
+      <input type="hidden" name="_csrf" value="9b795952ac19ae8422b1ddcdc81f2a24d0fb4f32e827294a9076465c38dbe22a">
+      <button type="submit" class="trial-exp-fechar" data-exp-action="logout">Sair da conta</button>
+    </form>
+  </div>
+</div>
+
+<script>
+window.LOKAFY_EXPIRED_MODAL = {
+  trialExpirado: false,
+  planoVencido: false};
+
+document.addEventListener('click', function (ev) {
+  const btn = ev.target.closest('[data-exp-action]');
+  if (!btn) return;
+  ev.preventDefault();
+  const box = btn.closest('.trial-exp-box');
+  if (!box) return;
+  const title = box.querySelector('.trial-exp-title');
+  const desc = box.querySelector('.trial-exp-desc');
+  const isCheckout = btn.getAttribute('data-exp-action') === 'checkout';
+
+  box.querySelectorAll('[data-exp-action]').forEach((el) => {
+    el.style.pointerEvents = 'none';
+    el.style.opacity = '.75';
+  });
+
+  if (isCheckout) {
+    btn.lastChild.textContent = ' Abrindo checkout...';
+  } else {
+    btn.textContent = 'Saindo...';
+  }
+
+  if (btn.getAttribute('data-exp-action') === 'checkout') {
+    if (title) title.textContent = 'Redirecionando para o checkout...';
+    if (desc) desc.textContent = 'Você será direcionado para regularizar sua assinatura agora.';
+    window.location.href = btn.getAttribute('href') || '/checkout/';
+  } else {
+    if (title) title.textContent = 'Saindo da conta...';
+    if (desc) desc.textContent = 'Estamos encerrando sua sessão com segurança.';
+    const form = btn.closest('form');
+    if (form) {
+      setTimeout(() => {
+        if (typeof form.requestSubmit === 'function') form.requestSubmit(btn);
+        else form.submit();
+      }, 260);
+      return;
+    }
+  }
+});
+</script>
+
+<script src="./Lokafy - Cadastro de Imoveis_files/menu.js.download"></script>
+<script src="./Lokafy - Cadastro de Imoveis_files/router.js.download"></script>
+<script src="./Lokafy - Cadastro de Imoveis_files/nav_feedback_desktop.js.download"></script>
+
+<script defer="" src="./Lokafy - Cadastro de Imoveis_files/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;9ba7b1c5141342559eb0d8e1d47b7466&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+</body></html>

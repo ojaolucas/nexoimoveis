@@ -1,6 +1,35 @@
 -- NexoMoveis - Schema do Banco de Dados PostgreSQL (Fase 2.5)
 -- Versão 1.5
 
+-- Drop tables for clean migration reset
+DROP TABLE IF EXISTS despesas_timeline CASCADE;
+DROP TABLE IF EXISTS despesas_recorrencias CASCADE;
+DROP TABLE IF EXISTS despesas_comprovantes CASCADE;
+DROP TABLE IF EXISTS recebimentos_timeline CASCADE;
+DROP TABLE IF EXISTS recebimentos_pagamentos CASCADE;
+DROP TABLE IF EXISTS contratos_timeline CASCADE;
+DROP TABLE IF EXISTS contratos_renovacoes CASCADE;
+DROP TABLE IF EXISTS contratos_reajustes CASCADE;
+DROP TABLE IF EXISTS contratos_documentos CASCADE;
+DROP TABLE IF EXISTS vistorias CASCADE;
+DROP TABLE IF EXISTS manutencoes_timeline CASCADE;
+DROP TABLE IF EXISTS manutencoes_anexos CASCADE;
+DROP TABLE IF EXISTS manutencoes CASCADE;
+DROP TABLE IF EXISTS imoveis_timeline CASCADE;
+DROP TABLE IF EXISTS imoveis_fotos CASCADE;
+DROP TABLE IF EXISTS imoveis_documentos CASCADE;
+DROP TABLE IF EXISTS despesas CASCADE;
+DROP TABLE IF EXISTS recebimentos CASCADE;
+DROP TABLE IF EXISTS contratos CASCADE;
+DROP TABLE IF EXISTS imoveis CASCADE;
+DROP TABLE IF EXISTS locatarios_documentos CASCADE;
+DROP TABLE IF EXISTS locatarios CASCADE;
+DROP TABLE IF EXISTS proprietarios_documentos CASCADE;
+DROP TABLE IF EXISTS proprietarios CASCADE;
+DROP TABLE IF EXISTS notificacoes CASCADE;
+DROP TABLE IF EXISTS auditoria_logs CASCADE;
+DROP TABLE IF EXISTS usuarios CASCADE;
+
 -- Ativar extensão de UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -69,6 +98,15 @@ CREATE TABLE IF NOT EXISTS proprietarios (
     endereco TEXT, -- Armazena JSON formatado em string ou endereço em texto plano
     observacoes TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
+    data_nascimento DATE,
+    rg_orgao VARCHAR(50),
+    rg_uf VARCHAR(5),
+    genero VARCHAR(30),
+    nacionalidade VARCHAR(100),
+    estado_civil VARCHAR(50),
+    profissao VARCHAR(150),
+    representante_nome VARCHAR(255),
+    representante_cpf VARCHAR(20),
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -99,6 +137,13 @@ CREATE TABLE IF NOT EXISTS locatarios (
     endereco TEXT,
     observacoes TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
+    data_nascimento DATE,
+    rg_orgao VARCHAR(50),
+    rg_uf VARCHAR(5),
+    genero VARCHAR(30),
+    nacionalidade VARCHAR(100),
+    estado_civil VARCHAR(50),
+    profissao VARCHAR(150),
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -123,9 +168,15 @@ CREATE TABLE IF NOT EXISTS imoveis (
     endereco TEXT NOT NULL,
     area_total NUMERIC(12,2) NOT NULL,
     valor_locacao NUMERIC(12,2) NOT NULL,
-    status VARCHAR(30) NOT NULL DEFAULT 'Disponível' CHECK (status IN ('Disponível', 'Alugado', 'Reservado', 'Manutenção', 'Inativo')),
+    status VARCHAR(30) NOT NULL DEFAULT 'Disponível' CHECK (status IN ('Disponível', 'Alugado', 'Reservado', 'Em Manutenção', 'Inativo')),
     observacoes TEXT,
     foto_principal TEXT,
+    quartos INTEGER DEFAULT 0,
+    banheiros INTEGER DEFAULT 0,
+    vagas_garagem INTEGER DEFAULT 0,
+    mobiliado VARCHAR(30) DEFAULT 'Não informado',
+    valor_condominio NUMERIC(12,2) DEFAULT 0,
+    aceita_pet VARCHAR(30) DEFAULT 'Não informado',
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -367,4 +418,9 @@ CREATE TABLE IF NOT EXISTS despesas_timeline (
     descricao TEXT NOT NULL,
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 24. Migração e ajuste de constraint de status do imóvel
+ALTER TABLE imoveis DROP CONSTRAINT IF EXISTS imoveis_status_check;
+UPDATE imoveis SET status = 'Em Manutenção' WHERE status = 'Manutenção';
+ALTER TABLE imoveis ADD CONSTRAINT imoveis_status_check CHECK (status IN ('Disponível', 'Alugado', 'Reservado', 'Em Manutenção', 'Inativo'));
 

@@ -26,7 +26,7 @@ VALUES (
 ) ON CONFLICT (cpf) DO NOTHING;
 
 -- 2. Inserir Proprietários (f1a1...)
-INSERT INTO proprietarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, telefone, email, endereco, observacoes, status)
+INSERT INTO proprietarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao, representante_nome, representante_cpf)
 VALUES (
     'f1a1a1a1-1111-1111-1111-111111111111',
     'PROP-001',
@@ -38,10 +38,19 @@ VALUES (
     'proprietario1@nexo.com',
     'Av. Paulista, 1000 - Bela Vista - São Paulo/SP',
     'Proprietário corporativo principal',
-    'ativo'
+    'ativo',
+    NULL,
+    'SSP',
+    'SP',
+    'Não informado',
+    'Brasileira',
+    'Outro',
+    'Empresa',
+    'Carlos Representante',
+    '111.222.333-44'
 ) ON CONFLICT (codigo) DO NOTHING;
 
-INSERT INTO proprietarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, telefone, email, endereco, observacoes, status)
+INSERT INTO proprietarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao, representante_nome, representante_cpf)
 VALUES (
     'f2a2a2a2-2222-2222-2222-222222222222',
     'PROP-002',
@@ -53,11 +62,20 @@ VALUES (
     'carlos.alberto@gmail.com',
     'Rua das Palmeiras, 450 - Centro - Campinas/SP',
     'Proprietário de imóveis residenciais e salas comerciais',
-    'ativo'
+    'ativo',
+    '1975-04-12',
+    'DETRAN',
+    'SP',
+    'Masculino',
+    'Brasileiro',
+    'Casado',
+    'Engenheiro',
+    NULL,
+    NULL
 ) ON CONFLICT (codigo) DO NOTHING;
 
 -- 3. Inserir Locatários (e1a1...)
-INSERT INTO locatarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, telefone, email, endereco, observacoes, status)
+INSERT INTO locatarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao)
 VALUES (
     'e1a1a1a1-1111-1111-1111-111111111111',
     'LOC-001',
@@ -70,10 +88,17 @@ VALUES (
     'financeiro@mercadinho.com.br',
     'Rua Direita, 200 - Centro - São Paulo/SP',
     'Locatário comercial do Galpão Alpha',
-    'ativo'
+    'ativo',
+    NULL,
+    'SSP',
+    'SP',
+    'Não informado',
+    'Brasileira',
+    'Outro',
+    'Comércio'
 ) ON CONFLICT (codigo) DO NOTHING;
 
-INSERT INTO locatarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, telefone, email, endereco, observacoes, status)
+INSERT INTO locatarios (id, codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao)
 VALUES (
     'e2a2a2a2-2222-2222-2222-222222222222',
     'LOC-002',
@@ -86,11 +111,18 @@ VALUES (
     'anamaria@yahoo.com.br',
     'Av. General Flores, 78 - Botafogo - Campinas/SP',
     'Locatária residencial',
-    'ativo'
+    'ativo',
+    '1988-08-25',
+    'SSP',
+    'SP',
+    'Feminino',
+    'Brasileira',
+    'Solteira',
+    'Advogada'
 ) ON CONFLICT (codigo) DO NOTHING;
 
 -- 4. Inserir Imóveis (d1a1...)
-INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal)
+INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet)
 VALUES (
     'd1a1a1a1-1111-1111-1111-111111111111',
     'IMOV-001',
@@ -102,10 +134,16 @@ VALUES (
     15000.00,
     'Alugado',
     'Galpão com pé direito duplo e docas',
-    NULL
+    NULL,
+    0,
+    2,
+    4,
+    'Sem mobília',
+    0.00,
+    'Não informado'
 ) ON CONFLICT (codigo) DO NOTHING;
 
-INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal)
+INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet)
 VALUES (
     'd2a2a2a2-2222-2222-2222-222222222222',
     'IMOV-002',
@@ -117,10 +155,16 @@ VALUES (
     2200.00,
     'Disponível',
     'Sala comercial com ar condicionado e 1 vaga',
-    NULL
+    NULL,
+    0,
+    1,
+    1,
+    'Sem mobília',
+    450.00,
+    'Não'
 ) ON CONFLICT (codigo) DO NOTHING;
 
-INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal)
+INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet)
 VALUES (
     'd3a3a3a3-3333-3333-3333-333333333333',
     'IMOV-003',
@@ -132,10 +176,16 @@ VALUES (
     3000.00,
     'Reservado',
     'Apartamento de 2 dormitórios mobiliado',
-    NULL
+    NULL,
+    2,
+    2,
+    1,
+    'Mobiliado',
+    600.00,
+    'Sim'
 ) ON CONFLICT (codigo) DO NOTHING;
 
-INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal)
+INSERT INTO imoveis (id, codigo, nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet)
 VALUES (
     'd4a4a4a4-4444-4444-4444-444444444444',
     'IMOV-004',
@@ -145,9 +195,15 @@ VALUES (
     'Av. das Américas, 5000 - Loja 102 - Barra da Tijuca - Rio de Janeiro/RJ',
     120.00,
     8000.00,
-    'Manutenção',
+    'Em Manutenção',
     'Loja em ponto nobre do Shopping Sul',
-    NULL
+    NULL,
+    0,
+    1,
+    0,
+    'Sem mobília',
+    1200.00,
+    'Não'
 ) ON CONFLICT (codigo) DO NOTHING;
 
 -- 5. Inserir Contratos (c1a1...)
@@ -234,11 +290,11 @@ INSERT INTO despesas (imovel_id, categoria, responsavel, competencia, vencimento
 VALUES ('d1a1a1a1-1111-1111-1111-111111111111', 'Seguro', 'Locador', CURRENT_DATE - INTERVAL '1 month', CURRENT_DATE - INTERVAL '5 days', 2200.00, 'A Vencer', true); -- Vencimento < CURRENT_DATE, status 'A Vencer' = Vencida
 
 -- 8. Inserir Notificações
-INSERT INTO notificacoes (titulo, descricao, tipo, lida)
-VALUES ('Contrato CTR-001 Próximo do Fim', 'O contrato CTR-001 do locatário Mercado do Bairro Ltda vencerá em 30 dias.', 'Alerta', false);
+INSERT INTO notificacoes (titulo, descricao, categoria, prioridade, status)
+VALUES ('Contrato CTR-001 Próximo do Fim', 'O contrato CTR-001 do locatário Mercado do Bairro Ltda vencerá em 30 dias.', 'Alerta', 'Média', 'Não Lida');
 
-INSERT INTO notificacoes (titulo, descricao, tipo, lida)
-VALUES ('Despesa Seguro Atrasada', 'O Seguro da propriedade Galpão Industrial Alpha está vencido desde ' || (CURRENT_DATE - INTERVAL '5 days')::text, 'Financeiro', false);
+INSERT INTO notificacoes (titulo, descricao, categoria, prioridade, status)
+VALUES ('Despesa Seguro Atrasada', 'O Seguro da propriedade Galpão Industrial Alpha está vencido desde ' || (CURRENT_DATE - INTERVAL '5 days')::text, 'Financeiro', 'Alta', 'Não Lida');
 
 -- 9. Auditoria
 INSERT INTO auditoria_logs (usuario_id, modulo, acao, descricao, ip)

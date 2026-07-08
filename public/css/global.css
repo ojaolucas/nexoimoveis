@@ -147,3 +147,120 @@ p {
 .toast-close:hover {
   opacity: 1;
 }
+
+/* Info Alert Component */
+.info-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--color-info-light);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  border-radius: var(--border-radius-md);
+  margin-bottom: 20px;
+  transition: all var(--transition-normal);
+}
+
+.info-alert-icon {
+  color: var(--color-info);
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-alert-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--color-text-main);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Custom Confirm Modal styling */
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.confirm-modal-overlay.active {
+  opacity: 1;
+}
+
+.confirm-modal-box {
+  background: var(--color-bg-card, #ffffff);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  transform: scale(0.9);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirm-modal-overlay.active .confirm-modal-box {
+  transform: scale(1);
+}
+
+.confirm-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirm-modal-header i {
+  font-size: 24px;
+  color: var(--color-warning, #f59e0b);
+}
+
+.confirm-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-main);
+}
+
+.confirm-modal-body p {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.confirm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.confirm-modal-footer .btn {
+  padding: 0 20px;
+  height: 40px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}

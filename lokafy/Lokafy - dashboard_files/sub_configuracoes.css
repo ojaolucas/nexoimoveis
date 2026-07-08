@@ -1,0 +1,169 @@
+/* =========================================================
+   SUB-CONFIGURAÇÕES — Componentes compartilhados
+   Carregado globalmente via layout.php
+========================================================= */
+
+/* ================= INTG-CARD ================= */
+
+.intg-card {
+  border: 1px solid #c7e6e3;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 4px 28px rgba(15, 118, 110, .08);
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.intg-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px 16px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2f0ee;
+}
+
+.intg-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.intg-card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 19px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, .28);
+}
+
+.intg-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.intg-card-desc {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 3px 0 0;
+  line-height: 1.45;
+}
+
+.intg-card-badge {
+  border: 1px solid #d7e2ee;
+  background: #ffffff;
+  color: #334155;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.intg-card-badge--ativo {
+  border-color: rgba(15, 118, 110, .3);
+  background: rgba(15, 118, 110, .08);
+  color: #0f766e;
+}
+
+.intg-card-body {
+  padding: 20px 22px 18px;
+}
+
+.intg-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* ================= FORM SECTION ================= */
+
+.intg-form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #0f766e;
+  margin-bottom: 8px;
+}
+
+.intg-form-section-title i {
+  font-size: 13px;
+  color: #0f766e;
+  opacity: .85;
+}
+
+.intg-form-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, #c7e6e3 0%, transparent 80%);
+  margin: 0 0 16px;
+}
+
+/* ================= DARK MODE ================= */
+
+:root[data-theme="dark"] .intg-card {
+  background: #0f1b2b;
+  border-color: #223246;
+  box-shadow: 0 4px 28px rgba(2, 8, 23, .35);
+}
+
+:root[data-theme="dark"] .intg-card-header {
+  background: linear-gradient(135deg, #0d2235 0%, #0f1b2b 100%);
+  border-bottom-color: #223246;
+}
+
+:root[data-theme="dark"] .intg-card-title {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .intg-card-desc {
+  color: #7a9cb8;
+}
+
+:root[data-theme="dark"] .intg-card-badge {
+  border-color: #2b425a;
+  background: #0f1b2b;
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .intg-card-badge--ativo {
+  border-color: #1a4a40;
+  background: rgba(15, 118, 110, .15);
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .intg-form-section-title,
+:root[data-theme="dark"] .intg-form-section-title i {
+  color: #5eead4;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .intg-form-divider {
+  background: linear-gradient(to right, #223246 0%, transparent 80%);
+}
+
+@media (max-width: 600px) {
+  .intg-card-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .intg-card-body {
+    padding: 16px;
+  }
+}

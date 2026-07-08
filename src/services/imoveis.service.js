@@ -90,7 +90,7 @@ async function buscarPorId(id, responsavelUser = null, ip = null) {
 }
 
 async function cadastrar(imovelData, responsavelUser, ip) {
-  const { nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal } = imovelData;
+  const { nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet } = imovelData;
 
   // 1. Validations
   if (!nome || nome.trim() === '') throw new Error('Nome/Identificação do imóvel é obrigatório.');
@@ -129,7 +129,13 @@ async function cadastrar(imovelData, responsavelUser, ip) {
     valor_locacao: valor,
     status: status || 'Disponível',
     observacoes: observacoes ? observacoes.trim() : null,
-    foto_principal: foto_principal || null
+    foto_principal: foto_principal || null,
+    quartos: parseInt(quartos || '0', 10),
+    banheiros: parseInt(banheiros || '0', 10),
+    vagas_garagem: parseInt(vagas_garagem || '0', 10),
+    mobiliado: mobiliado || 'Não informado',
+    valor_condominio: parseFloat(valor_condominio || '0'),
+    aceita_pet: aceita_pet || 'Não informado'
   });
 
   // 4. Audit & local timeline
@@ -149,7 +155,7 @@ async function cadastrar(imovelData, responsavelUser, ip) {
 }
 
 async function atualizar(id, imovelData, responsavelUser, ip) {
-  const { nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal } = imovelData;
+  const { nome, tipo, proprietario_id, endereco, area_total, valor_locacao, status, observacoes, foto_principal, quartos, banheiros, vagas_garagem, mobiliado, valor_condominio, aceita_pet } = imovelData;
 
   const current = await imoveisRepository.findById(id);
   if (!current) throw new Error('Imóvel não encontrado.');
@@ -188,7 +194,13 @@ async function atualizar(id, imovelData, responsavelUser, ip) {
     valor_locacao: valor,
     status,
     observacoes: observacoes ? observacoes.trim() : null,
-    foto_principal: foto_principal || current.foto_principal
+    foto_principal: foto_principal || current.foto_principal,
+    quartos: parseInt(quartos || '0', 10),
+    banheiros: parseInt(banheiros || '0', 10),
+    vagas_garagem: parseInt(vagas_garagem || '0', 10),
+    mobiliado: mobiliado || 'Não informado',
+    valor_condominio: parseFloat(valor_condominio || '0'),
+    aceita_pet: aceita_pet || 'Não informado'
   });
 
   // Check if status changed

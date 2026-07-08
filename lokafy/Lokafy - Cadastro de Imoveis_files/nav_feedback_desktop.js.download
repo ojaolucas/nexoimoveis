@@ -1,0 +1,96 @@
+(function () {
+  if (window.__lkNavFeedbackDesktopInit) return;
+  window.__lkNavFeedbackDesktopInit = true;
+
+  var opening = false;
+  var openingSince = 0;
+  var lockMs = 800;
+  var overlayEl = null;
+
+  function isSameOriginInternal(url) {
+    if (!url) return false;
+    try {
+      var parsed = new URL(url, window.location.origin);
+      return parsed.origin === window.location.origin;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function shouldIgnore(link) {
+    if (!link) return true;
+    if (link.hasAttribute("data-no-loading")) return true;
+    if (link.getAttribute("target") === "_blank") return true;
+    if (link.hasAttribute("download")) return true;
+
+    var hrefRaw = (link.getAttribute("href") || "").trim();
+    if (!hrefRaw || hrefRaw === "#" || hrefRaw.indexOf("#") === 0) return true;
+
+    if (!isSameOriginInternal(link.href || hrefRaw)) return true;
+
+    return false;
+  }
+
+  function ensureOverlay() {
+    if (overlayEl) return overlayEl;
+
+    var styleId = "lk-nav-feedback-desktop-style";
+    if (!document.getElementById(styleId)) {
+      var style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = [
+        ".lk-nav-desk-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(248,250,252,.34);backdrop-filter:blur(3px) saturate(1.08);-webkit-backdrop-filter:blur(3px) saturate(1.08);z-index:99999;pointer-events:none;}",
+        ".lk-nav-desk-overlay.is-visible{display:flex;}",
+        ".lk-nav-desk-card{position:relative;display:grid;place-items:center;width:58px;height:58px;border-radius:999px;background:rgba(255,255,255,.76);border:1px solid rgba(15,76,70,.12);box-shadow:0 18px 44px rgba(15,23,42,.16),0 1px 0 rgba(255,255,255,.86) inset;transform:translateY(4px) scale(.98);opacity:0;animation:lkNavDeskIn .18s ease-out forwards;}",
+        ".lk-nav-desk-card:before{content:'';position:absolute;inset:8px;border-radius:999px;border:3px solid rgba(15,76,70,.12);border-top-color:#0f4c46;border-right-color:#14b8a6;animation:lkNavDeskSpin .82s linear infinite;}",
+        ".lk-nav-desk-mark{position:relative;z-index:1;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:transparent;overflow:hidden;}",
+        ".lk-nav-desk-mark img{width:26px;height:26px;display:block;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.14));}",
+        "@keyframes lkNavDeskIn{to{transform:translateY(0) scale(1);opacity:1;}}",
+        "@keyframes lkNavDeskSpin{to{transform:rotate(360deg);}}",
+        ":root[data-theme='dark'] .lk-nav-desk-overlay{background:rgba(2,6,23,.28);}",
+        ":root[data-theme='dark'] .lk-nav-desk-card{background:rgba(15,23,42,.86);border-color:rgba(148,163,184,.18);box-shadow:0 18px 50px rgba(0,0,0,.34),0 1px 0 rgba(255,255,255,.08) inset;}",
+        ":root[data-theme='dark'] .lk-nav-desk-card:before{border-color:rgba(236,253,245,.14);border-top-color:#5eead4;border-right-color:#38bdf8;}",
+        "@media (prefers-reduced-motion:reduce){.lk-nav-desk-card{animation:none;opacity:1;transform:none;}.lk-nav-desk-card:before{animation:none;}}"
+      ].join("");
+      document.head.appendChild(style);
+    }
+
+    overlayEl = document.createElement("div");
+    overlayEl.className = "lk-nav-desk-overlay";
+    overlayEl.setAttribute("aria-hidden", "true");
+    overlayEl.innerHTML = '<div class="lk-nav-desk-card"><span class="lk-nav-desk-mark" aria-hidden="true"><img src="/imagens/favicon.png" alt=""></span></div>';
+    document.body.appendChild(overlayEl);
+    return overlayEl;
+  }
+
+  function showFeedback(link) {
+    opening = true;
+    openingSince = Date.now();
+    ensureOverlay().classList.add("is-visible");
+    if (link) link.classList.add("is-opening");
+  }
+
+  function shouldLockAgain() {
+    if (!opening) return false;
+    return Date.now() - openingSince <= lockMs;
+  }
+
+  document.addEventListener(
+    "click",
+    function (event) {
+      var link = event.target && event.target.closest ? event.target.closest("a[href]") : null;
+      if (!link) return;
+
+      if (shouldIgnore(link)) return;
+
+      if (shouldLockAgain()) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      showFeedback(link);
+    },
+    true
+  );
+})();

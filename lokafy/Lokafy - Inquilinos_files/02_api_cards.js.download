@@ -1,0 +1,38 @@
+function carregarInquilinos() {
+  const state = window.inquilinosTabelaState;
+
+  fetch("/inquilinos/api/listar.php", { cache: "no-store" })
+    .then(r => r.json())
+    .then(json => {
+      if (!json.ok) {
+        state.listaInquilinos = [];
+        state.listaFiltrada = [];
+        state.paginaAtual = 1;
+        atualizarCards({});
+        renderTabela([]);
+        return;
+      }
+
+      state.listaInquilinos = Array.isArray(json.inquilinos) ? json.inquilinos : [];
+      state.listaFiltrada = [...state.listaInquilinos];
+      state.paginaAtual = 1;
+      atualizarCards(json.resumo || {});
+      renderTabela(state.listaFiltrada);
+    })
+    .catch(err => {
+      state.listaInquilinos = [];
+      state.listaFiltrada = [];
+      state.paginaAtual = 1;
+      atualizarCards({});
+      renderTabela([]);
+    });
+}
+
+function atualizarCards(resumo = {}) {
+  const total = document.getElementById("cardTotal");
+  const ativos = document.getElementById("cardAtivos");
+  const inativos = document.getElementById("cardInativos");
+  if (total) total.innerText = resumo.total || 0;
+  if (ativos) ativos.innerText = resumo.com_contrato || 0;
+  if (inativos) inativos.innerText = resumo.sem_contrato || 0;
+}

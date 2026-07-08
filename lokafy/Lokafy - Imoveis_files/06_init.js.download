@@ -1,0 +1,23 @@
+function initImoveisListar() {
+  const pageRoot = document.querySelector(".imoveis-page");
+  if (!pageRoot) return;
+  if (pageRoot.dataset.imoveisListarInit === "1") return;
+  pageRoot.dataset.imoveisListarInit = "1";
+
+  const state = window.imoveisListarState;
+  if (!state.eventosTabelaConfigurados) {
+    state.eventosTabelaConfigurados = true;
+    configurarFiltrosImoveis();
+    configurarAcoesImoveis();
+  }
+
+  carregarImoveis();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initImoveisListar, { once: true });
+} else {
+  initImoveisListar();
+}
+
+document.addEventListener("lokafy:page-ready", initImoveisListar);

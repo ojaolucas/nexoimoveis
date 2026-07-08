@@ -1,0 +1,124 @@
+/* =========================
+   MODAL EXCLUIR PROPRIETÁRIO
+========================= */
+
+let proprietarioExcluirId = null;
+
+function avisoErroProprietario(msg) {
+  if (typeof criarToast === "function") {
+    criarToast(msg, "warning");
+    return;
+  }
+  if (typeof toastWarning === "function") {
+    toastWarning(msg);
+    return;
+  }
+  if (typeof toastError === "function") {
+    toastError(msg);
+    return;
+  }
+}
+
+function avisoSucessoProprietario(msg) {
+  if (typeof criarToast === "function") {
+    criarToast(msg, "success");
+    return;
+  }
+  if (typeof toastSuccess === "function") {
+    toastSuccess(msg);
+    return;
+  }
+}
+
+/* ABRIR MODAL */
+function excluirProprietario(id) {
+  proprietarioExcluirId = id;
+
+  const modal = document.getElementById("modalExcluirProprietario");
+  if (!modal) return;
+
+  modal.classList.add("active");
+}
+
+/* FECHAR MODAL */
+function fecharModalExcluirProprietario() {
+  const modal = document.getElementById("modalExcluirProprietario");
+  if (!modal) return;
+
+  modal.classList.remove("active");
+  proprietarioExcluirId = null;
+}
+
+/* CONFIRMAR EXCLUSÃO */
+function initModalExcluirProprietario() {
+  if (!document.querySelector(".proprietarios-page")) return;
+
+  const btnConfirmar = document.getElementById("btnConfirmarExcluirProprietario");
+  if (!btnConfirmar) return;
+  if (btnConfirmar.dataset.boundExcluir === "1") return;
+  btnConfirmar.dataset.boundExcluir = "1";
+
+  btnConfirmar.addEventListener("click", () => {
+
+    if (!proprietarioExcluirId) return;
+    if (btnConfirmar.disabled) return;
+
+    const textoOriginal = btnConfirmar.innerHTML;
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerText = "Excluindo...";
+
+    fetch("/proprietarios/api/excluir_proprietario.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: `id=${proprietarioExcluirId}`
+    })
+      .then(r => r.json())
+      .then(j => {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = textoOriginal;
+
+        if (!j.ok) {
+          avisoErroProprietario(j.erro || "Erro ao excluir proprietário");
+          return;
+        }
+
+        fecharModalExcluirProprietario();
+
+        avisoSucessoProprietario("Proprietário excluído com sucesso");
+
+        if (typeof carregarProprietarios === "function") {
+          carregarProprietarios();
+        }
+      })
+      .catch(() => {
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = textoOriginal;
+        avisoErroProprietario("Erro de conexão ao excluir proprietário");
+      });
+
+  });
+
+}
+
+/* FECHAR CLICANDO FORA */
+document.addEventListener("click", e => {
+  const modal = document.getElementById("modalExcluirProprietario");
+  if (!modal) return;
+
+  if (
+    modal.classList.contains("active") &&
+    e.target === modal
+  ) {
+    fecharModalExcluirProprietario();
+  }
+});
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initModalExcluirProprietario, { once: true });
+} else {
+  initModalExcluirProprietario();
+}
+
+document.addEventListener("lokafy:page-ready", initModalExcluirProprietario);

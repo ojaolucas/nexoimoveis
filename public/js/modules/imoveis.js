@@ -5,6 +5,8 @@ const limit = 10;
 let currentFilters = { busca: '', status: '', tipo: '', proprietario: '' };
 let currentImovelId = null; // Used for documents and gallery uploads
 let userProfile = null;
+let currentStep = 1;
+let isEditMode = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname === '/imoveis') {
@@ -65,6 +67,7 @@ async function initImoveis() {
 
   // 2. Populate owners dropdowns
   await popularProprietarios();
+  await popularSelectLocatarios();
 
   // 3. Load initial list and cards stats
   await carregarImoveis(currentPage);
@@ -82,7 +85,7 @@ async function popularProprietarios() {
       const filterSelect = document.getElementById('filtro-proprietario');
       const formSelect = document.getElementById('proprietario_id');
       
-      const options = res.data.map(p => `<option value="${p.id}">${p.nome_razao_social} (${p.codigo})</option>`).join('');
+      const options = res.data.map(p => `<option value="${p.id}">${p.nome_razao_social}</option>`).join('');
       
       if (filterSelect) {
         filterSelect.innerHTML = '<option value="">Todos</option>' + options;
@@ -167,7 +170,7 @@ function setupEventListeners() {
       document.getElementById('form-imovel').reset();
       document.getElementById('imovel-id').value = '';
       document.getElementById('modal-title').textContent = 'Novo Imóvel';
-      document.getElementById('btn-salvar-imovel').textContent = 'Cadastrar';
+      document.getElementById('modal-subtitle').textContent = 'Cadastre as informações completas para listar o imóvel no sistema.';
       
       // Hide preview container and dropzone preview class
       document.getElementById('preview-container').style.display = 'none';
@@ -175,17 +178,26 @@ function setupEventListeners() {
       const dropzoneEl = document.getElementById('foto-principal-dropzone');
       if (dropzoneEl) dropzoneEl.classList.remove('has-preview');
       
-      // Select default tab
-      switchFormTab('dados-gerais');
+      // Clear address fields
+      ['cep', 'numero', 'complemento', 'bairro', 'cidade', 'estado'].forEach(f => {
+        const el = document.getElementById(f);
+        if (el) el.value = '';
+      });
+
+      // Clear contract fields
+      const contrFields = document.getElementById('vincular-contrato-fields');
+      if (contrFields) contrFields.style.display = 'none';
       
+      isEditMode = false;
+      const step3Tab = document.querySelector('#modal-imovel [data-step-target="3"]');
+      if (step3Tab) step3Tab.style.display = 'flex';
+      
+      goToStep(1);
       modalForm.classList.add('active');
     });
   }
 
   document.getElementById('btn-close-modal').addEventListener('click', () => {
-    modalForm.classList.remove('active');
-  });
-  document.getElementById('btn-cancelar-modal').addEventListener('click', () => {
     modalForm.classList.remove('active');
   });
 
@@ -255,15 +267,77 @@ function setupEventListeners() {
     }, false);
   }
 
-  // Form Switch tabs (General vs Observations)
-  document.querySelectorAll('[data-form-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      switchFormTab(btn.getAttribute('data-form-tab'));
+  // Wizard navigation buttons
+  document.getElementById('wizard-btn-prev').addEventListener('click', () => {
+    if (currentStep === 1) {
+      document.getElementById('modal-imovel').classList.remove('active');
+    } else {
+      goToStep(getPrevStep(currentStep));
+    }
+  });
+
+  document.getElementById('wizard-btn-next').addEventListener('click', () => {
+    if (currentStep < 5) {
+      if (validateStep(currentStep)) {
+        goToStep(getNextStep(currentStep));
+      }
+    }
+  });
+
+  // Since we want the form to handle submit correctly, we'll intercept form submit:
+  document.getElementById('form-imovel').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (currentStep < 5) {
+      if (validateStep(currentStep)) {
+        goToStep(getNextStep(currentStep));
+      }
+    } else {
+      handleSaveImovel(e);
+    }
+  });
+
+  // Wizard sidebar steps navigation click
+  document.querySelectorAll('#modal-imovel .wizard-step').forEach(stepEl => {
+    stepEl.addEventListener('click', () => {
+      const target = parseInt(stepEl.getAttribute('data-step-target'));
+      if (target === currentStep) return;
+      
+      if (isEditMode && target === 3) return; // Skip step 3 in edit mode
+      
+      if (target > currentStep) {
+        // Validate intermediate steps
+        let tempStep = currentStep;
+        while (tempStep < target) {
+          if (!validateStep(tempStep)) return;
+          tempStep = getNextStep(tempStep);
+        }
+      }
+      
+      goToStep(target);
     });
   });
 
-  // Form Submit (Save/Update)
-  document.getElementById('form-imovel').addEventListener('submit', handleSaveImovel);
+  // Locatário select link change listener
+  const selectVincular = document.getElementById('vincular_locatario_id');
+  if (selectVincular) {
+    selectVincular.addEventListener('change', (e) => {
+      const fields = document.getElementById('vincular-contrato-fields');
+      const showFields = e.target.value !== '';
+      if (fields) fields.style.display = showFields ? 'block' : 'none';
+      
+      // Toggle required attributes for contract fields
+      ['contrato_data_inicio', 'contrato_data_fim', 'contrato_valor_mensal', 'contrato_dia_vencimento'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          if (showFields) {
+            input.setAttribute('required', 'required');
+          } else {
+            input.removeAttribute('required');
+          }
+        }
+      });
+    });
+  }
 
   // Details Modal tabs switching
   document.querySelectorAll('[data-tab]').forEach(btn => {
@@ -289,15 +363,266 @@ function setupEventListeners() {
 
   // Gallery photo upload form
   document.getElementById('form-upload-galeria').addEventListener('submit', handleUploadFoto);
+
+  // Wizard Document Type selection change vencimento fields display toggle
+  const wizardDocTipo = document.getElementById('wizard-doc-tipo');
+  if (wizardDocTipo) {
+    wizardDocTipo.addEventListener('change', (e) => {
+      const isLegal = ['Alvará', 'AVCB', 'Seguro'].includes(e.target.value);
+      document.getElementById('wizard-group-data-emissao').style.display = isLegal ? 'block' : 'none';
+      document.getElementById('wizard-group-data-vencimento').style.display = isLegal ? 'block' : 'none';
+    });
+  }
+
+  // Wizard Document Upload button click
+  const btnWizardUploadDoc = document.getElementById('btn-wizard-upload-documento');
+  if (btnWizardUploadDoc) {
+    btnWizardUploadDoc.addEventListener('click', handleWizardUploadDocumento);
+  }
+
+  // Wizard Gallery upload button click
+  const btnWizardUploadGal = document.getElementById('btn-wizard-upload-galeria');
+  if (btnWizardUploadGal) {
+    btnWizardUploadGal.addEventListener('click', handleWizardUploadGaleria);
+  }
+
+  // Toggle gallery upload form
+  const btnToggleGal = document.getElementById('btn-toggle-upload-galeria');
+  if (btnToggleGal) {
+    btnToggleGal.addEventListener('click', () => {
+      const container = document.getElementById('gallery-upload-container');
+      if (container) {
+        const isHidden = container.style.display === 'none';
+        container.style.display = isHidden ? 'block' : 'none';
+      }
+    });
+  }
+
+  // Locatário linkage controls
+  const btnAbrirLinkLoc = document.getElementById('btn-abrir-link-locatario');
+  const btnCancelarLinkLoc = document.getElementById('btn-cancelar-link-locatario');
+  const formLinkLoc = document.getElementById('form-link-locatario');
+
+  if (btnAbrirLinkLoc) {
+    btnAbrirLinkLoc.addEventListener('click', async () => {
+      const container = document.getElementById('locatario-link-container');
+      if (container) {
+        container.style.display = 'block';
+        await popularSelectLocatarios();
+      }
+    });
+  }
+
+  if (btnCancelarLinkLoc) {
+    btnCancelarLinkLoc.addEventListener('click', () => {
+      const container = document.getElementById('locatario-link-container');
+      if (container) container.style.display = 'none';
+    });
+  }
+
+  if (formLinkLoc) {
+    formLinkLoc.addEventListener('submit', handleLinkLocatarioSubmit);
+  }
+
+  // Financeiro Sub-tabs switching
+  const btnFinReceitas = document.getElementById('btn-fin-receitas');
+  const btnFinDespesas = document.getElementById('btn-fin-despesas');
+
+  if (btnFinReceitas && btnFinDespesas) {
+    btnFinReceitas.addEventListener('click', () => {
+      btnFinReceitas.classList.add('active');
+      btnFinDespesas.classList.remove('active');
+      document.getElementById('pane-fin-receitas').style.display = 'block';
+      document.getElementById('pane-fin-despesas').style.display = 'none';
+    });
+
+    btnFinDespesas.addEventListener('click', () => {
+      btnFinDespesas.classList.add('active');
+      btnFinReceitas.classList.remove('active');
+      document.getElementById('pane-fin-despesas').style.display = 'block';
+      document.getElementById('pane-fin-receitas').style.display = 'none';
+    });
+  }
 }
 
-// Switches form tab UI
-function switchFormTab(tabId) {
-  document.querySelectorAll('[data-form-tab]').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-form-tab') === tabId);
+// Wizard Helper Functions
+function getNextStep(step) {
+  if (isEditMode && step === 2) return 4;
+  return step + 1;
+}
+
+function getPrevStep(step) {
+  if (isEditMode && step === 4) return 2;
+  return step - 1;
+}
+
+function goToStep(step) {
+  currentStep = step;
+  
+  if (step === 4) {
+    const isEdit = document.getElementById('imovel-id').value !== '';
+    const gc = document.getElementById('wizard-gallery-card');
+    const dc = document.getElementById('wizard-documents-card');
+    const ic = document.getElementById('wizard-informative-card');
+    if (gc) gc.style.display = isEdit ? 'block' : 'none';
+    if (dc) dc.style.display = isEdit ? 'block' : 'none';
+    if (ic) ic.style.display = isEdit ? 'none' : 'block';
+  }
+
+  // Update step elements in sidebar
+  document.querySelectorAll('#modal-imovel .wizard-step').forEach(el => {
+    const targetStep = parseInt(el.getAttribute('data-step-target'));
+    el.classList.toggle('active', targetStep === step);
   });
-  document.getElementById('form-dados-gerais').style.display = tabId === 'dados-gerais' ? 'block' : 'none';
-  document.getElementById('form-observacoes-tab').style.display = tabId === 'observacoes-tab' ? 'block' : 'none';
+  
+  // Show active pane
+  document.querySelectorAll('#modal-imovel .wizard-pane').forEach(el => {
+    el.style.display = el.getAttribute('id') === `wizard-pane-${step}` ? 'block' : 'none';
+  });
+  
+  // Configure footer buttons
+  const btnPrev = document.getElementById('wizard-btn-prev');
+  const btnNext = document.getElementById('wizard-btn-next');
+  
+  if (step === 1) {
+    btnPrev.textContent = 'Cancelar';
+  } else {
+    btnPrev.textContent = '← Voltar';
+  }
+  
+  if (step < 5) {
+    btnNext.type = 'button';
+    btnNext.innerHTML = 'Próximo Passo <i class="fi fi-rr-arrow-right"></i>';
+  } else {
+    btnNext.type = 'submit';
+    btnNext.innerHTML = 'Salvar Cadastro <i class="fi fi-rr-check"></i>';
+    renderRevision();
+  }
+}
+
+function validateStep(step) {
+  const pane = document.getElementById(`wizard-pane-${step}`);
+  if (!pane) return true;
+  
+  const inputs = pane.querySelectorAll('input, select, textarea');
+  let valid = true;
+  
+  inputs.forEach(input => {
+    // If the input is in a hidden group, skip validating
+    let parent = input.parentElement;
+    let isHidden = false;
+    while (parent && parent !== pane) {
+      if (parent.style.display === 'none') {
+        isHidden = true;
+        break;
+      }
+      parent = parent.parentElement;
+    }
+    if (isHidden) return;
+
+    // Skip validating contract fields if locatario is not selected
+    if (step === 3) {
+      const locatarioId = document.getElementById('vincular_locatario_id').value;
+      if (!locatarioId && input.id !== 'vincular_locatario_id') {
+        return;
+      }
+    }
+    
+    if (!input.checkValidity()) {
+      input.reportValidity();
+      valid = false;
+    }
+  });
+  
+  return valid;
+}
+
+function renderRevision() {
+  const container = document.getElementById('revisao-conteudo');
+  if (!container) return;
+  
+  const nome = document.getElementById('nome').value || '-';
+  const tipo = document.getElementById('tipo').value || '-';
+  const status = document.getElementById('status').value || '-';
+  const valorLocacao = document.getElementById('valor_locacao').value ? formatCurrency(document.getElementById('valor_locacao').value) : 'Não informado';
+  const areaTotal = document.getElementById('area_total').value ? `${document.getElementById('area_total').value} m²` : 'Não informada';
+  
+  const ownerSelect = document.getElementById('proprietario_id');
+  const ownerName = ownerSelect.options[ownerSelect.selectedIndex]?.text || 'Nenhum';
+  
+  const quartos = document.getElementById('quartos').value || '0';
+  const banheiros = document.getElementById('banheiros').value || '0';
+  const vagasGaragem = document.getElementById('vagas_garagem').value || '0';
+  const mobiliado = document.getElementById('mobiliado').value || 'Não informado';
+  const valorCondominio = document.getElementById('valor_condominio').value ? formatCurrency(document.getElementById('valor_condominio').value) : 'R$ 0,00';
+  const aceitaPet = document.getElementById('aceita_pet').value || 'Não informado';
+  
+  const cep = document.getElementById('cep').value || '-';
+  const endereco = document.getElementById('endereco').value || '-';
+  const numero = document.getElementById('numero').value || '-';
+  const complemento = document.getElementById('complemento').value || '-';
+  const bairro = document.getElementById('bairro').value || '-';
+  const cidade = document.getElementById('cidade').value || '-';
+  const estado = document.getElementById('estado').value || '-';
+  
+  const tenantSelect = document.getElementById('vincular_locatario_id');
+  const tenantName = tenantSelect.value ? (tenantSelect.options[tenantSelect.selectedIndex]?.text || 'Sim') : 'Nenhum';
+  const contratoDataInicio = document.getElementById('contrato_data_inicio').value || '-';
+  const contratoDataFim = document.getElementById('contrato_data_fim').value || '-';
+  const contratoValorMensal = document.getElementById('contrato_valor_mensal').value ? formatCurrency(document.getElementById('contrato_valor_mensal').value) : '-';
+  const contratoDiaVencimento = document.getElementById('contrato_dia_vencimento').value || '-';
+  const contratoPdf = document.getElementById('contrato_pdf').files[0]?.name || 'Nenhum arquivo anexado';
+  
+  const photoFile = document.getElementById('foto_principal').files[0]?.name || (document.getElementById('img-preview').src ? 'Foto principal existente' : 'Nenhuma foto anexada');
+  
+  container.innerHTML = `
+    <div class="revisao-secao" style="border-bottom: 1px dashed var(--color-border); padding-bottom: 12px;">
+      <h4 style="font-size: 13px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; margin-bottom: 8px; margin-top: 0;">Dados Básicos</h4>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 13px;">
+        <div><strong>Nome:</strong> ${nome}</div>
+        <div><strong>Tipo:</strong> ${tipo}</div>
+        <div><strong>Status:</strong> ${status}</div>
+        <div><strong>Valor Locação:</strong> ${valorLocacao}</div>
+        <div><strong>Área Total:</strong> ${areaTotal}</div>
+        <div><strong>Proprietário:</strong> ${ownerName}</div>
+        <div><strong>Quartos / Banheiros:</strong> ${quartos} Q / ${banheiros} B</div>
+        <div><strong>Vagas de Garagem:</strong> ${vagasGaragem}</div>
+        <div><strong>Mobiliado:</strong> ${mobiliado}</div>
+        <div><strong>Condomínio:</strong> ${valorCondominio}</div>
+        <div><strong>Aceita Pet:</strong> ${aceitaPet}</div>
+      </div>
+    </div>
+    <div class="revisao-secao" style="border-bottom: 1px dashed var(--color-border); padding-bottom: 12px; margin-top: 12px;">
+      <h4 style="font-size: 13px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; margin-bottom: 8px; margin-top: 0;">Localização</h4>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 13px;">
+        <div><strong>CEP:</strong> ${cep}</div>
+        <div><strong>Endereço:</strong> ${endereco}</div>
+        <div><strong>Número:</strong> ${numero}</div>
+        <div><strong>Complemento:</strong> ${complemento}</div>
+        <div><strong>Bairro:</strong> ${bairro}</div>
+        <div><strong>Cidade/UF:</strong> ${cidade}/${estado}</div>
+      </div>
+    </div>
+    ${!isEditMode && tenantSelect.value ? `
+    <div class="revisao-secao" style="border-bottom: 1px dashed var(--color-border); padding-bottom: 12px; margin-top: 12px;">
+      <h4 style="font-size: 13px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; margin-bottom: 8px; margin-top: 0;">Contrato Inicial</h4>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 13px;">
+        <div><strong>Locatário Vinculado:</strong> ${tenantName}</div>
+        <div><strong>Início:</strong> ${formatDate(contratoDataInicio)}</div>
+        <div><strong>Fim:</strong> ${formatDate(contratoDataFim)}</div>
+        <div><strong>Valor Mensal:</strong> ${contratoValorMensal}</div>
+        <div><strong>Dia Vencimento:</strong> ${contratoDiaVencimento}</div>
+        <div><strong>PDF Anexo:</strong> ${contratoPdf}</div>
+      </div>
+    </div>
+    ` : ''}
+    <div class="revisao-secao" style="margin-top: 12px;">
+      <h4 style="font-size: 13px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; margin-bottom: 8px; margin-top: 0;">Mídias e Anexos</h4>
+      <div style="font-size: 13px;">
+        <strong>Foto Principal:</strong> ${photoFile}
+      </div>
+    </div>
+  `;
 }
 
 // Switches detail modal tab UI
@@ -357,7 +682,7 @@ async function carregarImoveis(page) {
       let badgeClass = 'badge-disponivel';
       if (i.status === 'Alugado') badgeClass = 'badge-alugado';
       if (i.status === 'Reservado') badgeClass = 'badge-reservado';
-      if (i.status === 'Manutenção') badgeClass = 'badge-manutencao';
+      if (i.status === 'Em Manutenção') badgeClass = 'badge-manutencao';
       if (i.status === 'Inativo') badgeClass = 'badge-inativo';
 
       // Action buttons based on profile
@@ -372,7 +697,6 @@ async function carregarImoveis(page) {
 
       return `
         <tr class="animate-fade-in">
-          <td><strong>${i.codigo}</strong></td>
           <td>${i.nome}</td>
           <td>${i.tipo}</td>
           <td>${i.proprietario_nome || 'Nenhum'}</td>
@@ -407,12 +731,58 @@ function updatePaginationControls(totalPages, activePage) {
   btnNext.disabled = activePage >= totalPages;
 }
 
+// Compose full address string from individual fields
+function composeEnderecoCompleto() {
+  const parts = [];
+  const endereco = (document.getElementById('endereco').value || '').trim();
+  const numero = (document.getElementById('numero').value || '').trim();
+  const complemento = (document.getElementById('complemento').value || '').trim();
+  const bairro = (document.getElementById('bairro').value || '').trim();
+  const cidade = (document.getElementById('cidade').value || '').trim();
+  const estado = (document.getElementById('estado').value || '').trim();
+  const cep = (document.getElementById('cep').value || '').trim();
+
+  if (endereco) parts.push(endereco);
+  if (numero) parts.push(numero);
+  if (complemento) parts.push(complemento);
+  if (bairro) parts.push(bairro);
+  if (cidade && estado) {
+    parts.push(`${cidade}/${estado}`);
+  } else if (cidade) {
+    parts.push(cidade);
+  } else if (estado) {
+    parts.push(estado);
+  }
+  if (cep) parts.push(`CEP: ${cep}`);
+  return parts.join(', ');
+}
+
+// Parse address string back into individual form fields
+function parseEnderecoParaCampos(enderecoFull) {
+  if (!enderecoFull) return;
+  // Best-effort parse: set the main street field to the full string
+  // Users can manually split when editing
+  document.getElementById('endereco').value = enderecoFull;
+  // Clear the auxiliary fields since we cannot reliably parse
+  ['cep', 'numero', 'complemento', 'bairro', 'cidade', 'estado'].forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.value = '';
+  });
+}
+
 // Save/Update handler
 async function handleSaveImovel(e) {
   e.preventDefault();
   const id = document.getElementById('imovel-id').value;
   
   const formData = new FormData(document.getElementById('form-imovel'));
+
+  // Compose the full address from individual fields and overwrite the endereco value
+  const enderecoCompleto = composeEnderecoCompleto();
+  formData.set('endereco', enderecoCompleto);
+
+  // Remove auxiliary address fields that the backend doesn't expect
+  ['cep', 'numero', 'complemento', 'bairro', 'cidade', 'estado'].forEach(f => formData.delete(f));
 
   // Custom size validation for foto_principal
   const fileInput = document.getElementById('foto_principal');
@@ -457,15 +827,22 @@ window.editarImovel = async function(id) {
       const i = res.data;
       
       document.getElementById('imovel-id').value = i.id;
-      document.getElementById('codigo').value = i.codigo;
       document.getElementById('tipo').value = i.tipo;
       document.getElementById('nome').value = i.nome;
       document.getElementById('proprietario_id').value = i.proprietario_id;
       document.getElementById('area_total').value = i.area_total;
       document.getElementById('valor_locacao').value = i.valor_locacao;
       document.getElementById('status').value = i.status;
-      document.getElementById('endereco').value = i.endereco;
       document.getElementById('observacoes').value = i.observacoes || '';
+      document.getElementById('quartos').value = i.quartos || 0;
+      document.getElementById('banheiros').value = i.banheiros || 0;
+      document.getElementById('vagas_garagem').value = i.vagas_garagem || 0;
+      document.getElementById('mobiliado').value = i.mobiliado || 'Não informado';
+      document.getElementById('valor_condominio').value = i.valor_condominio || 0;
+      document.getElementById('aceita_pet').value = i.aceita_pet || 'Não informado';
+
+      // Parse address into individual fields
+      parseEnderecoParaCampos(i.endereco);
 
       const previewContainer = document.getElementById('preview-container');
       const previewImg = document.getElementById('img-preview');
@@ -484,7 +861,16 @@ window.editarImovel = async function(id) {
       document.getElementById('modal-title').textContent = 'Editar Imóvel';
       document.getElementById('btn-salvar-imovel').textContent = 'Salvar Alterações';
       
-      switchFormTab('dados-gerais');
+      isEditMode = true;
+      currentImovelId = i.id;
+      const step3Tab = document.querySelector('#modal-imovel [data-step-target="3"]');
+      if (step3Tab) step3Tab.style.display = 'none';
+      
+      renderWizardDocumentos(i.documentos || []);
+      renderWizardGaleria(i.fotos || []);
+      
+      goToStep(1);
+      
       document.getElementById('modal-imovel').classList.add('active');
     }
   } catch (err) {
@@ -494,7 +880,8 @@ window.editarImovel = async function(id) {
 
 // Excluir handler
 window.excluirImovel = async function(id, nome) {
-  if (confirm(`Deseja realmente excluir o imóvel "${nome}"?\nEsta ação removerá definitivamente o imóvel do sistema. Se houver contratos ativos vinculados, a exclusão não será permitida.`)) {
+  const confirmar = await confirmarAcao('Excluir Imóvel', `Deseja realmente excluir o imóvel "${nome}"?\nEsta ação removerá definitivamente o imóvel do sistema. Se houver contratos ativos vinculados, a exclusão não será permitida.`, 'Excluir', 'Cancelar', true);
+  if (confirmar) {
     try {
       const res = await api.delete(`/api/imoveis/${id}`);
       if (res.success) {
@@ -518,61 +905,101 @@ window.verDetalhes = async function(id) {
       const i = res.data;
       currentImovelId = i.id;
 
-      // Banner section header
+      // Executive Compact Header Left Column
       document.getElementById('detalhe-header-nome').textContent = i.nome;
-      document.getElementById('det-banner-nome').textContent = i.nome;
-      document.getElementById('det-banner-codigo').textContent = i.codigo;
-      document.getElementById('det-banner-preco').textContent = `${formatCurrency(i.valor_locacao)} / mês`;
-      
-      const bannerFoto = document.getElementById('det-banner-foto');
-      if (i.foto_principal) {
-        bannerFoto.style.backgroundImage = `url('${i.foto_principal}')`;
+      document.getElementById('det-header-tipo').textContent = i.tipo;
+      document.getElementById('det-header-endereco').textContent = i.endereco;
+
+      // Executive Compact Header Right Column
+      document.getElementById('det-header-preco').textContent = `${formatCurrency(i.valor_locacao)}/mês`;
+
+      // Find active contract from contracts array
+      const activeContract = (i.contratos || []).find(c => c.status === 'Ativo');
+      const contractEl = document.getElementById('det-header-contrato');
+      const dueEl = document.getElementById('det-header-due');
+      if (activeContract) {
+        contractEl.innerHTML = `<i class="fi fi-rr-document-signed"></i> Com Contrato Ativo`;
+        dueEl.innerHTML = `<i class="fi fi-rr-calendar"></i> Vence dia ${activeContract.dia_vencimento}`;
       } else {
-        bannerFoto.style.backgroundImage = "url('/img/avatar-default.png')";
+        contractEl.textContent = 'Sem contrato ativo';
+        dueEl.textContent = 'Próximo Recebimento: -';
       }
 
+      // Status Badge
       const badgeStatus = document.getElementById('detalhe-badge-status');
       badgeStatus.textContent = i.status;
-      
       let badgeClass = 'badge-disponivel';
       if (i.status === 'Alugado') badgeClass = 'badge-alugado';
       if (i.status === 'Reservado') badgeClass = 'badge-reservado';
-      if (i.status === 'Manutenção') badgeClass = 'badge-manutencao';
+      if (i.status === 'Manutenção' || i.status === 'Em Manutenção') badgeClass = 'badge-manutencao';
       if (i.status === 'Inativo') badgeClass = 'badge-inativo';
       badgeStatus.className = `badge ${badgeClass}`;
 
-      // Tab Dados Gerais
-      document.getElementById('det-codigo').textContent = i.codigo;
+      // Tab Dados Gerais col 1 & col 2
       document.getElementById('det-tipo').textContent = i.tipo;
       document.getElementById('det-area').textContent = `${i.area_total} m²`;
+      document.getElementById('det-status').textContent = i.status;
       document.getElementById('det-proprietario').textContent = i.proprietario_nome || 'Nenhum';
+      document.getElementById('det-valor-locacao').textContent = formatCurrency(i.valor_locacao);
+      document.getElementById('det-quartos-banheiros').textContent = `${i.quartos || 0} quartos / ${i.banheiros || 0} banheiros`;
+      document.getElementById('det-vagas-mobiliado').textContent = `${i.vagas_garagem || 0} vagas / ${i.mobiliado || 'Não informado'}`;
+      document.getElementById('det-condominio-pet').textContent = `${formatCurrency(i.valor_condominio)} / Pet: ${i.aceita_pet || 'Não informado'}`;
+
       document.getElementById('det-endereco').textContent = i.endereco;
+      document.getElementById('det-cadastro').textContent = formatDate(i.criado_em);
+      document.getElementById('det-atualizacao').textContent = formatDate(i.atualizado_em);
       document.getElementById('det-observacoes').textContent = i.observacoes || 'Nenhuma observação cadastrada.';
 
-      // Tab Counts
-      document.getElementById('det-doc-count').textContent = i.documentos ? i.documentos.length : 0;
-      document.getElementById('det-contrato-count').textContent = i.contratos ? i.contratos.length : 0;
-      document.getElementById('det-recebimento-count').textContent = i.recebimentos ? i.recebimentos.length : 0;
-      document.getElementById('det-despesa-count').textContent = i.despesas ? i.despesas.length : 0;
-      document.getElementById('det-manutencao-count').textContent = i.manutencoes ? i.manutencoes.length : 0;
-      document.getElementById('det-vistoria-count').textContent = i.vistorias ? i.vistorias.length : 0;
+      // Count unique/active locatarios
+      const activeLocCount = i.contratos ? i.contratos.filter(c => c.status === 'Ativo').length : 0;
+
+      // Cards Resumo Upper stats
+      document.getElementById('card-det-area').textContent = `${i.area_total} m²`;
+      document.getElementById('card-det-locatarios').textContent = activeLocCount;
+      document.getElementById('card-det-contratos').textContent = i.contratos ? i.contratos.length : 0;
+      document.getElementById('card-det-recebimentos').textContent = i.recebimentos ? i.recebimentos.length : 0;
+      document.getElementById('card-det-despesas').textContent = i.despesas ? i.despesas.length : 0;
+      document.getElementById('card-det-documentos').textContent = i.documentos ? i.documentos.length : 0;
+
+      // Tab Navigation Badges
+      document.getElementById('badge-det-locatarios').textContent = activeLocCount;
+      document.getElementById('badge-det-contratos').textContent = i.contratos ? i.contratos.length : 0;
+      document.getElementById('badge-det-documentos').textContent = i.documentos ? i.documentos.length : 0;
+      document.getElementById('badge-det-fotos').textContent = i.fotos ? i.fotos.length : 0;
+      document.getElementById('badge-det-manutencoes').textContent = i.manutencoes ? i.manutencoes.length : 0;
+
+      // Toggle link locatario buttons based on profile permissions
+      const btnLinkLoc = document.getElementById('btn-abrir-link-locatario');
+      if (btnLinkLoc) {
+        btnLinkLoc.style.display = (userProfile === 'administrador' || userProfile === 'operacional') ? 'inline-flex' : 'none';
+      }
+
+      // Toggle upload button for gallery based on profile permissions
+      const btnToggleGal = document.getElementById('btn-toggle-upload-galeria');
+      if (btnToggleGal) {
+        btnToggleGal.style.display = (userProfile === 'administrador' || userProfile === 'operacional') ? 'inline-flex' : 'none';
+      }
 
       // Populate upload type options
       document.getElementById('doc-tipo').value = 'Escritura';
       toggleVencimentoFields('Escritura');
 
-      // Clear input fields
+      // Clear input/toggle fields
       document.getElementById('doc-arquivo').value = '';
       document.getElementById('foto-arquivo').value = '';
+      const linkageForm = document.getElementById('locatario-link-container');
+      if (linkageForm) linkageForm.style.display = 'none';
+      const galleryUploadContainer = document.getElementById('gallery-upload-container');
+      if (galleryUploadContainer) galleryUploadContainer.style.display = 'none';
 
       // Render Sub-resources content
       renderDetalheGaleria(i.fotos);
       renderDetalheDocumentos(i.documentos);
+      renderDetalheLocatarios(i.contratos);
       renderDetalheContratos(i.contratos);
       renderDetalheRecebimentos(i.recebimentos);
       renderDetalheDespesas(i.despesas);
       renderDetalheManutencoes(i.manutencoes);
-      renderDetalheVistorias(i.vistorias);
       renderDetalheTimeline(i.timeline);
 
       // Open details modal
@@ -589,7 +1016,18 @@ window.verDetalhes = async function(id) {
 function renderDetalheGaleria(fotos) {
   const container = document.getElementById('det-galeria-grid');
   if (!fotos || fotos.length === 0) {
-    container.innerHTML = `<div style="text-align:center; color:var(--color-text-muted); grid-column:span 4; padding:20px;">Nenhuma foto na galeria.</div>`;
+    let addBtnHtml = '';
+    if (userProfile === 'administrador' || userProfile === 'operacional') {
+      addBtnHtml = `<button type="button" class="btn btn-primary" onclick="const form = document.getElementById('gallery-upload-container'); if(form) form.style.display = 'block'; form.scrollIntoView({behavior: 'smooth'});" style="margin-top: 8px;"><i class="fi fi-rr-add"></i> Adicionar Primeira Foto</button>`;
+    }
+    container.innerHTML = `
+      <div class="empty-state-card animate-fade-in" style="grid-column: span 4;">
+        <div class="empty-state-icon"><i class="fi fi-rr-picture"></i></div>
+        <h5 class="empty-state-title">Nenhuma foto cadastrada</h5>
+        <p class="empty-state-text">Adicione imagens para facilitar futuras consultas e vistorias do imóvel.</p>
+        ${addBtnHtml}
+      </div>
+    `;
     return;
   }
 
@@ -610,7 +1048,18 @@ function renderDetalheGaleria(fotos) {
 function renderDetalheDocumentos(docs) {
   const container = document.getElementById('det-documentos-list');
   if (!docs || docs.length === 0) {
-    container.innerHTML = `<div style="text-align:center; color:var(--color-text-muted); padding:20px;">Nenhum documento anexado.</div>`;
+    let addBtnHtml = '';
+    if (userProfile === 'administrador' || userProfile === 'operacional') {
+      addBtnHtml = `<button type="button" class="btn btn-primary" onclick="const form = document.getElementById('document-upload-container'); if(form) form.style.display = 'block'; form.scrollIntoView({behavior: 'smooth'});" style="margin-top: 8px;"><i class="fi fi-rr-add"></i> Adicionar Documento</button>`;
+    }
+    container.innerHTML = `
+      <div class="empty-state-card animate-fade-in">
+        <div class="empty-state-icon" style="font-size: 38px;">📄</div>
+        <h5 class="empty-state-title">Nenhum documento anexado</h5>
+        <p class="empty-state-text">Adicione IPTU, Escritura, Alvarás e outros documentos importantes.</p>
+        ${addBtnHtml}
+      </div>
+    `;
     return;
   }
 
@@ -649,6 +1098,44 @@ function renderDetalheDocumentos(docs) {
   }).join('');
 }
 
+function renderDetalheLocatarios(contratos) {
+  const tbody = document.getElementById('det-locatarios-list-body');
+  if (!contratos || contratos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhum locatário vinculado.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = contratos.map(c => {
+    const formattedVal = formatCurrency(c.valor_mensal);
+    const startVal = formatDate(c.data_inicio);
+    const endVal = formatDate(c.data_fim);
+
+    let badgeClass = 'badge-disponivel';
+    if (c.status === 'Ativo') badgeClass = 'badge-disponivel';
+    if (c.status === 'Encerrado' || c.status === 'Cancelado') badgeClass = 'badge-manutencao';
+
+    let actionsHtml = '-';
+    if (c.status === 'Ativo' && (userProfile === 'administrador' || userProfile === 'operacional')) {
+      actionsHtml = `
+        <button onclick="desvincularLocatario('${c.id}', '${c.locatario_nome}')" class="btn btn-danger btn-icon" style="height:32px; padding: 0 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Desvincular">
+          <i class="fi fi-rr-ban"></i> Desvincular
+        </button>
+      `;
+    }
+
+    return `
+      <tr>
+        <td style="font-weight:600; color:var(--color-text-main);">${c.locatario_nome}</td>
+        <td>${startVal}</td>
+        <td>${endVal}</td>
+        <td>${formattedVal}</td>
+        <td><span class="badge ${badgeClass}">${c.status === 'Ativo' ? 'Ativo' : 'Histórico'}</span></td>
+        <td style="text-align: right; padding-right: 24px;">${actionsHtml}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
 function renderDetalheContratos(contratos) {
   const tbody = document.getElementById('det-contratos-list-body');
   if (!contratos || contratos.length === 0) {
@@ -665,17 +1152,18 @@ function renderDetalheContratos(contratos) {
     if (c.status === 'Ativo') badgeClass = 'badge-disponivel';
     if (c.status === 'Encerrado' || c.status === 'Cancelado') badgeClass = 'badge-manutencao';
 
-    // Allow redirection/opening contract details if contract module exists
-    const contractLink = `/contratos#${c.id}`;
-
     return `
       <tr>
-        <td><strong><a href="${contractLink}" style="color:var(--color-primary); font-weight:700;">${c.numero_contrato}</a></strong></td>
         <td>${c.locatario_nome}</td>
         <td>${startVal}</td>
         <td>${endVal}</td>
         <td>${formattedVal}</td>
         <td><span class="badge ${badgeClass}">${c.status}</span></td>
+        <td style="text-align: right; padding-right: 24px;">
+          <a href="/imoveis" class="btn btn-secondary btn-icon" style="height:32px; padding: 0 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Abrir Contrato" onclick="event.preventDefault(); showToast('Para gerenciar o contrato, acesse a aba Locatários.', 'info');">
+            <i class="fi fi-rr-eye"></i> Info
+          </a>
+        </td>
       </tr>
     `;
   }).join('');
@@ -684,7 +1172,7 @@ function renderDetalheContratos(contratos) {
 function renderDetalheRecebimentos(recebimentos) {
   const tbody = document.getElementById('det-recebimentos-list-body');
   if (!recebimentos || recebimentos.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhum recebimento registrado.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum recebimento registrado.</td></tr>`;
     return;
   }
 
@@ -698,11 +1186,10 @@ function renderDetalheRecebimentos(recebimentos) {
     if (r.status === 'Pago') badgeClass = 'badge-disponivel';
     if (r.status === 'Vencido') badgeClass = 'badge-manutencao';
     if (r.status === 'Parcial') badgeClass = 'badge-alugado';
-    if (r.status === 'A Vencer') badgeClass = 'badge-disponivel';
+    if (r.status === 'A Vencer') badgeClass = 'badge-reservado';
 
     return `
       <tr>
-        <td><strong>${r.numero_contrato}</strong></td>
         <td>${compVal}</td>
         <td>${vencVal}</td>
         <td>${prevVal}</td>
@@ -744,14 +1231,13 @@ function renderDetalheDespesas(despesas) {
 function renderDetalheManutencoes(manutencoes) {
   const tbody = document.getElementById('det-manutencoes-list-body');
   if (!manutencoes || manutencoes.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhuma manutenção registrada.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhuma manutenção registrada.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = manutencoes.map(m => {
     const prevDate = formatDate(m.data_prevista);
     const valReal = formatCurrency(m.valor_real);
-    const maintenanceLink = `/manutencoes#${m.id}`;
     
     let badgeClass = 'badge-disponivel';
     if (m.status === 'Planejada') badgeClass = 'badge-reservado';
@@ -761,38 +1247,11 @@ function renderDetalheManutencoes(manutencoes) {
 
     return `
       <tr>
-        <td><strong><a href="${maintenanceLink}" style="color:var(--color-primary); font-weight:700;">${m.codigo}</a></strong></td>
         <td>${m.tipo}</td>
         <td>${m.titulo}</td>
         <td>${prevDate}</td>
         <td>${valReal}</td>
         <td><span class="badge ${badgeClass}">${m.status}</span></td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function renderDetalheVistorias(vistorias) {
-  const tbody = document.getElementById('det-vistorias-list-body');
-  if (!vistorias || vistorias.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhuma vistoria registrada.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = vistorias.map(v => {
-    const dataVal = formatDate(v.data_vistoria || v.data);
-    
-    let badgeClass = 'badge-planejada';
-    if (v.status === 'Em Andamento') badgeClass = 'badge-em-andamento';
-    if (v.status === 'Concluída') badgeClass = 'badge-concluida';
-    if (v.status === 'Cancelada') badgeClass = 'badge-cancelada';
-
-    return `
-      <tr>
-        <td><strong><a href="/vistorias#${v.id}" style="color:var(--color-primary); font-weight:700;">${dataVal}</a></strong></td>
-        <td>${v.tipo}</td>
-        <td><span class="badge ${badgeClass}">${v.status}</span></td>
-        <td>${v.responsavel}</td>
       </tr>
     `;
   }).join('');
@@ -893,7 +1352,8 @@ async function handleUploadDocumento(e) {
 
 // Delete document handler
 window.excluirDocumento = async function(documentoId) {
-  if (confirm('Deseja realmente remover este documento? Esta ação não pode ser desfeita.')) {
+  const confirmar = await confirmarAcao('Remover Documento', 'Deseja realmente remover este documento? Esta ação não pode ser desfeita.', 'Remover', 'Cancelar', true);
+  if (confirmar) {
     showLoader();
     try {
       const res = await api.delete(`/api/imoveis/${currentImovelId}/documentos/${documentoId}`);
@@ -970,7 +1430,8 @@ async function handleUploadFoto(e) {
 
 // Delete photo handler
 window.excluirFoto = async function(fotoId) {
-  if (confirm('Deseja realmente remover esta foto da galeria?')) {
+  const confirmar = await confirmarAcao('Remover Foto', 'Deseja realmente remover esta foto da galeria?', 'Remover', 'Cancelar', true);
+  if (confirmar) {
     showLoader();
     try {
       const res = await api.delete(`/api/imoveis/${currentImovelId}/fotos/${fotoId}`);
@@ -993,3 +1454,331 @@ window.excluirFoto = async function(fotoId) {
     }
   }
 };
+
+// Popular Locatários dropdown
+async function popularSelectLocatarios() {
+  try {
+    const res = await api.get('/api/locatarios?limit=1000&status=ativo');
+    if (res.success && res.data) {
+      const select = document.getElementById('link-locatario-select');
+      if (select) {
+        select.innerHTML = '<option value="" disabled selected>Selecione um locatário...</option>';
+        res.data.forEach(l => {
+          const option = document.createElement('option');
+          option.value = l.id;
+          option.textContent = l.nome_razao_social;
+          select.appendChild(option);
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar locatários para vínculo:', error);
+  }
+}
+
+// Vincular locatário submit handler
+async function handleLinkLocatarioSubmit(e) {
+  e.preventDefault();
+  const locatarioId = document.getElementById('link-locatario-select').value;
+  const valorMensal = document.getElementById('link-valor-mensal').value;
+  const dataInicio = document.getElementById('link-data-inicio').value;
+  const dataFim = document.getElementById('link-data-fim').value;
+  const diaVencimento = document.getElementById('link-vencimento').value;
+
+  if (!locatarioId || !valorMensal || !dataInicio || !dataFim || !diaVencimento) {
+    showToast('Preencha todos os campos para vincular o locatário.', 'warning');
+    return;
+  }
+
+  const payload = {
+    numero_contrato: `CTR-${Date.now()}`,
+    imovel_id: currentImovelId,
+    locatario_id: locatarioId,
+    data_inicio: dataInicio,
+    data_fim: dataFim,
+    valor_mensal: valorMensal,
+    dia_vencimento: diaVencimento,
+    caucao: 0,
+    garantia: 'Caução',
+    indice_reajuste: 'IPCA',
+    observacoes: 'Vínculo gerado pela aba Locatários da Ficha do Imóvel.',
+    status: 'Ativo'
+  };
+
+  showLoader();
+  try {
+    const res = await api.post('/api/contratos', payload);
+    if (res.success) {
+      showToast('Locatário vinculado com sucesso!', 'success');
+      document.getElementById('locatario-link-container').style.display = 'none';
+      document.getElementById('form-link-locatario').reset();
+
+      // Reload details view and properties list
+      await verDetalhes(currentImovelId);
+      await carregarImoveis(currentPage);
+    } else {
+      showToast(res.message || 'Erro ao registrar vínculo.', 'error');
+    }
+  } catch (error) {
+    showToast(error.message || 'Erro ao comunicar com o servidor.', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Desvincular locatário handler
+window.desvincularLocatario = async function(contratoId, locatarioNome) {
+  const confirmar = await confirmarAcao('Desvincular Locatário', `Deseja realmente desvincular o locatário "${locatarioNome}" deste imóvel?\nO contrato será marcado como encerrado e o imóvel voltará a ficar disponível.`, 'Desvincular', 'Cancelar', true);
+  if (confirmar) {
+    showLoader();
+    try {
+      const res = await api.patch(`/api/contratos/${contratoId}/encerrar`);
+      if (res.success) {
+        showToast('Locatário desvinculado com sucesso.', 'success');
+        await verDetalhes(currentImovelId);
+        await carregarImoveis(currentPage);
+      } else {
+        showToast(res.message || 'Erro ao desvincular.', 'error');
+      }
+    } catch (err) {
+      showToast('Erro de conexão.', 'error');
+    } finally {
+      hideLoader();
+    }
+  }
+};
+
+// --- Wizard Upload and Delete Helpers ---
+
+async function handleWizardUploadDocumento(e) {
+  if (e) e.preventDefault();
+  const fileInput = document.getElementById('wizard-doc-arquivo');
+  const typeSelect = document.getElementById('wizard-doc-tipo');
+  const inputEmissao = document.getElementById('wizard-doc-emissao');
+  const inputVencimento = document.getElementById('wizard-doc-vencimento');
+
+  if (!fileInput.files || fileInput.files.length === 0) {
+    showToast('Escolha um arquivo para fazer upload.', 'error');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const tipoDocumento = typeSelect.value;
+  
+  const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+  const isImage = /\.(jpg|jpeg|png)$/.test(extension);
+  if (isImage && file.size > 10 * 1024 * 1024) {
+    showToast('Limite excedido: Imagens devem possuir no máximo 10 MB.', 'error');
+    return;
+  }
+  if (extension === '.pdf' && file.size > 20 * 1024 * 1024) {
+    showToast('Limite excedido: PDFs devem possuir no máximo 20 MB.', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('arquivo', file);
+  formData.append('tipo_documento', tipoDocumento);
+  
+  if (inputEmissao && inputEmissao.value) {
+    formData.append('data_emissao', inputEmissao.value);
+  }
+  if (inputVencimento && inputVencimento.value) {
+    formData.append('data_vencimento', inputVencimento.value);
+  }
+
+  showLoader();
+  try {
+    const res = await api.post(`/api/imoveis/${currentImovelId}/documentos`, formData, true);
+    if (res.success) {
+      showToast(res.message, 'success');
+      
+      fileInput.value = '';
+      if (inputEmissao) inputEmissao.value = '';
+      if (inputVencimento) inputVencimento.value = '';
+      
+      // Reload documents and update lists
+      const resDetails = await api.get(`/api/imoveis/${currentImovelId}`);
+      if (resDetails.success && resDetails.data) {
+        renderWizardDocumentos(resDetails.data.documentos);
+        renderDetalheDocumentos(resDetails.data.documentos);
+        renderDetalheTimeline(resDetails.data.timeline);
+      }
+    } else {
+      showToast(res.message || 'Erro ao anexar arquivo.', 'error');
+    }
+  } catch (err) {
+    showToast(err.message || 'Falha no upload do documento.', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+async function handleWizardUploadGaleria(e) {
+  if (e) e.preventDefault();
+  const fileInput = document.getElementById('wizard-foto-arquivo');
+
+  if (!fileInput.files || fileInput.files.length === 0) {
+    showToast('Escolha uma imagem para a galeria.', 'error');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+  const isImage = /\.(jpg|jpeg|png)$/.test(extension);
+  if (!isImage) {
+    showToast('Apenas formatos de imagem (JPG, JPEG, PNG) são aceitos.', 'error');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('Limite excedido: Imagem de galeria deve possuir no máximo 10 MB.', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('arquivo', file);
+
+  showLoader();
+  try {
+    const res = await api.post(`/api/imoveis/${currentImovelId}/fotos`, formData, true);
+    if (res.success) {
+      showToast(res.message, 'success');
+      fileInput.value = '';
+      
+      // Reload photos and update lists
+      const resDetails = await api.get(`/api/imoveis/${currentImovelId}`);
+      if (resDetails.success && resDetails.data) {
+        renderWizardGaleria(resDetails.data.fotos);
+        renderDetalheGaleria(resDetails.data.fotos);
+        renderDetalheTimeline(resDetails.data.timeline);
+      }
+    } else {
+      showToast(res.message || 'Erro ao carregar foto.', 'error');
+    }
+  } catch (err) {
+    showToast('Falha no upload da foto.', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+window.excluirDocumentoWizard = async function(documentoId) {
+  const confirmar = await confirmarAcao('Remover Documento', 'Deseja realmente remover este documento? Esta ação não pode ser desfeita.', 'Remover', 'Cancelar', true);
+  if (confirmar) {
+    showLoader();
+    try {
+      const res = await api.delete(`/api/imoveis/${currentImovelId}/documentos/${documentoId}`);
+      if (res.success) {
+        showToast(res.message, 'success');
+        
+        // Reload documents and update lists
+        const resDetails = await api.get(`/api/imoveis/${currentImovelId}`);
+        if (resDetails.success && resDetails.data) {
+          renderWizardDocumentos(resDetails.data.documentos);
+          renderDetalheDocumentos(resDetails.data.documentos);
+          renderDetalheTimeline(resDetails.data.timeline);
+        }
+      } else {
+        showToast(res.message || 'Erro ao remover documento.', 'error');
+      }
+    } catch (err) {
+      showToast('Falha na remoção do documento.', 'error');
+    } finally {
+      hideLoader();
+    }
+  }
+};
+
+window.excluirFotoWizard = async function(fotoId) {
+  const confirmar = await confirmarAcao('Remover Foto', 'Deseja realmente remover esta foto da galeria?', 'Remover', 'Cancelar', true);
+  if (confirmar) {
+    showLoader();
+    try {
+      const res = await api.delete(`/api/imoveis/${currentImovelId}/fotos/${fotoId}`);
+      if (res.success) {
+        showToast(res.message, 'success');
+        
+        // Reload photos and update lists
+        const resDetails = await api.get(`/api/imoveis/${currentImovelId}`);
+        if (resDetails.success && resDetails.data) {
+          renderWizardGaleria(resDetails.data.fotos);
+          renderDetalheGaleria(resDetails.data.fotos);
+          renderDetalheTimeline(resDetails.data.timeline);
+        }
+      } else {
+        showToast(res.message || 'Erro ao remover foto.', 'error');
+      }
+    } catch (err) {
+      showToast('Falha na remoção da foto.', 'error');
+    } finally {
+      hideLoader();
+    }
+  }
+};
+
+function renderWizardDocumentos(docs) {
+  const container = document.getElementById('wizard-det-documentos-list');
+  if (!container) return;
+  if (!docs || docs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-card" style="padding: 16px;">
+        <div class="empty-state-icon" style="font-size: 24px;">📄</div>
+        <h5 class="empty-state-title" style="font-size: 13px;">Nenhum documento anexado</h5>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = docs.map(d => {
+    let deleteBtn = '';
+    if (userProfile === 'administrador' || userProfile === 'operacional') {
+      deleteBtn = `<button type="button" onclick="excluirDocumentoWizard('${d.id}')" style="background:none; border:none; color:var(--color-error); font-size:14px; cursor:pointer;" title="Remover Documento"><i class="fi fi-rr-trash"></i></button>`;
+    }
+    const dateVal = formatDate(d.criado_em);
+    let datesInfo = '';
+    if (d.data_emissao || d.data_vencimento) {
+      const em = d.data_emissao ? formatDate(d.data_emissao) : 'Não inf.';
+      const ven = d.data_vencimento ? formatDate(d.data_vencimento) : 'Não inf.';
+      datesInfo = `<span style="display:block; font-size:10px; color:var(--color-text-muted); margin-top:2px;">Emissão: ${em} • Vencimento: ${ven}</span>`;
+    }
+
+    return `
+      <div class="document-item" style="padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: 6px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fi fi-rr-document" style="font-size: 16px; color: var(--color-info);"></i>
+          <div>
+            <strong style="font-size:12px; color:var(--color-text-main);">${d.tipo_documento}</strong>
+            <span style="font-size:10px; color:var(--color-text-muted); display:block;">${d.nome_arquivo}</span>
+            ${datesInfo}
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <a href="${d.caminho_arquivo}" target="_blank" class="btn btn-secondary btn-icon" style="height:28px; width:28px;" title="Download"><i class="fi fi-rr-download" style="font-size:12px;"></i></a>
+          ${deleteBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderWizardGaleria(fotos) {
+  const container = document.getElementById('wizard-det-galeria-grid');
+  if (!container) return;
+  if (!fotos || fotos.length === 0) {
+    container.innerHTML = `<div style="font-size: 12px; color: var(--color-text-muted); padding: 12px;">Nenhuma foto na galeria.</div>`;
+    return;
+  }
+
+  container.innerHTML = fotos.map(f => {
+    let deleteBtn = '';
+    if (userProfile === 'administrador' || userProfile === 'operacional') {
+      deleteBtn = `<button type="button" class="delete-photo-btn" onclick="excluirFotoWizard('${f.id}')" style="position:absolute; top:4px; right:4px; background:rgba(220,38,38,0.85); color:#fff; border:none; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fi fi-rr-trash" style="font-size:11px;"></i></button>`;
+    }
+    return `
+      <div class="gallery-photo-item" style="position:relative; border-radius:6px; overflow:hidden; aspect-ratio:1; width:120px;">
+        <img src="${f.caminho_arquivo}" style="width:100%; height:100%; object-fit:cover;" alt="Gallery photo">
+        ${deleteBtn}
+      </div>
+    `;
+  }).join('');
+}

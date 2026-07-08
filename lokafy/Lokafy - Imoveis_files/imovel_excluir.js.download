@@ -1,0 +1,89 @@
+/* ================= MODAL EXCLUIR IMÓVEL ================= */
+
+let imovelExcluirId = null;
+const csrfTokenImoveisExcluir = document.querySelector('meta[name="csrf-token"]')?.content
+  || document.querySelector('meta[name="csrf-token-imoveis"]')?.content
+  || "";
+
+/* abre o modal */
+function excluirImovel(id) {
+  imovelExcluirId = id;
+  const modal = document.getElementById("modalExcluirImovel");
+  if (modal) modal.classList.add("active");
+}
+
+/* fecha modal */
+function fecharModalExcluir() {
+  const modal = document.getElementById("modalExcluirImovel");
+  if (modal) modal.classList.remove("active");
+  imovelExcluirId = null;
+}
+
+/* eventos de fechar */
+document.addEventListener("click", function (e) {
+
+ if (e.target.closest("#fecharExcluirImovel")) {
+  fecharModalExcluir();
+  return;
+}
+
+
+  if (e.target.id === "cancelarExcluirImovel") {
+    fecharModalExcluir();
+    return;
+  }
+
+  // clique fora do modal
+  if (e.target.classList.contains("modal-confirm")) {
+    fecharModalExcluir();
+  }
+});
+
+/* confirma exclusão */
+document.addEventListener("click", function (e) {
+
+  if (e.target.id !== "confirmarExcluirImovel") return;
+  if (!imovelExcluirId) return;
+
+  const btn = e.target;
+  btn.disabled = true;
+  btn.innerText = "Excluindo...";
+
+  fetch("/imoveis/api/imovel_excluir.php", {
+    method: "POST",
+    headers: csrfTokenImoveisExcluir
+      ? {
+          "X-CSRF-Token": csrfTokenImoveisExcluir,
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      : { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      id: String(imovelExcluirId),
+      ...(csrfTokenImoveisExcluir ? { _csrf: csrfTokenImoveisExcluir } : {})
+    })
+  })
+  .then(r => r.json())
+  .then(j => {
+
+    btn.disabled = false;
+    btn.innerText = "Excluir imóvel";
+
+    if (!j.ok) {
+      toastWarning(j.erro || "Este imóvel possui contrato ativo e não pode ser excluído. Encerre o contrato antes de remover o imóvel");
+      return;
+    }
+
+    fecharModalExcluir();
+
+    toastSuccess("Imóvel excluído com sucesso");
+
+    if (typeof carregarImoveis === "function") {
+      carregarImoveis();
+    }
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.innerText = "Excluir imóvel";
+    toastWarning("Este imóvel possui contrato ativo e não pode ser excluído. Encerre o contrato antes de remover o imóvel");
+  });
+});

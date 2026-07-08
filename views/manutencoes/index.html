@@ -353,6 +353,147 @@
       font-size: 20px;
       color: var(--color-primary);
     }
+
+    /* Wizard Classes */
+    .wizard-layout {
+      display: flex;
+      min-height: 480px;
+    }
+    .wizard-sidebar {
+      width: 250px;
+      background-color: var(--color-bg-base);
+      border-right: 1px solid var(--color-border);
+      padding: 30px 20px;
+      flex-shrink: 0;
+    }
+    .wizard-steps-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .wizard-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid transparent;
+    }
+    .wizard-step:hover {
+      background-color: var(--color-bg-base);
+    }
+    .wizard-step.active {
+      background-color: var(--color-success-light) !important;
+      border-color: rgba(71, 140, 39, 0.15);
+    }
+    .wizard-step.active .wizard-step-number {
+      background-color: var(--color-primary) !important;
+      color: #ffffff !important;
+      border-color: var(--color-primary) !important;
+    }
+    .wizard-step.active .wizard-step-text {
+      color: var(--color-primary) !important;
+      font-weight: 700 !important;
+    }
+    .wizard-step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+    .wizard-step-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      transition: all var(--transition-fast);
+    }
+    .wizard-content {
+      flex-grow: 1;
+      padding: 30px;
+      overflow-y: auto;
+      max-height: 520px;
+      background-color: var(--color-bg-base);
+    }
+    .wizard-pane {
+      display: none;
+    }
+    .wizard-pane.active {
+      display: block;
+      animation: fadeIn var(--transition-fast) forwards;
+    }
+    .wizard-card {
+      background-color: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: var(--shadow-sm);
+    }
+    .wizard-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      border-top: 1px solid var(--color-border);
+      background-color: var(--color-bg-card);
+    }
+    .wizard-header {
+      padding: 24px 30px;
+      border-bottom: 1px solid var(--color-border);
+      background-color: var(--color-bg-card);
+    }
+    .wizard-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-main);
+      margin: 0;
+    }
+    .wizard-header p {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin: 4px 0 0 0;
+    }
+    @media (max-width: 768px) {
+      .wizard-layout {
+        flex-direction: column;
+      }
+      .wizard-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        padding: 16px 20px;
+      }
+      .wizard-steps-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        gap: 8px;
+      }
+      .wizard-step {
+        padding: 8px 12px;
+      }
+      .wizard-step-text {
+        display: none;
+      }
+      .wizard-content {
+        padding: 20px;
+        max-height: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -711,121 +852,235 @@
             </div>
           </div>
         </div>
-
       </main>
     </div>
   </div>
 
   <!-- MODAL: CADASTRAR / EDITAR MANUTENÇÃO -->
-  <div class="modal" id="modal-manutencao">
-    <div class="modal-content card glass animate-scale-up">
-      <div class="modal-header">
-        <h3 id="modal-title">Nova Manutenção</h3>
-        <span class="modal-close" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></span>
+  <div class="modal modal-fullpage" id="modal-manutencao">
+    <div class="modal-content glass" style="max-width: 900px; padding: 0; overflow: hidden; border: none;">
+      <!-- Header -->
+      <div class="wizard-header">
+        <div>
+          <h2 id="modal-title">Nova Manutenção</h2>
+          <p id="modal-subtitle">Cadastre as informações da ordem de serviço de manutenção.</p>
+        </div>
+        <button type="button" class="btn-voltar" id="btn-close-modal"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
       </div>
-      
+
       <form id="form-manutencao">
         <input type="hidden" id="manutencao-id">
         <input type="hidden" id="manutencao-codigo">
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="imovel_id">Imóvel *</label>
-            <select id="imovel_id" name="imovel_id" class="form-control" required>
-              <option value="" disabled selected>Selecione um imóvel</option>
-              <!-- Loaded by JS -->
-            </select>
+        <!-- Wizard Layout Wrapper -->
+        <div class="wizard-layout">
+          <!-- Left Sidebar (Step wizard menu) -->
+          <div class="wizard-sidebar">
+            <ul class="wizard-steps-list">
+              <li class="wizard-step active" data-step-target="1">
+                <span class="wizard-step-number">1</span>
+                <span class="wizard-step-text">Dados Básicos</span>
+              </li>
+              <li class="wizard-step" data-step-target="2">
+                <span class="wizard-step-number">2</span>
+                <span class="wizard-step-text">Custos & Fornecedor</span>
+              </li>
+              <li class="wizard-step" data-step-target="3">
+                <span class="wizard-step-number">3</span>
+                <span class="wizard-step-text">Anexos</span>
+              </li>
+              <li class="wizard-step" data-step-target="4">
+                <span class="wizard-step-number">4</span>
+                <span class="wizard-step-text">Revisão</span>
+              </li>
+            </ul>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="tipo">Tipo *</label>
-            <select id="tipo" name="tipo" class="form-control" required>
-              <option value="" disabled selected>Selecione o tipo</option>
-              <option value="Preventiva">Preventiva</option>
-              <option value="Corretiva">Corretiva</option>
-              <option value="Emergencial">Emergencial</option>
-              <option value="Melhoria">Melhoria</option>
-              <option value="Inspeção">Inspeção</option>
-            </select>
+          <!-- Right Content Area -->
+          <div class="wizard-content">
+            <!-- Step Pane 1: Dados da Manutenção -->
+            <div class="wizard-pane active" id="wizard-pane-1">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-info" style="color: var(--color-primary); font-size: 18px;"></i> Dados da Manutenção
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="imovel_id">Imóvel *</label>
+                    <select id="imovel_id" name="imovel_id" class="form-control" required>
+                      <option value="" disabled selected>Selecione um imóvel</option>
+                      <!-- Loaded by JS -->
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="tipo">Tipo *</label>
+                    <select id="tipo" name="tipo" class="form-control" required>
+                      <option value="" disabled selected>Selecione o tipo</option>
+                      <option value="Preventiva">Preventiva</option>
+                      <option value="Corretiva">Corretiva</option>
+                      <option value="Emergencial">Emergencial</option>
+                      <option value="Melhoria">Melhoria</option>
+                      <option value="Inspeção">Inspeção</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="form-label" for="titulo">Título Curto *</label>
+                  <input type="text" id="titulo" name="titulo" class="form-control" placeholder="Ex: Conserto de infiltração banheiro principal" required>
+                </div>
+
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="form-label" for="descricao">Descrição Detalhada *</label>
+                  <textarea id="descricao" name="descricao" class="form-control" rows="3" placeholder="Descreva os problemas observados e escopo do serviço..." required></textarea>
+                </div>
+
+                <div class="form-row" style="margin-top: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="data_solicitacao">Data de Solicitação *</label>
+                    <input type="date" id="data_solicitacao" name="data_solicitacao" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="responsavel">Responsável Interno *</label>
+                    <input type="text" id="responsavel" name="responsavel" class="form-control" placeholder="Ex: Engenharia / Padrao" required>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="form-label" for="status">Status *</label>
+                  <select id="status" name="status" class="form-control" required>
+                    <option value="Planejada">Planejada</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 2: Custos & Fornecedor -->
+            <div class="wizard-pane" id="wizard-pane-2">
+              <div class="wizard-card" style="margin-bottom: 20px;">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-money-bill-wave" style="color: var(--color-primary); font-size: 18px;"></i> Previsões & Custos
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="valor_previsto">Valor Previsto (Orçado) *</label>
+                    <input type="number" id="valor_previsto" name="valor_previsto" step="0.01" min="0" class="form-control" placeholder="0.00" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="data_prevista">Data Prevista</label>
+                    <input type="date" id="data_prevista" name="data_prevista" class="form-control">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="form-label" for="data_inicio">Data de Início Real</label>
+                  <input type="date" id="data_inicio" name="data_inicio" class="form-control">
+                </div>
+              </div>
+
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-users" style="color: var(--color-primary); font-size: 18px;"></i> Informações do Fornecedor (Opcional)
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="fornecedor_nome">Nome / Razão Social</label>
+                    <input type="text" id="fornecedor_nome" name="fornecedor_nome" class="form-control" placeholder="Ex: Prestadora ABC Ltda">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="fornecedor_telefone">Telefone de Contato</label>
+                    <input type="text" id="fornecedor_telefone" name="fornecedor_telefone" class="form-control" placeholder="(00) 00000-0000">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="form-label" for="fornecedor_email">E-mail</label>
+                  <input type="email" id="fornecedor_email" name="fornecedor_email" class="form-control" placeholder="fornecedor@email.com">
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                  <label class="form-label" for="fornecedor_observacoes">Observações sobre o Fornecedor</label>
+                  <textarea id="fornecedor_observacoes" name="fornecedor_observacoes" class="form-control" rows="2" placeholder="Qualificações, garantias, acordos..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 3: Anexos -->
+            <div class="wizard-pane" id="wizard-pane-3">
+              <!-- Anexos (Somente Edição) -->
+              <div class="wizard-card" id="manut-wizard-attachments-card" style="margin-bottom: 20px; display: none;">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-document" style="color: var(--color-primary); font-size: 18px;"></i> Anexar Documentos / Fotos
+                </div>
+                <div id="manut-wizard-attachment-upload-container" style="border-bottom: 1px solid var(--color-border); padding-bottom: 20px; margin-bottom: 20px;">
+                  <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; align-items:end;">
+                    <div class="form-group" style="margin:0;">
+                      <label class="form-label" for="manut-wizard-anexo-tipo">Tipo de Anexo</label>
+                      <select id="manut-wizard-anexo-tipo" class="form-control">
+                        <option value="Orçamentos" selected>Orçamento</option>
+                        <option value="Notas Fiscais">Nota Fiscal</option>
+                        <option value="Fotos">Foto</option>
+                        <option value="Laudos">Laudo</option>
+                        <option value="Relatórios">Relatório</option>
+                        <option value="Outros">Outro</option>
+                      </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin:0;">
+                      <label class="form-label" for="manut-wizard-anexo-arquivo">Arquivo</label>
+                      <input type="file" id="manut-wizard-anexo-arquivo" class="form-control" style="padding-top: 10px;" accept="image/*,application/pdf">
+                    </div>
+                    
+                    <button type="button" id="btn-manut-wizard-upload" class="btn btn-primary" style="height:44px; grid-column:span 2;"><i class="fi fi-rr-upload"></i> Anexar Arquivo</button>
+                  </div>
+                </div>
+
+                <div class="document-list" id="manut-wizard-attachments-list">
+                  <!-- populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Informative Card (Somente Criação) -->
+              <div class="wizard-card" id="manut-wizard-informative-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-folder" style="color: var(--color-primary); font-size: 18px;"></i> Notas Fiscais, Recibos & Orçamentos
+                </div>
+                <div class="info-alert">
+                  <div class="info-alert-icon">
+                    <i class="fi fi-rr-info"></i>
+                  </div>
+                  <p class="info-alert-text">
+                    Os documentos e imagens podem ser anexados agora ou posteriormente. O envio de arquivos não é obrigatório para concluir este cadastro. Após salvar, você poderá editar o registro a qualquer momento para adicionar, atualizar ou remover documentos e fotos conforme necessário.
+                  </p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-receipt" style="color:var(--color-primary);"></i> Nota Fiscal</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-document-signed" style="color:var(--color-warning);"></i> Orçamento Técnico</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-picture" style="color:var(--color-info);"></i> Foto Antes / Depois</div>
+                  <div style="background: var(--color-bg-base); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--color-border); font-size:12px; font-weight:600; display:flex; align-items:center; gap:8px;"><i class="fi fi-rr-file-check" style="color:var(--color-error);"></i> Recibo de Pagamento</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Pane 4: Revisão -->
+            <div class="wizard-pane" id="wizard-pane-4">
+              <div class="wizard-card">
+                <div style="font-size: 15px; font-weight: 700; color: var(--color-text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fi fi-rr-shield-check" style="color: var(--color-primary); font-size: 18px;"></i> Revisão da Ordem de Serviço
+                </div>
+                <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin: 0 0 20px 0;">
+                  Confirme as informações abaixo antes de salvar a manutenção.
+                </p>
+                <div id="revisao-conteudo" style="display: flex; flex-direction: column; gap: 16px;">
+                  <!-- Dynamic Summary -->
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="titulo">Título Curto *</label>
-          <input type="text" id="titulo" name="titulo" class="form-control" placeholder="Ex: Conserto de infiltração banheiro principal" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="descricao">Descrição Detalhada *</label>
-          <textarea id="descricao" name="descricao" class="form-control" rows="3" placeholder="Descreva os problemas observados e escopo do serviço..." required></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="data_solicitacao">Data de Solicitação *</label>
-            <input type="date" id="data_solicitacao" name="data_solicitacao" class="form-control" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="data_prevista">Data Prevista de Início/Fim</label>
-            <input type="date" id="data_prevista" name="data_prevista" class="form-control">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="data_inicio">Data de Início Real</label>
-            <input type="date" id="data_inicio" name="data_inicio" class="form-control">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="responsavel">Responsável Interno *</label>
-            <input type="text" id="responsavel" name="responsavel" class="form-control" placeholder="Ex: Engenharia / Padrao" required>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="valor_previsto">Valor Previsto (Orçado) *</label>
-            <input type="number" id="valor_previsto" name="valor_previsto" step="0.01" min="0" class="form-control" placeholder="0.00" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="status">Status *</label>
-            <select id="status" name="status" class="form-control" required>
-              <option value="Planejada">Planejada</option>
-              <option value="Em Andamento">Em Andamento</option>
-            </select>
-          </div>
-        </div>
-
-        <h4 style="margin: 20px 0 10px 0; border-bottom: 1px solid var(--color-border); padding-bottom: 6px; font-weight:700; font-size:13px; color:var(--color-primary); text-transform:uppercase;">Informações do Fornecedor (Opcional)</h4>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="fornecedor_nome">Nome / Razão Social</label>
-            <input type="text" id="fornecedor_nome" name="fornecedor_nome" class="form-control" placeholder="Ex: Prestadora ABC Ltda">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="fornecedor_telefone">Telefone de Contato</label>
-            <input type="text" id="fornecedor_telefone" name="fornecedor_telefone" class="form-control" placeholder="(00) 00000-0000">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="fornecedor_email">E-mail</label>
-          <input type="email" id="fornecedor_email" name="fornecedor_email" class="form-control" placeholder="fornecedor@email.com">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="fornecedor_observacoes">Observações sobre o Fornecedor</label>
-          <textarea id="fornecedor_observacoes" name="fornecedor_observacoes" class="form-control" rows="2" placeholder="Qualificações, garantias, acordos..."></textarea>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btn-cancelar-modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary" id="btn-salvar-manutencao">Cadastrar</button>
+        <!-- Fixed Footer -->
+        <div class="wizard-footer">
+          <button type="button" class="btn btn-secondary" id="wizard-btn-prev">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="wizard-btn-next" style="background-color: var(--color-primary); color: #fff; border: none; padding: 0 24px; height: 44px; font-weight: 600;">Próximo Passo <i class="fi fi-rr-arrow-right"></i></button>
         </div>
       </form>
     </div>

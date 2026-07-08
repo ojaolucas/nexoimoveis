@@ -87,18 +87,7 @@ SELECT
   m.status,
   '/manutencoes/' || m.id AS url_original
 FROM manutencoes m
-WHERE m.status <> 'Cancelada'
-UNION ALL
-SELECT
-  v.id AS evento_id,
-  'Vistoria' AS tipo,
-  v.data AS data_inicio,
-  v.data AS data_fim,
-  v.imovel_id,
-  NULL::uuid AS responsavel_id,
-  v.tipo AS status,
-  '/vistorias/' || v.id AS url_original
-FROM vistorias v;
+WHERE m.status <> 'Cancelada';
 -- Relatórios Views
 
 -- Ocupação (taxa de ocupação)
@@ -108,7 +97,7 @@ SELECT
   COUNT(*) FILTER (WHERE status = 'Alugado') AS alugados,
   COUNT(*) FILTER (WHERE status = 'Disponível') AS disponiveis,
   COUNT(*) FILTER (WHERE status = 'Reservado') AS reservados,
-  COUNT(*) FILTER (WHERE status = 'Manutenção') AS manutencao,
+  COUNT(*) FILTER (WHERE status = 'Em Manutenção') AS manutencao,
   ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'Alugado') / NULLIF(COUNT(*),0), 2) AS taxa_ocupacao
 FROM imoveis
 WHERE status <> 'Inativo';

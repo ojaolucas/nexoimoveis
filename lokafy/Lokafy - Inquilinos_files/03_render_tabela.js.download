@@ -1,0 +1,165 @@
+function renderTabela(lista = []) {
+  const state = window.inquilinosTabelaState;
+  const tbody = document.getElementById("tabelaInquilinos");
+  const vazio = document.getElementById("estadoVazio");
+  const vazioIcon = document.getElementById("estadoVazioIcon");
+  const vazioTitulo = document.getElementById("estadoVazioTitulo");
+  const vazioTexto = document.getElementById("estadoVazioTexto");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (vazio) vazio.style.display = "none";
+
+  if (!lista.length) {
+    renderTabelaVazia(tbody, vazioIcon, vazioTitulo, vazioTexto);
+    atualizarPaginacaoInfo(0, 0, 0);
+    atualizarControlesPaginacao(0);
+    return;
+  }
+
+  const total = lista.length;
+  const totalPaginas = Math.max(1, Math.ceil(total / state.itensPorPagina));
+  if (state.paginaAtual > totalPaginas) state.paginaAtual = totalPaginas;
+
+  const inicio = (state.paginaAtual - 1) * state.itensPorPagina;
+  const fim = Math.min(inicio + state.itensPorPagina, total);
+  const fatia = lista.slice(inicio, fim);
+
+  tbody.innerHTML = fatia.map(renderInquilinoRow).join("");
+  atualizarPaginacaoInfo(inicio + 1, fim, total);
+  atualizarControlesPaginacao(totalPaginas);
+}
+
+function renderTabelaVazia(tbody, vazioIcon, vazioTitulo, vazioTexto) {
+  const state = window.inquilinosTabelaState;
+  const busca = (document.getElementById("filtroBusca")?.value || "").trim();
+  const filtroContrato = (document.getElementById("filtroContrato")?.value || "").trim();
+  const filtroImovel = (document.getElementById("filtroImovel")?.value || "").trim();
+  const temFiltroAtivo = !!(busca || filtroContrato || filtroImovel);
+  const semCadastro = state.listaInquilinos.length === 0;
+  const iconHtml = semCadastro
+    ? '<span class="empty-icon"><i class="fa-regular fa-address-book"></i></span>'
+    : '<span class="empty-icon"><i class="fa-solid fa-filter-circle-xmark"></i></span>';
+  const titulo = semCadastro ? "Nenhum inquilino cadastrado" : "Nenhum inquilino encontrado";
+  const texto = semCadastro
+    ? "Use o botão <strong>Novo inquilino</strong> para começar."
+    : (temFiltroAtivo ? "Tente ajustar os filtros para encontrar resultados." : "Não há dados para exibir no momento.");
+
+  if (vazioIcon) vazioIcon.innerHTML = semCadastro ? '<i class="fa-regular fa-address-book"></i>' : '<i class="fa-solid fa-filter-circle-xmark"></i>';
+  if (vazioTitulo) vazioTitulo.textContent = titulo;
+  if (vazioTexto) vazioTexto.innerHTML = texto;
+
+  tbody.innerHTML = `
+    <tr class="empty-state-row">
+      <td colspan="5">
+        <div class="table-empty table-empty-inline">
+          ${iconHtml}
+          <h4>${titulo}</h4>
+          <p>${texto}</p>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function renderInquilinoRow(i) {
+  const nome = i.nome || "Não informado";
+  const telefone = String(i.telefone || "");
+  const docFmt = i.cpf_cnpj || i.cpf || "";
+  const docMask = maskCpfCnpj(docFmt);
+  const docDigits = onlyDigits(docFmt);
+  const docLabel = String(docFmt).includes("/") || docDigits.length === 14 ? "CNPJ:" : "CPF:";
+  const rgNumeroMask = maskRg(i.rg_numero);
+  const rgFmt = i.rg_numero ? `${rgNumeroMask}${i.rg_orgao && i.rg_uf ? ` ${i.rg_orgao}/${i.rg_uf}` : ""}` : "Não informado";
+  const docValue = docDigits ? docMask : "Não informado";
+  const docTitle = docDigits ? `${docLabel} ${docMask}` : `${docLabel} Não informado`;
+  const imovelNome = (i.imovel_titulo || "").trim();
+  const imovelComplemento = (i.imovel_complemento || "").trim();
+  const imovelFmt = imovelNome ? `${imovelNome}${imovelComplemento ? ` · ${imovelComplemento}` : ""}` : "Inquilino sem vínculo com imóvel";
+  const totalImoveis = imovelNome ? 1 : 0;
+  const labelImovel = totalImoveis === 1 ? "imóvel" : "imóveis";
+  const telefoneFmt = maskTelefoneExibicao(telefone);
+  const emailFmt = formatEmail(i.email);
+  const razaoSocial = String(i.razao_social || "").trim();
+  const representanteNome = String(i.representante_legal_nome || "").trim();
+  const representanteCpfRaw = String(i.representante_legal_cpf || "").trim();
+  const representanteCpf = representanteCpfRaw ? maskCpfCnpj(representanteCpfRaw) : "";
+  const representanteCargo = String(i.representante_legal_cargo || "").trim();
+  const temRepresentante = !!(representanteNome || representanteCpfRaw || representanteCargo);
+
+  return `
+    <tr>
+      <td data-label="#" class="fx-id">${escapeHtml(i.id)}</td>
+      <td data-label="Nome" class="fx-nome">
+        <div class="inq-nome-stack" title="${escapeHtml(nome)}">
+          <i class="fa-regular fa-user inq-nome-icon" aria-hidden="true"></i>
+          <div class="inq-nome-content">
+            <span class="fx-main">${escapeHtml(nome)}</span>
+            ${razaoSocial ? `<span class="inq-nome-extra">Razão social: ${escapeHtml(razaoSocial)}</span>` : ""}
+            ${temRepresentante ? `<span class="inq-nome-extra">Representante: ${escapeHtml(representanteNome || "-")}${representanteCpf ? ` • ${escapeHtml(representanteCpf)}` : ""}${representanteCargo ? ` • ${escapeHtml(representanteCargo)}` : ""}</span>` : ""}
+          </div>
+        </div>
+      </td>
+      <td data-label="Telefone / E-mail" class="fx-telefone">
+        <div class="inq-tel-stack" title="${escapeHtml(`${telefoneFmt} • ${emailFmt}`)}">
+          <div class="inq-tel-content">
+            <span class="inq-tel-row"><i class="fa-solid fa-phone inq-tel-icon" aria-hidden="true"></i><span class="inq-tel-value">${escapeHtml(telefoneFmt)}</span></span>
+            <span class="inq-tel-row"><i class="fa-regular fa-envelope inq-tel-icon" aria-hidden="true"></i><span class="inq-tel-email">${escapeHtml(emailFmt)}</span></span>
+          </div>
+        </div>
+      </td>
+      <td data-label="Documentos" class="fx-documentos">${renderDocumentosInquilino(docLabel, docTitle, docValue, rgFmt)}</td>
+      <td data-label="Imóvel" class="fx-imovel"><div class="inq-imovel-stack">${renderBotaoImovelInquilino(i, nome, imovelFmt, totalImoveis, labelImovel)}</div></td>
+      <td class="fx-acoes" data-label="Ações">${renderAcoesInquilino(i.id)}</td>
+    </tr>
+  `;
+}
+
+function renderDocumentosInquilino(docLabel, docTitle, docValue, rgFmt) {
+  return `
+    <div class="inq-doc-list">
+      <span class="inq-doc-block" title="${escapeHtml(docTitle)}"><span class="inq-doc-item"><i class="fa-regular fa-id-card inq-doc-icon" aria-hidden="true"></i><span class="inq-doc-label">${docLabel}</span><span class="inq-doc-value">${escapeHtml(docValue)}</span></span></span>
+      <span class="inq-doc-block" title="RG: ${escapeHtml(rgFmt)}"><span class="inq-doc-item"><i class="fa-regular fa-address-card inq-doc-icon" aria-hidden="true"></i><span class="inq-doc-label">RG:</span><span class="inq-doc-value">${escapeHtml(rgFmt)}</span></span></span>
+    </div>
+  `;
+}
+
+function renderBotaoImovelInquilino(i, nome, imovelFmt, totalImoveis, labelImovel) {
+  if (totalImoveis <= 0) return '<span class="inq-imovel-empty">Sem imóvel</span>';
+  return `<button class="imoveis-link btn-ver-imovel-inq"
+    data-nome="${escapeHtml(nome)}"
+    data-imovel="${escapeHtml(imovelFmt)}"
+    data-contrato="${escapeHtml(i.contrato_codigo || "Sem contrato")}"
+    data-imovel-id="${escapeHtml(i.imovel_id || "")}"
+    data-imovel-status="${escapeHtml(i.imovel_status || (i.contrato_id ? "ocupado" : "disponivel"))}">
+    <i class="fa-regular fa-building" aria-hidden="true"></i>
+    <span class="imoveis-link-text">${totalImoveis} ${labelImovel}</span>
+  </button>`;
+}
+
+function renderAcoesInquilino(id) {
+  return `
+    <div class="actions-menu">
+      <button class="btn-more" type="button" aria-label="Ações do inquilino"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+      <div class="dropdown">
+        <button type="button" data-id="${escapeHtml(id)}" data-action="edit">Editar</button>
+        <button type="button" class="danger" data-id="${escapeHtml(id)}" data-action="delete">Excluir</button>
+      </div>
+    </div>
+  `;
+}
+
+function atualizarPaginacaoInfo(inicio, fim, total) {
+  const info = document.getElementById("paginacaoInfo");
+  if (!info) return;
+  info.innerText = total ? `Mostrando ${inicio}-${fim} de ${total} inquilinos` : "Mostrando 0 de 0 inquilinos";
+}
+
+function atualizarControlesPaginacao(totalPaginas) {
+  const state = window.inquilinosTabelaState;
+  const prev = document.getElementById("btnPaginaAnterior");
+  const next = document.getElementById("btnProximaPagina");
+  if (!prev || !next) return;
+  prev.disabled = state.paginaAtual <= 1;
+  next.disabled = state.paginaAtual >= totalPaginas;
+}

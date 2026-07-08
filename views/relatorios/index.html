@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios Gerenciais - NexoMoveis</title>
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- CSS stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/cards.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/tables.css">
+  <link rel="stylesheet" href="/css/modals.css">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <style>
+    .relatorios-page {
+      padding: 24px;
+    }
+    
+    .filter-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid var(--color-border);
+      padding-top: 16px;
+    }
+    
+    .report-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+    }
+    
+    .report-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .report-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .report-card-title i {
+      color: var(--color-primary);
+    }
+    
+    .export-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    
+    .empty-state {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+    
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+      color: var(--color-primary);
+    }
+    
+    .empty-state p {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    
+    /* Loading styles */
+    .loading-container {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--color-primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <i class="fi fi-rr-key"></i>
+        <span class="brand-name">NexoMoveis</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="/dashboard" class="nav-item">
+              <i class="fi fi-rr-apps"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="/imoveis" class="nav-item">
+              <i class="fi fi-rr-home"></i>
+              <span>Imóveis</span>
+            </a>
+          </li>
+          <li>
+            <a href="/pessoas" class="nav-item">
+              <i class="fi fi-rr-users"></i>
+              <span>Pessoas</span>
+            </a>
+          </li>
+          <li>
+            <a href="/calendario" class="nav-item">
+              <i class="fi fi-rr-calendar"></i>
+              <span>Calendário</span>
+            </a>
+          </li>
+          <li>
+            <a href="/relatorios" class="nav-item active">
+              <i class="fi fi-rr-stats"></i>
+              <span>Relatórios</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auditoria" class="nav-item">
+              <i class="fi fi-rr-shield-check"></i>
+              <span>Auditoria</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar" id="sidebar-user-avatar">
+          <div class="user-info">
+            <span class="user-name" id="sidebar-user-name">Carregando...</span>
+            <span class="user-role" id="sidebar-user-role">Carregando...</span>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Sair">
+            <i class="fi fi-rr-sign-out-alt"></i>
+          </button>
+        </div>
+        <div class="system-meta">
+          <span>Versão 1.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="app-main">
+      
+      <!-- NAVBAR -->
+      <header class="app-navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle" title="Menu">
+            <i class="fi fi-rr-menu-burger"></i>
+          </button>
+          
+          <div class="search-bar-container">
+            <i class="fi fi-rr-search search-icon"></i>
+            <input type="text" id="global-search" class="search-input" placeholder="Pesquisar imóveis, locatários...">
+            <div class="search-results-dropdown glass" id="search-results" style="display: none;"></div>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Notification Bell -->
+          <div class="navbar-bell-container">
+            <button class="navbar-btn" id="notification-btn" title="Notificações">
+              <i class="fi fi-rr-bell"></i>
+              <span class="bell-badge" id="notification-badge" style="display: none;">0</span>
+            </button>
+            <div class="notifications-dropdown glass" id="notifications-dropdown" style="display: none;">
+              <div class="dropdown-header">
+                <h3>Notificações</h3>
+                <button class="mark-all-read-btn" id="mark-all-read">Marcar todas como lidas</button>
+              </div>
+              <div class="dropdown-list" id="notifications-list">
+                <div class="dropdown-empty">Nenhuma notificação pendente.</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="navbar-btn" id="theme-toggle" title="Alternar Tema">
+            <i class="fi fi-rr-moon" id="theme-icon"></i>
+          </button>
+
+          <div class="navbar-user">
+            <span class="navbar-user-name" id="navbar-user-name">Carregando...</span>
+            <img src="/img/avatar-default.png" alt="User Avatar" class="user-avatar">
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES PORT -->
+      <main class="view-content animate-fade-in">
+        <div class="relatorios-page">
+          <div class="view-header">
+            <div>
+              <h1>Relatórios Gerenciais</h1>
+              <p>Extraia e analise dados operacionais e financeiros da sua carteira de imóveis.</p>
+            </div>
+          </div>
+
+          <!-- FILTERS PANEL -->
+          <div class="filter-panel card glass">
+            <div class="filter-grid">
+              
+              <!-- Report Type -->
+              <div class="filter-group">
+                <label class="form-label" for="report-select-tipo">Tipo de Relatório</label>
+                <select id="report-select-tipo" class="form-control" required>
+                  <option value="">Selecione um relatório...</option>
+                  <option value="receitas">Relatório de Receitas</option>
+                  <option value="despesas">Relatório de Despesas</option>
+                  <option value="financeiro-imovel">Financeiro por Imóvel</option>
+                  <option value="inadimplencia">Relatório de Inadimplência</option>
+                  <option value="contratos">Relatório de Contratos</option>
+                  <option value="ocupacao">Taxa de Ocupação</option>
+                  <option value="imoveis">Relatório de Imóveis</option>
+                </select>
+              </div>
+
+              <!-- Filter: Imovel -->
+              <div class="filter-group filter-dynamic" id="filter-group-imovel" style="display: none;">
+                <label class="form-label" for="report-filter-imovel">Imóvel</label>
+                <select id="report-filter-imovel" class="form-control">
+                  <option value="">Todos os Imóveis</option>
+                </select>
+              </div>
+
+              <!-- Filter: Status Receita/Despesa/Contrato/Ocupacao/Imovel -->
+              <div class="filter-group filter-dynamic" id="filter-group-status" style="display: none;">
+                <label class="form-label" for="report-filter-status">Status</label>
+                <select id="report-filter-status" class="form-control">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+
+              <!-- Filter: Categoria Despesa -->
+              <div class="filter-group filter-dynamic" id="filter-group-categoria" style="display: none;">
+                <label class="form-label" for="report-filter-categoria">Categoria</label>
+                <select id="report-filter-categoria" class="form-control">
+                  <option value="">Todas as Categorias</option>
+                  <option value="IPTU">IPTU</option>
+                  <option value="Condomínio">Condomínio</option>
+                  <option value="Água">Água</option>
+                  <option value="Luz">Luz</option>
+                  <option value="Seguro">Seguro</option>
+                  <option value="Reforma/Manutenção">Reforma/Manutenção</option>
+                  <option value="Taxa de Administração">Taxa de Administração</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+
+              <!-- Filter: Tipo de Imóvel -->
+              <div class="filter-group filter-dynamic" id="filter-group-tipo-imovel" style="display: none;">
+                <label class="form-label" for="report-filter-tipo-imovel">Tipo de Imóvel</label>
+                <select id="report-filter-tipo-imovel" class="form-control">
+                  <option value="">Todos os Tipos</option>
+                  <option value="Apartamento">Apartamento</option>
+                  <option value="Casa">Casa</option>
+                  <option value="Comercial">Comercial</option>
+                  <option value="Terreno">Terreno</option>
+                  <option value="Galpão">Galpão</option>
+                </select>
+              </div>
+
+              <!-- Filter: Data Inicio -->
+              <div class="filter-group filter-dynamic" id="filter-group-data-inicio" style="display: none;">
+                <label class="form-label" for="report-filter-data-inicio">Data Inicial</label>
+                <input type="date" id="report-filter-data-inicio" class="form-control">
+              </div>
+
+              <!-- Filter: Data Fim -->
+              <div class="filter-group filter-dynamic" id="filter-group-data-fim" style="display: none;">
+                <label class="form-label" for="report-filter-data-fim">Data Final</label>
+                <input type="date" id="report-filter-data-fim" class="form-control">
+              </div>
+
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn btn-ghost" id="report-btn-limpar" style="display: none;">
+                <i class="fi fi-rr-cross-circle"></i> Limpar Filtros
+              </button>
+              <button class="btn btn-primary" id="report-btn-visualizar" disabled>
+                <i class="fi fi-rr-search"></i> Visualizar Relatório
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW AREA -->
+          <div class="report-card card glass">
+            <div class="report-card-header">
+              <div class="report-card-title">
+                <i class="fi fi-rr-list"></i>
+                <span id="preview-report-title">Selecione um relatório para visualizar</span>
+              </div>
+              <div class="export-buttons" id="export-buttons-container" style="display: none;">
+                <button class="btn btn-secondary" id="report-btn-excel" style="height: 38px;">
+                  <i class="fi fi-rr-file-spreadsheet"></i> Exportar Excel
+                </button>
+                <button class="btn btn-secondary" id="report-btn-pdf" style="height: 38px;">
+                  <i class="fi fi-rr-file-pdf"></i> Exportar PDF
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container" id="preview-table-container">
+              <!-- Initial state -->
+              <div class="empty-state">
+                <i class="fi fi-rr-stats"></i>
+                <p>Nenhum dado para exibir. Selecione um tipo de relatório e clique em "Visualizar Relatório".</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/notificacoes.js"></script>
+  <script src="/js/buscaGlobal.js"></script>
+  <script src="/js/modules/relatorios.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+function abrirModalImoveisProprietario(id, nome) {
+  const modal = document.getElementById('modalImoveisProprietario');
+  const titulo = document.getElementById('tituloModalImoveis');
+  const body = document.getElementById('listaImoveisProprietario');
+  if (!modal || !titulo || !body) return;
+
+  titulo.innerText = `Imóveis de ${nome || 'proprietário'}`;
+  body.innerHTML = '<div class="imoveis-loading">Carregando imóveis...</div>';
+  modal.classList.add('active');
+
+  fetch(`/proprietarios/api/imoveis_por_proprietario.php?id=${encodeURIComponent(id)}`, { cache: 'no-store' })
+    .then((r) => r.json())
+    .then((j) => renderizarModalImoveisProprietario(body, j))
+    .catch(() => { body.innerHTML = '<div class="imoveis-vazio">Erro ao carregar imóveis.</div>'; });
+}
+
+function renderizarModalImoveisProprietario(body, j) {
+  if (!j.ok) {
+    body.innerHTML = '<div class="imoveis-vazio">Não foi possível carregar os imóveis.</div>';
+    return;
+  }
+  const lista = Array.isArray(j.lista) ? j.lista : [];
+  if (!lista.length) {
+    body.innerHTML = '<div class="imoveis-vazio">Este proprietário ainda não possui imóveis vinculados.</div>';
+    return;
+  }
+  body.innerHTML = lista.map((i) => `<article class="imovel-item"><div class="imovel-item-topo"><strong>${escapeHtml(i.codigo || `#IM${i.id}`)}</strong><span class="status ${i.status === 'ocupado' ? 'ativo' : 'inativo'}">${i.status === 'ocupado' ? 'Ocupado' : 'Disponível'}</span></div><p>${escapeHtml(i.titulo || 'Endereço não informado')}</p><small>${escapeHtml(i.complemento || 'Sem complemento')} • ${escapeHtml(i.condominio || 'Sem condomínio')}</small><div style="margin-top:8px;"><button class="btn-link-imoveis btn-abrir-imovel-prop" data-imovel-id="${escapeHtml(i.id)}">Ver imóvel</button></div></article>`).join('');
+}
+
+function fecharModalImoveisProprietario() {
+  document.getElementById('modalImoveisProprietario')?.classList.remove('active');
+}
+
+function abrirModalContratosProprietario(id, nome) {
+  const modal = document.getElementById('modalContratosProprietario');
+  const titulo = document.getElementById('tituloModalContratos');
+  const body = document.getElementById('listaContratosProprietario');
+  if (!modal || !titulo || !body) return;
+
+  titulo.innerText = `Contratos de ${nome || 'proprietário'}`;
+  body.innerHTML = '<div class="imoveis-loading">Carregando contratos...</div>';
+  modal.classList.add('active');
+
+  fetch(`/proprietarios/api/contratos_por_proprietario.php?id=${encodeURIComponent(id)}`, { cache: 'no-store' })
+    .then((r) => r.json())
+    .then((j) => renderizarModalContratosProprietario(body, j))
+    .catch(() => { body.innerHTML = '<div class="imoveis-vazio">Erro ao carregar contratos.</div>'; });
+}
+
+function renderizarModalContratosProprietario(body, j) {
+  if (!j.ok) {
+    body.innerHTML = '<div class="imoveis-vazio">Não foi possível carregar os contratos.</div>';
+    return;
+  }
+  const lista = Array.isArray(j.lista) ? j.lista : [];
+  if (!lista.length) {
+    body.innerHTML = '<div class="imoveis-vazio">Este proprietário ainda não possui contratos vinculados.</div>';
+    return;
+  }
+  body.innerHTML = lista.map((c) => `<article class="imovel-item"><div class="imovel-item-topo"><strong>${escapeHtml(c.codigo || `CT-${c.id}`)}</strong><span class="status ${c.status === 'ativo' ? 'ativo' : 'inativo'}">${escapeHtml((c.status || '—').charAt(0).toUpperCase() + (c.status || '—').slice(1))}</span></div><p>${escapeHtml(c.imovel_titulo || 'Imóvel não informado')}</p><small>Inquilino: ${escapeHtml(c.inquilino_nome || 'Não informado')}</small><div style="margin-top:8px;"><button class="btn-link-imoveis btn-abrir-contrato-prop" data-contrato-id="${escapeHtml(c.id)}">Ver contrato</button></div></article>`).join('');
+}
+
+function fecharModalContratosProprietario() {
+  document.getElementById('modalContratosProprietario')?.classList.remove('active');
+}
+
+function abrirContratoDoProprietario(contratoId) {
+  const id = Number(contratoId || 0);
+  if (!id) return;
+  window.open(`/contratos/api/get_pdf.php?id=${id}&t=${Date.now()}`, '_blank');
+}
+
+function abrirImovelDoProprietario(imovelId) {
+  const id = Number(imovelId || 0);
+  if (!id) return;
+  window.location.href = `/imoveis/?id=${id}`;
+}

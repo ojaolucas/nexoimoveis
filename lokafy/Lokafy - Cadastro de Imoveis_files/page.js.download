@@ -1,0 +1,637 @@
+(function () {
+  const qs = new URLSearchParams(window.location.search);
+  const editId = Number(qs.get("id") || 0);
+  const duplicateId = Number(qs.get("duplicar_id") || 0);
+
+  const form = document.getElementById("imovelNovoForm");
+  if (!form) return;
+
+  const isEdit = editId > 0;
+  const isDuplicate = !isEdit && duplicateId > 0;
+  const fields = {
+    id: document.getElementById("imovel_id"),
+    codigo: document.getElementById("imovel_codigo"),
+    cidadeIbge: document.getElementById("imovel_cidade_ibge"),
+    tipo: document.getElementById("imovel_tipo"),
+    status: document.getElementById("imovel_status"),
+    principal: document.getElementById("imovel_proprietario"),
+    secundario: document.getElementById("imovel_proprietario_secundario"),
+    inquilinoMoradia: document.getElementById("imovel_inquilino_moradia"),
+    pixRecebedor: document.getElementById("imovel_pix_recebedor"),
+    cep: document.getElementById("imovel_cep"),
+    rua: document.getElementById("imovel_rua"),
+    numero: document.getElementById("imovel_numero"),
+    complemento: document.getElementById("imovel_complemento"),
+    bairro: document.getElementById("imovel_bairro"),
+    cidade: document.getElementById("imovel_cidade"),
+    uf: document.getElementById("imovel_uf"),
+    quartos: document.getElementById("imovel_quartos"),
+    banheiros: document.getElementById("imovel_banheiros"),
+    vagasGaragem: document.getElementById("imovel_vagas_garagem"),
+    areaM2: document.getElementById("imovel_area_m2"),
+    mobiliado: document.getElementById("imovel_mobiliado"),
+    condominio: document.getElementById("imovel_condominio"),
+    aceitaPet: document.getElementById("imovel_aceita_pet"),
+    inscricao: document.getElementById("imovel_inscricao_municipal"),
+    registro: document.getElementById("imovel_registro"),
+    energiaCompanhia: document.getElementById("imovel_energia_companhia"),
+    energiaCodigoNome: document.getElementById("imovel_energia_codigo_nome"),
+    energiaCodigoNumero: document.getElementById("imovel_energia_codigo_numero"),
+    aguaCompanhia: document.getElementById("imovel_agua_companhia"),
+    aguaCodigoNome: document.getElementById("imovel_agua_codigo_nome"),
+    aguaCodigoNumero: document.getElementById("imovel_agua_codigo_numero"),
+    iptuValor: document.getElementById("imovel_iptu_valor_total"),
+    iptuTipo: document.getElementById("imovel_iptu_tipo")
+  };
+
+  const btnCep = document.getElementById("cepSearchBtn");
+  const moradorSection = document.getElementById("moradorSection");
+  const moradorHelp = document.getElementById("moradorHelp");
+  const submitBtn = document.getElementById("submitBtn");
+  const submitEditBtn = document.getElementById("submitEditBtn");
+  const saveAnotherBtn = document.getElementById("saveAnotherBtn");
+  const saveDuplicateBtn = document.getElementById("saveDuplicateBtn");
+  const detalhesWrap = document.getElementById("detalhesWrap");
+  const toggleSecundarioBtn = document.getElementById("toggleSecundarioBtn");
+  const secundarioWrap = document.getElementById("secundarioWrap");
+  const toggleCompanhiasBtn = document.getElementById("toggleCompanhiasBtn");
+  const companhiasWrap = document.getElementById("companhiasWrap");
+  const toggleRegistroBtn = document.getElementById("toggleRegistroBtn");
+  const registroWrap = document.getElementById("registroWrap");
+  const toggleIptuBtn = document.getElementById("toggleIptuBtn");
+  const iptuWrap = document.getElementById("iptuWrap");
+  const togglePixRecebedorBtn = document.getElementById("togglePixRecebedorBtn");
+  const pixRecebedorWrap = document.getElementById("pixRecebedorWrap");
+  const acoesCriar = document.getElementById("acoesCriar");
+  const acoesEditar = document.getElementById("acoesEditar");
+  const titulo = document.getElementById("tituloPagina");
+  const subtitulo = document.getElementById("subtituloPagina");
+
+  let submitMode = "save";
+  let inquilinosMoradia = [];
+
+  function onlyDigits(v) { return String(v || "").replace(/\D/g, ""); }
+  function setVal(el, v) { if (el) el.value = v == null ? "" : String(v); }
+  function getVal(el) { return String(el?.value || "").trim(); }
+
+  function setCreateUi() {
+    titulo.textContent = "Novo imóvel";
+    subtitulo.textContent = "Cadastre o imóvel com os dados principais e complete as configurações quando precisar.";
+    acoesCriar.style.display = "flex";
+    acoesEditar.style.display = "none";
+  }
+
+  function setDuplicateUi() {
+    titulo.textContent = "Duplicar imóvel";
+    subtitulo.textContent = "Revise os dados abaixo e ajuste apenas o que precisar.";
+    acoesCriar.style.display = "flex";
+    acoesEditar.style.display = "none";
+  }
+
+  function showOptional(wrap, btn, removeText, show) {
+    if (!wrap || !btn) return;
+    wrap.classList.toggle("is-hidden", !show);
+    btn.textContent = show ? removeText : btn.dataset.addText;
+  }
+
+  function clearCompanhias() {
+    setVal(fields.energiaCompanhia, "");
+    setVal(fields.energiaCodigoNome, "");
+    setVal(fields.energiaCodigoNumero, "");
+    setVal(fields.aguaCompanhia, "");
+    setVal(fields.aguaCodigoNome, "");
+    setVal(fields.aguaCodigoNumero, "");
+  }
+
+  function clearIptu() {
+    setVal(fields.iptuValor, "");
+    setVal(fields.iptuTipo, "");
+  }
+
+  function clearPixRecebedor() {
+    setVal(fields.pixRecebedor, "");
+  }
+
+  function clearRegistro() {
+    setVal(fields.inscricao, "");
+    setVal(fields.registro, "");
+  }
+
+  function temDetalhesPreenchidos(iptu) {
+    const temSecundario = !!getVal(fields.secundario);
+    const temCaracteristicas = !!(getVal(fields.condominio) || getVal(fields.aceitaPet));
+    const temCompanhias = !!(
+      getVal(fields.energiaCompanhia) ||
+      getVal(fields.energiaCodigoNome) ||
+      getVal(fields.energiaCodigoNumero) ||
+      getVal(fields.aguaCompanhia) ||
+      getVal(fields.aguaCodigoNome) ||
+      getVal(fields.aguaCodigoNumero)
+    );
+    const temRegistro = !!(getVal(fields.inscricao) || getVal(fields.registro));
+    const temIptu = !!(Number(iptu || 0) > 0 || getVal(fields.iptuTipo));
+    const temPixRecebedor = !!getVal(fields.pixRecebedor);
+    return temSecundario || temCaracteristicas || temCompanhias || temRegistro || temIptu || temPixRecebedor;
+  }
+
+  function setEditUi() {
+    titulo.textContent = "Editar imóvel";
+    subtitulo.textContent = "Atualize os dados principais e as configurações deste imóvel.";
+    acoesCriar.style.display = "none";
+    acoesEditar.style.display = "flex";
+    fields.id.value = String(editId);
+  }
+
+  function formatCep(v) {
+    const d = onlyDigits(v).slice(0, 8);
+    if (d.length > 5) return d.slice(0, 5) + "-" + d.slice(5);
+    return d;
+  }
+
+  function parseMoedaBR(v) {
+    const s = String(v || "").replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".");
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function maskMoedaBR(v) {
+    const d = onlyDigits(v);
+    if (!d) return "";
+    const n = Number(d) / 100;
+    return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function validar() {
+    const principal = getVal(fields.principal);
+    const secundario = getVal(fields.secundario);
+    const tipo = getVal(fields.tipo);
+    const cep = onlyDigits(fields.cep.value);
+    const rua = getVal(fields.rua);
+    const numero = getVal(fields.numero);
+    const bairro = getVal(fields.bairro);
+    const cidade = getVal(fields.cidade);
+    const uf = getVal(fields.uf).toUpperCase();
+
+    if (!principal) return toastWarning("Selecione o proprietário principal."), false;
+    if (secundario && secundario === principal) return toastWarning("O proprietário secundário não pode ser igual ao principal."), false;
+    if (!tipo) return toastWarning("Selecione o tipo do imóvel."), false;
+    if (cep.length !== 8) return toastWarning("Informe um CEP válido."), false;
+    if (!rua || !numero || !bairro || !cidade || !uf) return toastWarning("Preencha o endereço completo."), false;
+
+    return true;
+  }
+
+  async function carregarProprietarios() {
+    const r = await fetch("/proprietarios/api/listar_proprietario.php", { cache: "no-store" });
+    const j = await r.json();
+    if (!j.ok) throw new Error("Erro ao carregar proprietários.");
+
+    const principalAtual = getVal(fields.principal);
+    const secundarioAtual = getVal(fields.secundario);
+
+    fields.principal.innerHTML = '<option value="">Selecione o proprietário</option>';
+    fields.secundario.innerHTML = '<option value="">Sem 2º proprietário</option>';
+
+    (j.lista || []).forEach((p) => {
+      const op1 = document.createElement("option");
+      op1.value = String(p.id);
+      op1.textContent = p.nome || `Proprietário #${p.id}`;
+      fields.principal.appendChild(op1);
+
+      const op2 = document.createElement("option");
+      op2.value = String(p.id);
+      op2.textContent = p.nome || `Proprietário #${p.id}`;
+      fields.secundario.appendChild(op2);
+    });
+
+    if (principalAtual) fields.principal.value = principalAtual;
+    if (secundarioAtual) fields.secundario.value = secundarioAtual;
+  }
+
+  function normalizarTextoEndereco(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function enderecoImovelPronto() {
+    return onlyDigits(fields.cep.value).length === 8
+      || Boolean(getVal(fields.rua) && getVal(fields.cidade))
+      || Boolean(getVal(fields.rua) && getVal(fields.numero));
+  }
+
+  function enderecoPodeSelecionarAutomatico() {
+    return onlyDigits(fields.cep.value).length === 8
+      && getVal(fields.rua)
+      && getVal(fields.numero)
+      && getVal(fields.cidade)
+      && getVal(fields.uf).length === 2;
+  }
+
+  function enderecoBateComInquilino(inq) {
+    if (!enderecoPodeSelecionarAutomatico()) return false;
+    const cepIgual = onlyDigits(inq.cep || "") === onlyDigits(fields.cep.value);
+    const numeroInq = normalizarTextoEndereco(inq.numero);
+    const numeroImovel = normalizarTextoEndereco(fields.numero.value);
+    const numeroIgual = numeroInq && numeroImovel && numeroInq === numeroImovel;
+    const ruaIgual = normalizarTextoEndereco(inq.rua) === normalizarTextoEndereco(fields.rua.value);
+    const cidadeIgual = normalizarTextoEndereco(inq.cidade) === normalizarTextoEndereco(fields.cidade.value);
+    const ufIgual = normalizarTextoEndereco(inq.uf) === normalizarTextoEndereco(fields.uf.value);
+    const bairroInq = normalizarTextoEndereco(inq.bairro);
+    const bairroImovel = normalizarTextoEndereco(fields.bairro.value);
+    const bairroCompativel = !bairroInq || !bairroImovel || bairroInq === bairroImovel;
+    return cepIgual && numeroIgual && ruaIgual && cidadeIgual && ufIgual && bairroCompativel;
+  }
+
+  function formatarEnderecoInquilino(inq) {
+    const cidadeUf = [inq.cidade, inq.uf].map((v) => String(v || "").trim()).filter(Boolean).join("/");
+    return [inq.rua, inq.numero, inq.bairro, cidadeUf]
+      .map((v) => String(v || "").trim())
+      .filter(Boolean)
+      .join(" - ");
+  }
+
+  function renderizarInquilinosMoradia(valorAtual = "") {
+    if (!fields.inquilinoMoradia) return;
+    const atual = String(valorAtual || getVal(fields.inquilinoMoradia));
+    fields.inquilinoMoradia.innerHTML = '<option value="">Nenhum inquilino encontrado</option>';
+    inquilinosMoradia.forEach((inq) => {
+      const op = document.createElement("option");
+      op.value = String(inq.id || "");
+      const nome = inq.nome || `Inquilino #${inq.id}`;
+      const endereco = formatarEnderecoInquilino(inq);
+      op.textContent = endereco ? `${nome} - ${endereco}` : nome;
+      fields.inquilinoMoradia.appendChild(op);
+    });
+    if (atual) fields.inquilinoMoradia.value = atual;
+  }
+
+  async function carregarInquilinosMoradia() {
+    if (!fields.inquilinoMoradia) return;
+    const r = await fetch("/inquilinos/api/listar_select.php", { credentials: "same-origin", cache: "no-store" });
+    const j = await r.json();
+    if (!j.ok) throw new Error("Erro ao carregar inquilinos.");
+    inquilinosMoradia = Array.isArray(j.inquilinos) ? j.inquilinos : [];
+    renderizarInquilinosMoradia();
+  }
+
+  function atualizarCardMorador(autoSelecionar = true) {
+    if (!moradorSection || !fields.inquilinoMoradia) return;
+    const pronto = Boolean(enderecoImovelPronto());
+    moradorSection.hidden = !pronto;
+    if (!pronto) {
+      if (moradorHelp) moradorHelp.textContent = "";
+      return;
+    }
+
+    renderizarInquilinosMoradia(getVal(fields.inquilinoMoradia));
+    const podeAutoSelecionar = Boolean(enderecoPodeSelecionarAutomatico());
+    const encontrado = podeAutoSelecionar ? inquilinosMoradia.find(enderecoBateComInquilino) : null;
+    if (autoSelecionar && encontrado) {
+      setVal(fields.inquilinoMoradia, encontrado.id);
+    }
+    if (moradorHelp) {
+      moradorHelp.textContent = !podeAutoSelecionar
+        ? ""
+        : encontrado
+        ? "Encontramos um inquilino cadastrado com este endereço e selecionamos automaticamente."
+        : "";
+    }
+  }
+
+  async function carregarRecebedoresPix() {
+    if (!fields.pixRecebedor) return;
+    const atual = getVal(fields.pixRecebedor);
+    fields.pixRecebedor.innerHTML = '<option value="">Usar Pix padrão da conta</option>';
+    try {
+      const r = await fetch("/configuracoes/pix_proprio/api/recebedores.php", { cache: "no-store" });
+      const j = await r.json();
+      if (!j.ok) return;
+      (j.recebedores || []).forEach((rec) => {
+        const op = document.createElement("option");
+        op.value = String(rec.id);
+        const padrao = rec.padrao ? " • padrão" : "";
+        const chave = rec.chave_mask ? ` • ${rec.chave_mask}` : "";
+        op.textContent = `${rec.nome_recebedor || "Recebedor Pix"}${chave}${padrao}`;
+        fields.pixRecebedor.appendChild(op);
+      });
+      if (atual) fields.pixRecebedor.value = atual;
+    } catch (_) {
+    }
+  }
+
+  async function carregarImovelPorId(idBusca) {
+    const r = await fetch(`/imoveis/api/buscar_imovel.php?id=${encodeURIComponent(String(idBusca))}`, { cache: "no-store" });
+    const j = await r.json();
+    if (!j.ok || !j.imovel) throw new Error(j.erro || "Não foi possível carregar o imóvel.");
+
+    const i = j.imovel;
+    setVal(fields.id, i.id);
+    setVal(fields.codigo, i.codigo || "");
+    setVal(fields.tipo, i.tipo || "");
+    setVal(fields.status, i.status || "disponivel");
+    setVal(fields.principal, i.proprietario_id || "");
+    setVal(fields.secundario, i.proprietario_secundario_id || "");
+    setVal(fields.inquilinoMoradia, i.inquilino_moradia_id || "");
+    setVal(fields.pixRecebedor, i.pix_recebedor_id || "");
+    setVal(fields.cep, formatCep(i.cep || ""));
+    setVal(fields.rua, i.rua || "");
+  setVal(fields.numero, i.numero || "");
+  setVal(fields.complemento, i.complemento || "");
+  setVal(fields.bairro, i.bairro || "");
+  setVal(fields.cidade, i.cidade || "");
+  setVal(fields.uf, String(i.uf || "").toUpperCase());
+  setVal(fields.quartos, i.quartos ?? "");
+  setVal(fields.banheiros, i.banheiros ?? "");
+  setVal(fields.vagasGaragem, i.vagas_garagem ?? "");
+  setVal(fields.areaM2, i.area_m2 ?? "");
+  setVal(fields.mobiliado, i.mobiliado || "");
+  setVal(fields.cidadeIbge, i.cidade_ibge || "");
+  setVal(fields.condominio, i.condominio || "");
+  setVal(fields.aceitaPet, i.aceita_pet || "");
+    setVal(fields.inscricao, i.inscricao_municipal || "");
+    setVal(fields.registro, i.registro_imovel || "");
+    setVal(fields.energiaCompanhia, i.energia_companhia || "");
+    setVal(fields.energiaCodigoNome, i.energia_codigo_nome || "");
+    setVal(fields.energiaCodigoNumero, i.energia_codigo_numero || "");
+    setVal(fields.aguaCompanhia, i.agua_companhia || "");
+    setVal(fields.aguaCodigoNome, i.agua_codigo_nome || "");
+    setVal(fields.aguaCodigoNumero, i.agua_codigo_numero || "");
+    setVal(fields.iptuTipo, i.iptu_tipo || "");
+
+    const iptu = Number(i.iptu_valor_total || 0);
+    setVal(fields.iptuValor, iptu > 0 ? ("R$ " + iptu.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : "");
+
+    const temDetalhes = temDetalhesPreenchidos(iptu);
+    const temSecundario = !!getVal(fields.secundario);
+    const temCompanhias = !!(
+      getVal(fields.energiaCompanhia) ||
+      getVal(fields.energiaCodigoNome) ||
+      getVal(fields.energiaCodigoNumero) ||
+      getVal(fields.aguaCompanhia) ||
+      getVal(fields.aguaCodigoNome) ||
+      getVal(fields.aguaCodigoNumero)
+    );
+    const temRegistro = !!(getVal(fields.inscricao) || getVal(fields.registro));
+    const temIptu = !!(iptu > 0 || getVal(fields.iptuTipo));
+    const temPixRecebedor = !!getVal(fields.pixRecebedor);
+
+    showOptional(secundarioWrap, toggleSecundarioBtn, "Ocultar proprietário secundário", temSecundario);
+    showOptional(companhiasWrap, toggleCompanhiasBtn, "Ocultar contas de energia e água", temCompanhias);
+    showOptional(registroWrap, toggleRegistroBtn, "Remover registro do imóvel", temRegistro);
+    showOptional(iptuWrap, toggleIptuBtn, "Remover IPTU", temIptu);
+    showOptional(pixRecebedorWrap, togglePixRecebedorBtn, "Usar Pix padrão da conta", temPixRecebedor);
+    atualizarCardMorador(false);
+  }
+
+  async function carregarImovelDuplicado() {
+    await carregarImovelPorId(duplicateId);
+    setVal(fields.id, "");
+    setVal(fields.codigo, "");
+    setVal(fields.inquilinoMoradia, "");
+    atualizarCardMorador(true);
+  }
+
+  async function buscarCep() {
+    const cep = onlyDigits(fields.cep.value);
+    if (cep.length !== 8) {
+      toastWarning("Informe um CEP válido.");
+      return;
+    }
+
+    btnCep.disabled = true;
+    btnCep.classList.add("is-loading");
+
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const j = await r.json();
+      if (j.erro) {
+        toastWarning("CEP não encontrado.");
+        return;
+      }
+
+      setVal(fields.rua, j.logradouro || "");
+      setVal(fields.bairro, j.bairro || "");
+      setVal(fields.cidade, j.localidade || "");
+    setVal(fields.uf, String(j.uf || "").toUpperCase());
+    setVal(fields.cidadeIbge, j.ibge || "");
+    atualizarCardMorador(true);
+    fields.numero.focus();
+    } catch (_) {
+      toastWarning("Não foi possível buscar o CEP agora.");
+    } finally {
+      btnCep.disabled = false;
+      btnCep.classList.remove("is-loading");
+    }
+  }
+
+  function limparFormulario() {
+    form.querySelectorAll("input, select").forEach((el) => {
+      if (el.type === "hidden") return;
+      if (el.tagName === "SELECT") el.selectedIndex = 0;
+      else el.value = "";
+    });
+    fields.status.value = "disponivel";
+    fields.id.value = "";
+    fields.codigo.value = "";
+    fields.cidadeIbge.value = "";
+    setVal(fields.inquilinoMoradia, "");
+    atualizarCardMorador(false);
+    showOptional(secundarioWrap, toggleSecundarioBtn, "Ocultar proprietário secundário", false);
+    showOptional(companhiasWrap, toggleCompanhiasBtn, "Ocultar contas de energia e água", false);
+    showOptional(registroWrap, toggleRegistroBtn, "Remover registro do imóvel", false);
+    showOptional(iptuWrap, toggleIptuBtn, "Remover IPTU", false);
+    showOptional(pixRecebedorWrap, togglePixRecebedorBtn, "Usar Pix padrão da conta", false);
+  }
+
+  async function salvar() {
+    if (!validar()) return;
+
+    const fd = new FormData();
+    const id = getVal(fields.id);
+    if (id) fd.append("id", id);
+    if (getVal(fields.codigo)) fd.append("codigo", getVal(fields.codigo));
+
+    fd.append("proprietario_id", getVal(fields.principal));
+    fd.append("proprietario_id_secundario", getVal(fields.secundario));
+    fd.append("inquilino_moradia_id", getVal(fields.inquilinoMoradia));
+    fd.append("pix_recebedor_id", getVal(fields.pixRecebedor));
+    fd.append("tipo", getVal(fields.tipo));
+    fd.append("status", getVal(fields.status) || "disponivel");
+    fd.append("cep", onlyDigits(fields.cep.value));
+    fd.append("rua", getVal(fields.rua));
+    fd.append("numero", getVal(fields.numero));
+    fd.append("complemento", getVal(fields.complemento));
+  fd.append("bairro", getVal(fields.bairro));
+  fd.append("cidade", getVal(fields.cidade));
+  fd.append("uf", getVal(fields.uf).toUpperCase());
+  fd.append("quartos", getVal(fields.quartos));
+  fd.append("banheiros", getVal(fields.banheiros));
+  fd.append("vagas_garagem", getVal(fields.vagasGaragem));
+  fd.append("area_m2", getVal(fields.areaM2));
+  fd.append("mobiliado", getVal(fields.mobiliado));
+  fd.append("cidade_ibge", getVal(fields.cidadeIbge));
+  fd.append("condominio", getVal(fields.condominio));
+  fd.append("aceita_pet", getVal(fields.aceitaPet));
+    fd.append("inscricao_municipal", getVal(fields.inscricao));
+    fd.append("registro_imovel", getVal(fields.registro));
+    fd.append("energia_companhia", getVal(fields.energiaCompanhia));
+    fd.append("energia_codigo_nome", getVal(fields.energiaCodigoNome));
+    fd.append("energia_codigo_numero", getVal(fields.energiaCodigoNumero));
+    fd.append("agua_companhia", getVal(fields.aguaCompanhia));
+    fd.append("agua_codigo_nome", getVal(fields.aguaCodigoNome));
+    fd.append("agua_codigo_numero", getVal(fields.aguaCodigoNumero));
+
+    const iptu = parseMoedaBR(getVal(fields.iptuValor));
+    if (iptu > 0) {
+      fd.append("iptu_valor_total", String(iptu));
+      fd.append("iptu_tipo", getVal(fields.iptuTipo));
+      fd.append("iptu_repassar", "nao");
+    } else {
+      fd.append("iptu_valor_total", "");
+      fd.append("iptu_tipo", "");
+      fd.append("iptu_repassar", "nao");
+    }
+
+    const activeBtn = isEdit
+      ? submitEditBtn
+      : (submitMode === "save_another"
+          ? saveAnotherBtn
+          : (submitMode === "save_duplicate" ? saveDuplicateBtn : submitBtn));
+    const oldText = activeBtn.textContent;
+    activeBtn.disabled = true;
+    activeBtn.textContent = "Salvando...";
+
+    try {
+      const r = await fetch("/imoveis/api/salvar_imovel.php", { method: "POST", body: fd });
+      const j = await r.json();
+      if (!j.ok) {
+        toastWarning(j.erro || "Erro ao salvar imóvel.");
+        return;
+      }
+
+      if (isEdit) {
+        toastSuccess("Imóvel atualizado com sucesso.");
+        window.location.href = "/imoveis/";
+        return;
+      }
+
+      toastSuccess("Imóvel cadastrado com sucesso.");
+      if (submitMode === "save_another") {
+        limparFormulario();
+        fields.principal.focus();
+      } else if (submitMode === "save_duplicate") {
+        setVal(fields.id, "");
+        setVal(fields.codigo, "");
+        setVal(fields.inquilinoMoradia, "");
+        atualizarCardMorador(true);
+        fields.codigo.focus();
+      } else {
+        window.location.href = "/imoveis/";
+      }
+    } catch (_) {
+      toastWarning("Erro ao salvar imóvel.");
+    } finally {
+      activeBtn.disabled = false;
+      activeBtn.textContent = oldText;
+    }
+  }
+
+  fields.cep.addEventListener("input", () => { fields.cep.value = formatCep(fields.cep.value); fields.cidadeIbge.value = ""; });
+  fields.uf.addEventListener("input", () => { fields.uf.value = String(fields.uf.value || "").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase(); fields.cidadeIbge.value = ""; });
+  [fields.cep, fields.rua, fields.numero, fields.bairro, fields.cidade, fields.uf].forEach((field) => {
+    field?.addEventListener("input", () => atualizarCardMorador(true));
+    field?.addEventListener("change", () => atualizarCardMorador(true));
+  });
+  fields.iptuValor.addEventListener("input", () => { fields.iptuValor.value = maskMoedaBR(fields.iptuValor.value); });
+  btnCep.addEventListener("click", buscarCep);
+
+  fields.principal.addEventListener("change", () => {
+    if (getVal(fields.secundario) && getVal(fields.secundario) === getVal(fields.principal)) {
+      setVal(fields.secundario, "");
+      toastWarning("O proprietário secundário não pode ser igual ao principal.");
+    }
+  });
+  fields.secundario.addEventListener("change", () => {
+    if (getVal(fields.secundario) && getVal(fields.secundario) === getVal(fields.principal)) {
+      setVal(fields.secundario, "");
+      toastWarning("O proprietário secundário não pode ser igual ao principal.");
+    }
+  });
+
+  saveAnotherBtn?.addEventListener("click", () => { submitMode = "save_another"; });
+  saveDuplicateBtn?.addEventListener("click", () => { submitMode = "save_duplicate"; });
+  submitBtn?.addEventListener("click", () => { submitMode = "save"; });
+  submitEditBtn?.addEventListener("click", () => { submitMode = "save"; });
+  if (toggleSecundarioBtn) {
+    toggleSecundarioBtn.dataset.addText = "Adicionar";
+    toggleSecundarioBtn.addEventListener("click", () => {
+      const abrindo = secundarioWrap.classList.contains("is-hidden");
+      if (!abrindo) setVal(fields.secundario, "");
+      showOptional(secundarioWrap, toggleSecundarioBtn, "Remover", abrindo);
+    });
+  }
+  if (toggleCompanhiasBtn) {
+    toggleCompanhiasBtn.dataset.addText = "Adicionar";
+    toggleCompanhiasBtn.addEventListener("click", () => {
+      const abrindo = companhiasWrap.classList.contains("is-hidden");
+      if (!abrindo) clearCompanhias();
+      showOptional(companhiasWrap, toggleCompanhiasBtn, "Remover", abrindo);
+    });
+  }
+  if (toggleRegistroBtn) {
+    toggleRegistroBtn.dataset.addText = "Adicionar";
+    toggleRegistroBtn.addEventListener("click", () => {
+      const abrindo = registroWrap.classList.contains("is-hidden");
+      if (!abrindo) clearRegistro();
+      showOptional(registroWrap, toggleRegistroBtn, "Remover", abrindo);
+    });
+  }
+  if (toggleIptuBtn) {
+    toggleIptuBtn.dataset.addText = "Adicionar";
+    toggleIptuBtn.addEventListener("click", () => {
+      const abrindo = iptuWrap.classList.contains("is-hidden");
+      if (!abrindo) clearIptu();
+      showOptional(iptuWrap, toggleIptuBtn, "Remover", abrindo);
+    });
+  }
+  if (togglePixRecebedorBtn) {
+    togglePixRecebedorBtn.dataset.addText = "Adicionar";
+    togglePixRecebedorBtn.addEventListener("click", () => {
+      const abrindo = pixRecebedorWrap.classList.contains("is-hidden");
+      if (!abrindo) clearPixRecebedor();
+      showOptional(pixRecebedorWrap, togglePixRecebedorBtn, "Remover", abrindo);
+    });
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    salvar();
+  });
+
+  (async () => {
+    showOptional(secundarioWrap, toggleSecundarioBtn, "Ocultar proprietário secundário", false);
+    showOptional(companhiasWrap, toggleCompanhiasBtn, "Ocultar contas de energia e água", false);
+    showOptional(registroWrap, toggleRegistroBtn, "Remover registro do imóvel", false);
+    showOptional(iptuWrap, toggleIptuBtn, "Remover IPTU", false);
+    showOptional(pixRecebedorWrap, togglePixRecebedorBtn, "Usar Pix padrão da conta", false);
+    if (isEdit) setEditUi(); else setCreateUi();
+    try {
+      await carregarProprietarios();
+      await carregarInquilinosMoradia();
+      await carregarRecebedoresPix();
+      if (isEdit) {
+        await carregarImovelPorId(editId);
+      } else if (isDuplicate) {
+        setDuplicateUi();
+        await carregarImovelDuplicado();
+      }
+      atualizarCardMorador(true);
+    } catch (err) {
+      toastWarning(err?.message || "Erro ao carregar formulário.");
+    }
+  })();
+})();

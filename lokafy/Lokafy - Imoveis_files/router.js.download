@@ -1,0 +1,187 @@
+/* ======================================================
+   LOKAFY ROUTER — SPA REAL (VERSÃO CORRIGIDA)
+====================================================== */
+
+(async () => {
+
+  const content = document.getElementById("appContent");
+  const loadedScripts = new Set();
+  const spaEnabled = false;
+  const spaSafePrefixes = [];
+
+  document.querySelectorAll("script[src]").forEach((script) => {
+    loadedScripts.add(new URL(script.src, window.location.origin).href);
+  });
+
+  if (!content) return;
+
+  function rotaSuportaSpa(pathname) {
+    if (!spaEnabled) return false;
+    return spaSafePrefixes.some((prefix) => pathname.startsWith(prefix));
+  }
+
+  async function executarScripts(container) {
+    const scripts = Array.from(container.querySelectorAll("script"));
+
+    for (const oldScript of scripts) {
+      const src = oldScript.getAttribute("src");
+
+      if (src) {
+        const absoluteSrc = new URL(src, window.location.origin).href;
+        oldScript.remove();
+
+        if (loadedScripts.has(absoluteSrc)) {
+          continue;
+        }
+
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = absoluteSrc;
+          script.async = false;
+          script.onload = () => {
+            loadedScripts.add(absoluteSrc);
+            script.remove();
+            resolve();
+          };
+          script.onerror = () => {
+            script.remove();
+            resolve();
+          };
+          document.body.appendChild(script);
+        });
+        continue;
+      }
+
+      const inline = oldScript.textContent || "";
+      oldScript.remove();
+      if (!inline.trim()) continue;
+
+      const script = document.createElement("script");
+      script.textContent = inline;
+      document.body.appendChild(script);
+      script.remove();
+    }
+  }
+
+  function dispararEventoPagina(pathname) {
+    document.dispatchEvent(
+      new CustomEvent("lokafy:page-ready", {
+        detail: { pathname }
+      })
+    );
+  }
+
+
+  function atualizarTopbar(novoConteudo) {
+    const title = (novoConteudo.dataset.topbarTitle || "").trim();
+    const desc = (novoConteudo.dataset.topbarDesc || "").trim();
+
+    const titleEl = document.querySelector(".topbar .topbar-title");
+    const descEl = document.querySelector(".topbar .topbar-desc");
+
+    if (titleEl && title) {
+      titleEl.textContent = title;
+    }
+
+    if (!descEl) return;
+
+    if (desc) {
+      descEl.textContent = desc;
+      descEl.style.display = "";
+      return;
+    }
+
+    descEl.textContent = "";
+    descEl.style.display = "none";
+  }
+
+  async function carregar(url, push = true) {
+    if (!rotaSuportaSpa(url)) {
+      location.href = url;
+      return;
+    }
+
+    try {
+
+      document.body.classList.add("page-loading");
+
+      const res = await fetch(url, {
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin"
+      });
+
+      if (!res.ok) throw new Error("Erro HTTP " + res.status);
+
+      const html = await res.text();
+
+      /* ===== extrai só conteúdo ===== */
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      const novoConteudo = doc.querySelector("#appContent");
+
+      if (!novoConteudo) {
+        location.href = url;
+        return;
+      }
+
+      /* troca conteúdo */
+      content.innerHTML = novoConteudo.innerHTML;
+      atualizarTopbar(novoConteudo);
+      await executarScripts(content);
+
+      /* atualiza URL */
+      if (push) {
+        history.pushState({}, "", url);
+      }
+
+      dispararEventoPagina(url);
+
+    } catch (e) {
+      location.href = url;
+    }
+    finally {
+      document.body.classList.remove("page-loading");
+    }
+  }
+
+  /* ==============================
+     CLIQUE INTERNO
+  ============================== */
+  document.addEventListener("click", e => {
+
+    const link = e.target.closest("a");
+    if (!link) return;
+
+    const url = new URL(link.href);
+
+    if (url.origin !== location.origin) return;
+    if (link.target === "_blank") return;
+    if (link.hasAttribute("download")) return;
+    if (url.hash) return;
+
+    if (!rotaSuportaSpa(url.pathname)) {
+      return;
+    }
+
+    e.preventDefault();
+
+    carregar(url.pathname);
+  });
+
+  /* ==============================
+     VOLTAR / AVANÇAR
+  ============================== */
+  window.addEventListener("popstate", () => {
+    if (!rotaSuportaSpa(location.pathname)) {
+      location.href = location.pathname;
+      return;
+    }
+    carregar(location.pathname, false);
+  });
+
+  dispararEventoPagina(location.pathname);
+
+})();
