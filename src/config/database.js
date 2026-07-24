@@ -9,7 +9,8 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   max: 20, // maximum number of clients in the pool
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000, // increased to 5s to avoid network lag timeouts
+  ssl: process.env.DB_HOST !== 'localhost' && process.env.DB_HOST !== '127.0.0.1' ? { rejectUnauthorized: false } : false
 });
 
 pool.on('connect', () => {

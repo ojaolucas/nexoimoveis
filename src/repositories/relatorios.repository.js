@@ -16,7 +16,7 @@ async function getReceitas(filters = {}) {
     FROM recebimentos r
     JOIN contratos c ON r.contrato_id = c.id
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE 1=1
   `;
   const params = [];
@@ -148,7 +148,7 @@ async function getInadimplencia(filters = {}) {
     FROM recebimentos r
     JOIN contratos c ON r.contrato_id = c.id
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE r.status = 'Vencido'
   `;
   const params = [];
@@ -176,7 +176,7 @@ async function getContratos(filters = {}) {
       c.status
     FROM contratos c
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE 1=1
   `;
   const params = [];
@@ -208,7 +208,7 @@ async function getOcupacao(filters = {}) {
       l.nome_razao_social AS locatario_nome
     FROM imoveis i
     LEFT JOIN contratos c ON c.imovel_id = i.id AND c.status = 'Ativo'
-    LEFT JOIN locatarios l ON c.locatario_id = l.id
+    LEFT JOIN pessoas l ON c.locatario_id = l.id
     WHERE i.status != 'Inativo'
   `;
   const params = [];
@@ -236,7 +236,7 @@ async function getImoveis(filters = {}) {
       i.endereco,
       p.nome_razao_social AS proprietario_nome
     FROM imoveis i
-    JOIN proprietarios p ON i.proprietario_id = p.id
+    JOIN pessoas p ON i.proprietario_id = p.id
     WHERE i.status != 'Inativo'
   `;
   const params = [];

@@ -1,7 +1,7 @@
 // Manutenções Módulo JavaScript Controller (Fase 10)
 
 let currentPage = 1;
-const limit = 10;
+let limit = 10;
 let currentFilters = { status: '', imovel: '', tipo: '', data_inicial: '', data_final: '', busca: '' };
 let currentManutencaoId = null;
 let userProfile = null;
@@ -182,27 +182,32 @@ async function carregarManutencoes(page) {
       `;
     }).join('');
 
-    const total = res.pagination.total;
-    const pages = res.pagination.pages;
-    const start = (page - 1) * limit + 1;
-    const end = Math.min(page * limit, total);
-    
-    document.getElementById('pagination-info').textContent = `Mostrando ${start} a ${end} de ${total} registros`;
-    updatePaginationControls(pages, page);
+    // Render pagination dynamically
+    const footerElement = document.querySelector('.table-footer');
+    window.renderPagination({
+      footerElement: footerElement,
+      pagination: {
+        total: res.pagination.total,
+        page: page,
+        limit: limit,
+        pages: res.pagination.pages
+      },
+      onPageChange: (newPage) => {
+        currentPage = newPage;
+        carregarManutencoes(currentPage);
+      },
+      onLimitChange: (newLimit) => {
+        limit = newLimit;
+        currentPage = 1;
+        carregarManutencoes(currentPage);
+      }
+    });
   } catch (err) {
     console.error('Error loading maintenance:', err);
     showToast('Erro ao obter manutenções.', 'error');
   } finally {
     hideLoader();
   }
-}
-
-function updatePaginationControls(totalPages, activePage) {
-  const btnPrev = document.getElementById('btn-prev-page');
-  const btnNext = document.getElementById('btn-next-page');
-
-  btnPrev.disabled = activePage <= 1;
-  btnNext.disabled = activePage >= totalPages;
 }
 
 async function carregarGraficosManutencoes() {
@@ -339,19 +344,6 @@ function setupEventListeners() {
     
     currentFilters = { status: '', imovel: '', tipo: '', data_inicial: '', data_final: '', busca: '' };
     currentPage = 1;
-    carregarManutencoes(currentPage);
-  });
-
-  // Pagination
-  document.getElementById('btn-prev-page').addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--;
-      carregarManutencoes(currentPage);
-    }
-  });
-
-  document.getElementById('btn-next-page').addEventListener('click', () => {
-    currentPage++;
     carregarManutencoes(currentPage);
   });
 

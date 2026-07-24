@@ -20,8 +20,8 @@
   height: 46px;
   padding: 0 16px;
   background-color: var(--color-bg-card);
-  border: 1px solid #dbe3ed;
-  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   color: var(--color-text-main);
   font-size: 14px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
@@ -29,7 +29,8 @@
 
 .form-control:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  background-color: var(--color-bg-card);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
 
 .form-control::placeholder {
@@ -103,4 +104,36 @@
   height: 18px;
   accent-color: var(--color-primary);
   cursor: pointer;
+}
+
+/* CEP Input Wrapper & Button alignment */
+.imv-cep-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.imv-cep-wrap input {
+  flex-grow: 1;
+}
+
+.imv-cep-btn {
+  height: 46px;
+  width: 46px;
+  min-width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color var(--transition-fast);
+}
+
+.imv-cep-btn:hover {
+  background-color: var(--color-primary-hover);
 }

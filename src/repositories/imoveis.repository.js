@@ -5,7 +5,7 @@ async function findById(id) {
     SELECT i.*, p.nome_razao_social AS proprietario_nome,
       (SELECT COUNT(id) FROM contratos WHERE imovel_id = i.id AND status = 'Ativo') AS contratos_ativos
     FROM imoveis i
-    LEFT JOIN proprietarios p ON i.proprietario_id = p.id
+    LEFT JOIN pessoas p ON i.proprietario_id = p.id
     WHERE i.id = $1
   `;
   const result = await db.query(query, [id]);
@@ -59,7 +59,7 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
     SELECT i.*, p.nome_razao_social AS proprietario_nome,
       (SELECT COUNT(id) FROM contratos WHERE imovel_id = i.id AND status = 'Ativo') AS contratos_ativos
     FROM imoveis i
-    LEFT JOIN proprietarios p ON i.proprietario_id = p.id
+    LEFT JOIN pessoas p ON i.proprietario_id = p.id
     WHERE 1=1
   `;
   const params = [];
@@ -226,7 +226,7 @@ async function listContratos(imovelId) {
   const query = `
     SELECT c.*, l.nome_razao_social AS locatario_nome 
     FROM contratos c 
-    JOIN locatarios l ON c.locatario_id = l.id 
+    JOIN pessoas l ON c.locatario_id = l.id 
     WHERE c.imovel_id = $1 
     ORDER BY c.criado_em DESC
   `;

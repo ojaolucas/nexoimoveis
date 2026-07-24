@@ -16,8 +16,8 @@ async function findById(id) {
            p.codigo AS proprietario_codigo
     FROM contratos c
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
-    LEFT JOIN proprietarios p ON i.proprietario_id = p.id
+    JOIN pessoas l ON c.locatario_id = l.id
+    LEFT JOIN pessoas p ON i.proprietario_id = p.id
     WHERE c.id = $1
   `;
   const result = await db.query(query, [id]);
@@ -101,7 +101,7 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
            l.codigo AS locatario_codigo
     FROM contratos c
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE 1 = 1
   `;
   const params = [];
@@ -148,7 +148,7 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
     SELECT COUNT(c.id) 
     FROM contratos c
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE 1 = 1
   `;
   

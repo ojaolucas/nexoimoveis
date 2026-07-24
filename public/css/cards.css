@@ -61,3 +61,14 @@
   margin: 0;
 }
 
+/* Table Cards adjustments - prevent hover translation/lift effect */
+.card:has(.table-responsive) {
+  transform: none !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.card:has(.table-responsive):hover {
+  transform: none !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+

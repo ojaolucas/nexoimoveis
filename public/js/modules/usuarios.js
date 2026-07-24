@@ -1,7 +1,7 @@
 // Client-side Users Management module
 
 let currentPage = 1;
-const limitPerPage = 10;
+let limitPerPage = 10;
 let userProfile = 'consulta'; // Default fallback
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -107,18 +107,25 @@ async function loadUsuariosList(page = 1) {
     `;
   }).join('');
 
-  // Update pagination indicators
-  const total = res.pagination.total;
-  const pages = res.pagination.pages;
-  document.getElementById('pagination-info').textContent = `Mostrando ${users.length} de ${total} registros (Página ${page} de ${pages})`;
-
-  // Enable/disable page buttons
-  const prevBtn = document.getElementById('btn-prev-page');
-  const nextBtn = document.getElementById('btn-next-page');
-
-  if (prevBtn) prevBtn.disabled = page <= 1;
-  if (nextBtn) nextBtn.disabled = page >= pages;
-}
+    // Render pagination dynamically
+    const footerElement = document.querySelector('.table-footer');
+    window.renderPagination({
+      footerElement: footerElement,
+      pagination: {
+        total: res.pagination.total,
+        page: page,
+        limit: limitPerPage,
+        pages: res.pagination.pages
+      },
+      onPageChange: (newPage) => {
+        loadUsuariosList(newPage);
+      },
+      onLimitChange: (newLimit) => {
+        limitPerPage = newLimit;
+        loadUsuariosList(1);
+      }
+    });
+  }
 
 /**
  * Bind modal buttons and forms
@@ -152,22 +159,6 @@ function bindEvents() {
   // Submit User form (Create / Update)
   if (form) {
     form.addEventListener('submit', handleUserFormSubmit);
-  }
-
-  // Bind pagination clicks
-  const prevBtn = document.getElementById('btn-prev-page');
-  const nextBtn = document.getElementById('btn-next-page');
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      if (currentPage > 1) loadUsuariosList(currentPage - 1);
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      loadUsuariosList(currentPage + 1);
-    });
   }
 
   // Password reset modal close triggers

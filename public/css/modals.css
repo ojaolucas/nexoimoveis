@@ -44,14 +44,14 @@
 .modal-content .form-control {
   border-radius: 8px;
   border: 1px solid var(--color-border);
-  background-color: var(--color-bg-base); /* slight distinction from card body */
+  background-color: var(--color-bg-card);
   transition: all var(--transition-fast);
 }
 
 .modal-content .form-control:focus {
   background-color: var(--color-bg-card);
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
 
 /* Modal header/footer consistency */
@@ -168,10 +168,35 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .modal-fullpage .modal-content > form > div[style*="display: grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 15px !important;
+  }
+}
+
 @media (max-width: 768px) {
   .modal-fullpage .modal-content {
     width: 100vw !important;
     margin-left: 0 !important;
     padding: 20px !important;
   }
+}
+
+/* Integrate Wizard Header & Footer seamlessly into the page background */
+.wizard-header {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+}
+
+.wizard-footer {
+  background-color: transparent !important;
+  background: transparent !important;
+  border-top: none !important;
+  padding-left: 30px !important;
+  padding-right: 30px !important;
 }

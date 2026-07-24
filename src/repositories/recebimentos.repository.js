@@ -15,7 +15,7 @@ async function findById(id) {
     FROM recebimentos r
     JOIN contratos c ON r.contrato_id = c.id
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE r.id = $1
   `;
   const result = await db.query(query, [id]);
@@ -78,7 +78,7 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
     FROM recebimentos r
     JOIN contratos c ON r.contrato_id = c.id
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE 1 = 1
   `;
   const params = [];
@@ -132,7 +132,7 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
     FROM recebimentos r
     JOIN contratos c ON r.contrato_id = c.id
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE 1 = 1
   `;
   
@@ -319,7 +319,7 @@ async function getInadimplencias() {
     FROM recebimentos r
     JOIN contratos c ON r.contrato_id = c.id
     JOIN imoveis i ON c.imovel_id = i.id
-    JOIN locatarios l ON c.locatario_id = l.id
+    JOIN pessoas l ON c.locatario_id = l.id
     WHERE r.status = 'Vencido'
     ORDER BY dias_atraso DESC, r.vencimento ASC
   `;

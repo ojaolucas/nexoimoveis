@@ -3,7 +3,7 @@
 let currentPessoasTab = 'proprietarios';
 let propCurrentPage = 1;
 let locCurrentPage = 1;
-const limit = 10;
+let limit = 10;
 
 let propFilters = { busca: '', status: '', tipo: '' };
 let locFilters = { busca: '', status: '', tipo: '' };
@@ -11,6 +11,8 @@ let locFilters = { busca: '', status: '', tipo: '' };
 let currentProprietarioId = null;
 let currentLocatarioId = null;
 let userProfile = null;
+let tempPropDocs = []; // Temporário para cadastro de proprietários [{tipo: '...', arquivo: File}]
+let tempLocDocs = []; // Temporário para cadastro de locatários [{tipo: '...', arquivo: File}]
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname === '/pessoas') {
@@ -135,32 +137,6 @@ function setupEventListeners() {
     carregarLocatarios(locCurrentPage);
   });
 
-  // Pagination Proprietários
-  document.getElementById('prop-btn-prev').addEventListener('click', () => {
-    if (propCurrentPage > 1) {
-      propCurrentPage--;
-      carregarProprietarios(propCurrentPage);
-    }
-  });
-
-  document.getElementById('prop-btn-next').addEventListener('click', () => {
-    propCurrentPage++;
-    carregarProprietarios(propCurrentPage);
-  });
-
-  // Pagination Locatários
-  document.getElementById('loc-btn-prev').addEventListener('click', () => {
-    if (locCurrentPage > 1) {
-      locCurrentPage--;
-      carregarLocatarios(locCurrentPage);
-    }
-  });
-
-  document.getElementById('loc-btn-next').addEventListener('click', () => {
-    locCurrentPage++;
-    carregarLocatarios(locCurrentPage);
-  });
-
   // General exports (maps to current active tab)
   document.getElementById('btn-export-excel').addEventListener('click', () => {
     if (currentPessoasTab === 'proprietarios') {
@@ -208,101 +184,33 @@ function setupEventListeners() {
     document.getElementById('modal-locatario').classList.remove('active');
   });
 
-  // Wizard navigation buttons for Proprietários
-  document.getElementById('prop-wizard-btn-prev').addEventListener('click', () => {
-    if (propCurrentStep === 1) {
-      document.getElementById('modal-proprietario').classList.remove('active');
-    } else {
-      goToPropStep(propCurrentStep - 1);
-    }
-  });
-
-  document.getElementById('prop-wizard-btn-next').addEventListener('click', () => {
-    if (propCurrentStep < 5) {
-      if (validatePropStep(propCurrentStep)) {
-        goToPropStep(propCurrentStep + 1);
-      }
-    }
-  });
-
-  // Intercept form submit or click next for Proprietários
+  // Navigation & Submit actions for Proprietários
   document.getElementById('form-proprietario').addEventListener('submit', (e) => {
     e.preventDefault();
-    if (propCurrentStep < 5) {
-      if (validatePropStep(propCurrentStep)) {
-        goToPropStep(propCurrentStep + 1);
-      }
-    } else {
-      handleSaveProprietario(e);
-    }
+    handleSaveProprietario(e);
   });
 
-  // Wizard sidebar steps navigation click for Proprietários
-  document.querySelectorAll('#modal-proprietario .wizard-step').forEach(stepEl => {
-    stepEl.addEventListener('click', () => {
-      const target = parseInt(stepEl.getAttribute('data-step-target'));
-      if (target === propCurrentStep) return;
-      
-      if (target > propCurrentStep) {
-        // Validate intermediate steps
-        let tempStep = propCurrentStep;
-        while (tempStep < target) {
-          if (!validatePropStep(tempStep)) return;
-          tempStep++;
-        }
-      }
-      
-      goToPropStep(target);
+  const btnCancelarModalProp = document.getElementById('prop-btn-cancelar-modal');
+  if (btnCancelarModalProp) {
+    btnCancelarModalProp.addEventListener('click', () => {
+      document.getElementById('form-proprietario').reset();
+      document.getElementById('modal-proprietario').classList.remove('active');
     });
-  });
+  }
 
-  // Wizard navigation buttons for Locatários
-  document.getElementById('loc-wizard-btn-prev').addEventListener('click', () => {
-    if (locCurrentStep === 1) {
-      document.getElementById('modal-locatario').classList.remove('active');
-    } else {
-      goToLocStep(locCurrentStep - 1);
-    }
-  });
-
-  document.getElementById('loc-wizard-btn-next').addEventListener('click', () => {
-    if (locCurrentStep < 5) {
-      if (validateLocStep(locCurrentStep)) {
-        goToLocStep(locCurrentStep + 1);
-      }
-    }
-  });
-
-  // Intercept form submit or click next for Locatários
+  // Navigation & Submit actions for Locatários
   document.getElementById('form-locatario').addEventListener('submit', (e) => {
     e.preventDefault();
-    if (locCurrentStep < 5) {
-      if (validateLocStep(locCurrentStep)) {
-        goToLocStep(locCurrentStep + 1);
-      }
-    } else {
-      handleSaveLocatario(e);
-    }
+    handleSaveLocatario(e);
   });
 
-  // Wizard sidebar steps navigation click for Locatários
-  document.querySelectorAll('#modal-locatario .wizard-step').forEach(stepEl => {
-    stepEl.addEventListener('click', () => {
-      const target = parseInt(stepEl.getAttribute('data-step-target'));
-      if (target === locCurrentStep) return;
-      
-      if (target > locCurrentStep) {
-        // Validate intermediate steps
-        let tempStep = locCurrentStep;
-        while (tempStep < target) {
-          if (!validateLocStep(tempStep)) return;
-          tempStep++;
-        }
-      }
-      
-      goToLocStep(target);
+  const btnCancelarModalLoc = document.getElementById('loc-btn-cancelar-modal');
+  if (btnCancelarModalLoc) {
+    btnCancelarModalLoc.addEventListener('click', () => {
+      document.getElementById('form-locatario').reset();
+      document.getElementById('modal-locatario').classList.remove('active');
     });
-  });
+  }
 
   // Details Modal tab switches
   document.querySelectorAll('[data-tab]').forEach(btn => {
@@ -342,6 +250,229 @@ function setupEventListeners() {
   if (btnLocWizardUpload) {
     btnLocWizardUpload.addEventListener('click', handleLocWizardUpload);
   }
+
+  // Setup Proprietário Document Dropzone
+  const propInput = document.getElementById('prop-wizard-doc-arquivo');
+  if (propInput) {
+    propInput.addEventListener('change', (e) => {
+      console.log('[Proprietários Input] Change disparado! Arquivos:', e.target.files);
+      if (e.target.files && e.target.files.length > 0) {
+        handlePropFilesSelected(e.target.files);
+      }
+    });
+  }
+
+  // Setup Locatário Document Dropzone
+  const locInput = document.getElementById('loc-wizard-doc-arquivo');
+  if (locInput) {
+    locInput.addEventListener('change', (e) => {
+      console.log('[Locatários Input] Change disparado! Arquivos:', e.target.files);
+      if (e.target.files && e.target.files.length > 0) {
+        handleLocFilesSelected(e.target.files);
+      }
+    });
+  }
+
+  // Listener CEP Proprietário (ao digitar 8 números ou perder o foco)
+  const propCep = document.getElementById('prop-cep');
+  if (propCep) {
+    let lastPropCep = '';
+    const buscarCepProp = async () => {
+      const cep = propCep.value.replace(/\D/g, '');
+      if (cep.length === 8) {
+        if (cep === lastPropCep) return;
+        lastPropCep = cep;
+        try {
+          const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          const data = await res.json();
+          if (data && !data.erro) {
+            const rua = data.logradouro || '';
+            const bairro = data.bairro || '';
+            const cidade = data.localidade || '';
+            const uf = data.uf || '';
+            document.getElementById('prop-endereco').value = `${rua}, , Bairro: ${bairro}, ${cidade}/${uf}`;
+            document.getElementById('prop-endereco').focus();
+            
+            const commaIndex = rua.length + 2;
+            document.getElementById('prop-endereco').setSelectionRange(commaIndex, commaIndex);
+            
+            showToast('Endereço completado via CEP! Digite o número.', 'success');
+          } else {
+            showToast('CEP não encontrado.', 'warning');
+          }
+        } catch(err) {
+          showToast('Erro ao buscar o CEP.', 'error');
+        }
+      }
+    };
+    propCep.addEventListener('blur', buscarCepProp);
+    propCep.addEventListener('input', buscarCepProp);
+    
+    const btnBuscarCepProp = document.getElementById('btn-buscar-cep-prop');
+    if (btnBuscarCepProp) {
+      btnBuscarCepProp.addEventListener('click', () => {
+        lastPropCep = '';
+        buscarCepProp();
+      });
+    }
+  }
+
+  // Listener CEP Locatário (ao digitar 8 números ou perder o foco)
+  const locCep = document.getElementById('loc-cep');
+  if (locCep) {
+    let lastLocCep = '';
+    const buscarCepLoc = async () => {
+      const cep = locCep.value.replace(/\D/g, '');
+      if (cep.length === 8) {
+        if (cep === lastLocCep) return;
+        lastLocCep = cep;
+        try {
+          const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          const data = await res.json();
+          if (data && !data.erro) {
+            const rua = data.logradouro || '';
+            const bairro = data.bairro || '';
+            const cidade = data.localidade || '';
+            const uf = data.uf || '';
+            document.getElementById('loc-endereco').value = `${rua}, , Bairro: ${bairro}, ${cidade}/${uf}`;
+            document.getElementById('loc-endereco').focus();
+            
+            const commaIndex = rua.length + 2;
+            document.getElementById('loc-endereco').setSelectionRange(commaIndex, commaIndex);
+            
+            showToast('Endereço completado via CEP! Digite o número.', 'success');
+          } else {
+            showToast('CEP não encontrado.', 'warning');
+          }
+        } catch(err) {
+          showToast('Erro ao buscar o CEP.', 'error');
+        }
+      }
+    };
+    locCep.addEventListener('blur', buscarCepLoc);
+    locCep.addEventListener('input', buscarCepLoc);
+    
+    const btnBuscarCepLoc = document.getElementById('btn-buscar-cep-loc');
+    if (btnBuscarCepLoc) {
+      btnBuscarCepLoc.addEventListener('click', () => {
+        lastLocCep = '';
+        buscarCepLoc();
+      });
+    }
+  }
+  // Listener de CNPJ e Lupa para Proprietário
+  const propCnpjInput = document.getElementById('prop-cpf_cnpj');
+  if (propCnpjInput) {
+    let lastSearchCnpjProp = '';
+    const buscarCnpjProp = async () => {
+      const isPJ = document.getElementById('prop-tipo_pessoa').value === 'PJ';
+      if (!isPJ) return;
+      
+      const cnpj = propCnpjInput.value.replace(/\D/g, '');
+      if (cnpj.length === 14) {
+        if (cnpj === lastSearchCnpjProp) return;
+        lastSearchCnpjProp = cnpj;
+        showLoader();
+        try {
+          const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+          if (res.ok) {
+            const data = await res.json();
+            document.getElementById('prop-nome_razao_social').value = data.razao_social || '';
+            document.getElementById('prop-nome_fantasia').value = data.nome_fantasia || data.razao_social || '';
+            document.getElementById('prop-email').value = data.email || '';
+            
+            if (data.ddd_telefone1) {
+              const cleanedTel = data.ddd_telefone1.replace(/\D/g, '');
+              document.getElementById('prop-telefone').value = cleanedTel;
+            }
+            
+            const logradouro = data.logradouro || '';
+            const numero = data.numero || '';
+            const complemento = data.complemento || '';
+            const bairro = data.bairro || '';
+            const cidade = data.municipio || '';
+            const uf = data.uf || '';
+            
+            document.getElementById('prop-endereco').value = `${logradouro}, ${numero}${complemento ? ' - ' + complemento : ''}, Bairro: ${bairro}, ${cidade}/${uf}`;
+            showToast('Dados da empresa importados com sucesso!', 'success');
+          } else {
+            showToast('CNPJ não encontrado ou indisponível.', 'warning');
+          }
+        } catch(err) {
+          showToast('Erro ao consultar o CNPJ.', 'error');
+        } finally {
+          hideLoader();
+        }
+      }
+    };
+    propCnpjInput.addEventListener('blur', buscarCnpjProp);
+    propCnpjInput.addEventListener('input', buscarCnpjProp);
+
+    const btnBuscarCnpjProp = document.getElementById('btn-buscar-cnpj-prop');
+    if (btnBuscarCnpjProp) {
+      btnBuscarCnpjProp.addEventListener('click', () => {
+        lastSearchCnpjProp = '';
+        buscarCnpjProp();
+      });
+    }
+  }
+
+  // Listener de CNPJ e Lupa para Locatário
+  const locCnpjInput = document.getElementById('loc-cpf_cnpj');
+  if (locCnpjInput) {
+    let lastSearchCnpjLoc = '';
+    const buscarCnpjLoc = async () => {
+      const isPJ = document.getElementById('loc-tipo_pessoa').value === 'PJ';
+      if (!isPJ) return;
+      
+      const cnpj = locCnpjInput.value.replace(/\D/g, '');
+      if (cnpj.length === 14) {
+        if (cnpj === lastSearchCnpjLoc) return;
+        lastSearchCnpjLoc = cnpj;
+        showLoader();
+        try {
+          const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+          if (res.ok) {
+            const data = await res.json();
+            document.getElementById('loc-nome_razao_social').value = data.razao_social || '';
+            document.getElementById('loc-nome_fantasia').value = data.nome_fantasia || data.razao_social || '';
+            document.getElementById('loc-email').value = data.email || '';
+            
+            if (data.ddd_telefone1) {
+              const cleanedTel = data.ddd_telefone1.replace(/\D/g, '');
+              document.getElementById('loc-telefone').value = cleanedTel;
+            }
+            
+            const logradouro = data.logradouro || '';
+            const numero = data.numero || '';
+            const complemento = data.complemento || '';
+            const bairro = data.bairro || '';
+            const cidade = data.municipio || '';
+            const uf = data.uf || '';
+            
+            document.getElementById('loc-endereco').value = `${logradouro}, ${numero}${complemento ? ' - ' + complemento : ''}, Bairro: ${bairro}, ${cidade}/${uf}`;
+            showToast('Dados da empresa importados com sucesso!', 'success');
+          } else {
+            showToast('CNPJ não encontrado ou indisponível.', 'warning');
+          }
+        } catch(err) {
+          showToast('Erro ao consultar o CNPJ.', 'error');
+        } finally {
+          hideLoader();
+        }
+      }
+    };
+    locCnpjInput.addEventListener('blur', buscarCnpjLoc);
+    locCnpjInput.addEventListener('input', buscarCnpjLoc);
+
+    const btnBuscarCnpjLoc = document.getElementById('btn-buscar-cnpj-loc');
+    if (btnBuscarCnpjLoc) {
+      btnBuscarCnpjLoc.addEventListener('click', () => {
+        lastSearchCnpjLoc = '';
+        buscarCnpjLoc();
+      });
+    }
+  }
 }
 
 // Switch between main screen tabs (Proprietários / Locatários)
@@ -371,48 +502,7 @@ function switchMainTab(tabId) {
 let propCurrentStep = 1;
 let locCurrentStep = 1;
 
-function goToPropStep(step) {
-  propCurrentStep = step;
-  
-  if (step === 3) {
-    const isEdit = document.getElementById('prop-id').value !== '';
-    const dc = document.getElementById('prop-wizard-documents-card');
-    const ic = document.getElementById('prop-wizard-informative-card');
-    if (dc) dc.style.display = isEdit ? 'block' : 'none';
-    if (ic) ic.style.display = isEdit ? 'none' : 'block';
-  }
-
-  // Update step elements in sidebar
-  document.querySelectorAll('#modal-proprietario .wizard-step').forEach(el => {
-    const targetStep = parseInt(el.getAttribute('data-step-target'));
-    el.classList.toggle('active', targetStep === step);
-  });
-  
-  // Show active pane
-  document.querySelectorAll('#modal-proprietario .wizard-pane').forEach(el => {
-    el.style.display = el.getAttribute('id') === `prop-wizard-pane-${step}` ? 'block' : 'none';
-  });
-  
-  // Configure footer buttons
-  const btnPrev = document.getElementById('prop-wizard-btn-prev');
-  const btnNext = document.getElementById('prop-wizard-btn-next');
-  
-  if (step === 1) {
-    btnPrev.textContent = 'Cancelar';
-  } else {
-    btnPrev.textContent = '← Voltar';
-  }
-  
-  if (step < 5) {
-    btnNext.type = 'button';
-    btnNext.innerHTML = 'Próximo Passo <i class="fi fi-rr-arrow-right"></i>';
-  } else {
-    btnNext.type = 'submit';
-    const isEdit = document.getElementById('prop-id').value !== '';
-    btnNext.innerHTML = (isEdit ? 'Salvar Alterações' : 'Salvar Cadastro') + ' <i class="fi fi-rr-check"></i>';
-    renderPropRevision();
-  }
-}
+function goToPropStep(step) {}
 
 function validatePropStep(step) {
   const pane = document.getElementById(`prop-wizard-pane-${step}`);
@@ -574,48 +664,7 @@ function renderPropRevision() {
   container.innerHTML = html;
 }
 
-function goToLocStep(step) {
-  locCurrentStep = step;
-  
-  if (step === 3) {
-    const isEdit = document.getElementById('loc-id').value !== '';
-    const dc = document.getElementById('loc-wizard-documents-card');
-    const ic = document.getElementById('loc-wizard-informative-card');
-    if (dc) dc.style.display = isEdit ? 'block' : 'none';
-    if (ic) ic.style.display = isEdit ? 'none' : 'block';
-  }
-
-  // Update step elements in sidebar
-  document.querySelectorAll('#modal-locatario .wizard-step').forEach(el => {
-    const targetStep = parseInt(el.getAttribute('data-step-target'));
-    el.classList.toggle('active', targetStep === step);
-  });
-  
-  // Show active pane
-  document.querySelectorAll('#modal-locatario .wizard-pane').forEach(el => {
-    el.style.display = el.getAttribute('id') === `loc-wizard-pane-${step}` ? 'block' : 'none';
-  });
-  
-  // Configure footer buttons
-  const btnPrev = document.getElementById('loc-wizard-btn-prev');
-  const btnNext = document.getElementById('loc-wizard-btn-next');
-  
-  if (step === 1) {
-    btnPrev.textContent = 'Cancelar';
-  } else {
-    btnPrev.textContent = '← Voltar';
-  }
-  
-  if (step < 5) {
-    btnNext.type = 'button';
-    btnNext.innerHTML = 'Próximo Passo <i class="fi fi-rr-arrow-right"></i>';
-  } else {
-    btnNext.type = 'submit';
-    const isEdit = document.getElementById('loc-id').value !== '';
-    btnNext.innerHTML = (isEdit ? 'Salvar Alterações' : 'Salvar Cadastro') + ' <i class="fi fi-rr-check"></i>';
-    renderLocRevision();
-  }
-}
+function goToLocStep(step) {}
 
 function validateLocStep(step) {
   const pane = document.getElementById(`loc-wizard-pane-${step}`);
@@ -794,7 +843,9 @@ function switchPropTipoPessoa(type) {
   const groupFantasia = document.getElementById('prop-group-fantasia');
   const groupRg = document.getElementById('prop-group-rg');
   const groupPjRow = document.getElementById('prop-group-pj-row');
+  const cardComplementos = document.getElementById('prop-card-complementos');
 
+  const btnBuscarCnpjProp = document.getElementById('btn-buscar-cnpj-prop');
   if (type === 'PF') {
     labelNome.textContent = 'Nome Completo';
     inputNome.placeholder = 'Nome do proprietário';
@@ -803,6 +854,8 @@ function switchPropTipoPessoa(type) {
     groupFantasia.style.display = 'none';
     groupRg.style.display = 'grid';
     groupPjRow.style.display = 'none';
+    if (btnBuscarCnpjProp) btnBuscarCnpjProp.style.display = 'none';
+    if (cardComplementos) cardComplementos.style.display = 'block';
   } else {
     labelNome.textContent = 'Razão Social';
     inputNome.placeholder = 'Razão social da empresa';
@@ -811,6 +864,8 @@ function switchPropTipoPessoa(type) {
     groupFantasia.style.display = 'block';
     groupRg.style.display = 'none';
     groupPjRow.style.display = 'grid';
+    if (btnBuscarCnpjProp) btnBuscarCnpjProp.style.display = 'inline-flex';
+    if (cardComplementos) cardComplementos.style.display = 'none';
   }
 }
 
@@ -823,7 +878,9 @@ function switchLocTipoPessoa(type) {
   const groupFantasia = document.getElementById('loc-group-fantasia');
   const groupRg = document.getElementById('loc-group-rg');
   const groupPjRow = document.getElementById('loc-group-pj-row');
+  const cardComplementos = document.getElementById('loc-card-complementos');
 
+  const btnBuscarCnpjLoc = document.getElementById('btn-buscar-cnpj-loc');
   if (type === 'PF') {
     labelNome.textContent = 'Nome Completo';
     inputNome.placeholder = 'Nome do locatário';
@@ -832,6 +889,8 @@ function switchLocTipoPessoa(type) {
     groupFantasia.style.display = 'none';
     groupRg.style.display = 'grid';
     groupPjRow.style.display = 'none';
+    if (btnBuscarCnpjLoc) btnBuscarCnpjLoc.style.display = 'none';
+    if (cardComplementos) cardComplementos.style.display = 'block';
   } else {
     labelNome.textContent = 'Razão Social';
     inputNome.placeholder = 'Razão social da empresa';
@@ -840,6 +899,8 @@ function switchLocTipoPessoa(type) {
     groupFantasia.style.display = 'block';
     groupRg.style.display = 'none';
     groupPjRow.style.display = 'grid';
+    if (btnBuscarCnpjLoc) btnBuscarCnpjLoc.style.display = 'inline-flex';
+    if (cardComplementos) cardComplementos.style.display = 'none';
   }
 }
 
@@ -848,9 +909,21 @@ function abrirNovoProprietario() {
   document.getElementById('form-proprietario').reset();
   document.getElementById('prop-id').value = '';
   document.getElementById('prop-modal-title').textContent = 'Novo Proprietário';
-  document.getElementById('prop-status').value = 'ativo';
+  
+  // Limpar campos de CEP e endereco auxiliares
+  const cepEl = document.getElementById('prop-cep');
+  if (cepEl) cepEl.value = '';
+  
+  // Forçar selects limpos
+  document.getElementById('prop-tipo_pessoa').selectedIndex = 0;
+  document.getElementById('prop-status').selectedIndex = 0;
+  document.getElementById('prop-rg_uf').selectedIndex = 0;
+  document.getElementById('prop-genero').selectedIndex = 0;
+  document.getElementById('prop-estado_civil').selectedIndex = 0;
+  
+  tempPropDocs = [];
+  renderTempPropDocs();
   switchPropTipoPessoa('PF');
-  goToPropStep(1);
   document.getElementById('modal-proprietario').classList.add('active');
 }
 
@@ -858,9 +931,21 @@ function abrirNovoLocatario() {
   document.getElementById('form-locatario').reset();
   document.getElementById('loc-id').value = '';
   document.getElementById('loc-modal-title').textContent = 'Novo Locatário';
-  document.getElementById('loc-status').value = 'ativo';
+  
+  // Limpar campos de CEP e endereco auxiliares
+  const cepEl = document.getElementById('loc-cep');
+  if (cepEl) cepEl.value = '';
+  
+  // Forçar selects limpos
+  document.getElementById('loc-tipo_pessoa').selectedIndex = 0;
+  document.getElementById('loc-status').selectedIndex = 0;
+  document.getElementById('loc-rg_uf').selectedIndex = 0;
+  document.getElementById('loc-genero').selectedIndex = 0;
+  document.getElementById('loc-estado_civil').selectedIndex = 0;
+  
+  tempLocDocs = [];
+  renderTempLocDocs();
   switchLocTipoPessoa('PF');
-  goToLocStep(1);
   document.getElementById('modal-locatario').classList.add('active');
 }
 
@@ -890,13 +975,15 @@ async function carregarProprietarios(page) {
       const badgeClass = p.status === 'inativo' ? 'badge-inativo' : 'badge-ativo';
       const badgeText = p.status === 'inativo' ? 'Inativo' : 'Ativo';
 
-      let actions = `<button onclick="verDetalhesProprietario('${p.id}')" class="btn btn-secondary btn-icon" title="Ver Ficha"><i class="fi fi-rr-eye"></i></button>`;
+      let actions = `<div class="table-actions">
+        <button onclick="verDetalhesProprietario('${p.id}')" class="btn btn-secondary btn-icon" title="Ver Ficha"><i class="fi fi-rr-eye"></i></button>`;
       if (userProfile === 'administrador' || userProfile === 'operacional') {
-        actions += `<button onclick="editarProprietario('${p.id}')" class="btn btn-secondary btn-icon" style="margin-left: 6px;" title="Editar"><i class="fi fi-rr-edit"></i></button>`;
+        actions += `<button onclick="editarProprietario('${p.id}')" class="btn btn-secondary btn-icon" title="Editar"><i class="fi fi-rr-edit"></i></button>`;
       }
       if (userProfile === 'administrador') {
-        actions += `<button onclick="excluirProprietario('${p.id}', '${p.nome_razao_social}')" class="btn btn-danger btn-icon" style="margin-left: 6px;" title="Excluir"><i class="fi fi-rr-trash"></i></button>`;
+        actions += `<button onclick="excluirProprietario('${p.id}', '${p.nome_razao_social}')" class="btn btn-danger btn-icon" title="Excluir"><i class="fi fi-rr-trash"></i></button>`;
       }
+      actions += `</div>`;
 
       return `
         <tr class="animate-fade-in">
@@ -906,18 +993,31 @@ async function carregarProprietarios(page) {
           <td>${p.email}</td>
           <td style="text-align: center;">${p.qtd_imoveis || 0}</td>
           <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-          <td style="text-align: right; padding-right: 24px;">${actions}</td>
+          <td style="text-align: right; padding-right: 24px; width: 120px;">${actions}</td>
         </tr>
       `;
     }).join('');
 
-    const total = res.pagination.total;
-    const pages = res.pagination.pages;
-    const start = (page - 1) * limit + 1;
-    const end = Math.min(page * limit, total);
-    
-    document.getElementById('prop-pagination-info').textContent = `Mostrando ${start} a ${end} de ${total} registros`;
-    updatePropPaginationControls(pages, page);
+    // Render pagination dynamically
+    const footerElement = document.querySelector('#pane-proprietarios .table-footer');
+    window.renderPagination({
+      footerElement: footerElement,
+      pagination: {
+        total: res.pagination.total,
+        page: page,
+        limit: limit,
+        pages: res.pagination.pages
+      },
+      onPageChange: (newPage) => {
+        propCurrentPage = newPage;
+        carregarProprietarios(propCurrentPage);
+      },
+      onLimitChange: (newLimit) => {
+        limit = newLimit;
+        propCurrentPage = 1;
+        carregarProprietarios(propCurrentPage);
+      }
+    });
   } catch (err) {
     console.error('Error loading owners:', err);
     showToast('Erro ao obter proprietários.', 'error');
@@ -951,13 +1051,15 @@ async function carregarLocatarios(page) {
       const badgeClass = l.status === 'inativo' ? 'badge-inativo' : 'badge-ativo';
       const badgeText = l.status === 'inativo' ? 'Inativo' : 'Ativo';
 
-      let actions = `<button onclick="verDetalhesLocatario('${l.id}')" class="btn btn-secondary btn-icon" title="Ver Ficha"><i class="fi fi-rr-eye"></i></button>`;
+      let actions = `<div class="table-actions">
+        <button onclick="verDetalhesLocatario('${l.id}')" class="btn btn-secondary btn-icon" title="Ver Ficha"><i class="fi fi-rr-eye"></i></button>`;
       if (userProfile === 'administrador' || userProfile === 'operacional') {
-        actions += `<button onclick="editarLocatario('${l.id}')" class="btn btn-secondary btn-icon" style="margin-left: 6px;" title="Editar"><i class="fi fi-rr-edit"></i></button>`;
+        actions += `<button onclick="editarLocatario('${l.id}')" class="btn btn-secondary btn-icon" title="Editar"><i class="fi fi-rr-edit"></i></button>`;
       }
       if (userProfile === 'administrador') {
-        actions += `<button onclick="excluirLocatario('${l.id}', '${l.nome_razao_social}')" class="btn btn-danger btn-icon" style="margin-left: 6px;" title="Excluir"><i class="fi fi-rr-trash"></i></button>`;
+        actions += `<button onclick="excluirLocatario('${l.id}', '${l.nome_razao_social}')" class="btn btn-danger btn-icon" title="Excluir"><i class="fi fi-rr-trash"></i></button>`;
       }
+      actions += `</div>`;
 
       return `
         <tr class="animate-fade-in">
@@ -967,38 +1069,37 @@ async function carregarLocatarios(page) {
           <td>${l.email}</td>
           <td style="text-align: center;">${l.qtd_contratos || 0}</td>
           <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-          <td style="text-align: right; padding-right: 24px;">${actions}</td>
+          <td style="text-align: right; padding-right: 24px; width: 120px;">${actions}</td>
         </tr>
       `;
     }).join('');
 
-    const total = res.pagination.total;
-    const pages = res.pagination.pages;
-    const start = (page - 1) * limit + 1;
-    const end = Math.min(page * limit, total);
-    
-    document.getElementById('loc-pagination-info').textContent = `Mostrando ${start} a ${end} de ${total} registros`;
-    updateLocPaginationControls(pages, page);
+    // Render pagination dynamically
+    const footerElement = document.querySelector('#pane-locatarios .table-footer');
+    window.renderPagination({
+      footerElement: footerElement,
+      pagination: {
+        total: res.pagination.total,
+        page: page,
+        limit: limit,
+        pages: res.pagination.pages
+      },
+      onPageChange: (newPage) => {
+        locCurrentPage = newPage;
+        carregarLocatarios(locCurrentPage);
+      },
+      onLimitChange: (newLimit) => {
+        limit = newLimit;
+        locCurrentPage = 1;
+        carregarLocatarios(locCurrentPage);
+      }
+    });
   } catch (err) {
     console.error('Error loading tenants:', err);
     showToast('Erro ao obter locatários.', 'error');
   } finally {
     hideLoader();
   }
-}
-
-function updatePropPaginationControls(totalPages, activePage) {
-  const btnPrev = document.getElementById('prop-btn-prev');
-  const btnNext = document.getElementById('prop-btn-next');
-  btnPrev.disabled = activePage <= 1;
-  btnNext.disabled = activePage >= totalPages;
-}
-
-function updateLocPaginationControls(totalPages, activePage) {
-  const btnPrev = document.getElementById('loc-btn-prev');
-  const btnNext = document.getElementById('loc-btn-next');
-  btnPrev.disabled = activePage <= 1;
-  btnNext.disabled = activePage >= totalPages;
 }
 
 // Saves/Updates Owners
@@ -1045,7 +1146,23 @@ async function handleSaveProprietario(e) {
     }
 
     if (res.success) {
-      showToast(res.message, 'success');
+      const newId = id || res.data.id;
+      
+      // Upload de documentos temporários
+      if (tempPropDocs.length > 0) {
+        for (const doc of tempPropDocs) {
+          const docForm = new FormData();
+          docForm.append('arquivo', doc.arquivo);
+          docForm.append('tipo_documento', doc.tipo);
+          try {
+            await api.post(`/api/proprietarios/${newId}/documentos`, docForm, true);
+          } catch(err) {
+            console.error('Erro ao anexar documento pós-cadastro:', err);
+          }
+        }
+      }
+      
+      showToast(id ? 'Proprietário atualizado com sucesso.' : 'Proprietário cadastrado com sucesso e documentos enviados.', 'success');
       document.getElementById('modal-proprietario').classList.remove('active');
       carregarProprietarios(propCurrentPage);
     } else {
@@ -1100,7 +1217,23 @@ async function handleSaveLocatario(e) {
     }
 
     if (res.success) {
-      showToast(res.message, 'success');
+      const newId = id || res.data.id;
+      
+      // Upload de documentos temporários
+      if (tempLocDocs.length > 0) {
+        for (const doc of tempLocDocs) {
+          const docForm = new FormData();
+          docForm.append('arquivo', doc.arquivo);
+          docForm.append('tipo_documento', doc.tipo);
+          try {
+            await api.post(`/api/locatarios/${newId}/documentos`, docForm, true);
+          } catch(err) {
+            console.error('Erro ao anexar documento pós-cadastro:', err);
+          }
+        }
+      }
+      
+      showToast(id ? 'Locatário atualizado com sucesso.' : 'Locatário cadastrado com sucesso e documentos enviados.', 'success');
       document.getElementById('modal-locatario').classList.remove('active');
       carregarLocatarios(locCurrentPage);
     } else {
@@ -1889,3 +2022,166 @@ function renderLocWizardDocumentos(docs) {
     `;
   }).join('');
 }
+
+// Seleção de documentos temporários do Proprietário
+async function handlePropFilesSelected(files) {
+  const typeSelect = document.getElementById('prop-wizard-doc-tipo');
+  const tipo = typeSelect.value || 'Outros';
+  console.log('[Proprietários] handlePropFilesSelected iniciada. Tipo:', tipo, 'Arquivos:', files.length);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    const isImage = /\.(jpg|jpeg|png|webp)$/.test(extension);
+    if (isImage && file.size > 10 * 1024 * 1024) {
+      showToast('Imagens devem possuir no máximo 10 MB.', 'error');
+      continue;
+    }
+    if (extension === '.pdf' && file.size > 20 * 1024 * 1024) {
+      showToast('PDFs devem possuir no máximo 20 MB.', 'error');
+      continue;
+    }
+    
+    const propId = document.getElementById('prop-id').value;
+    if (propId) {
+      // Upload direto
+      const formData = new FormData();
+      formData.append('arquivo', file);
+      formData.append('tipo_documento', tipo);
+      showLoader();
+      try {
+        const res = await api.post(`/api/proprietarios/${propId}/documentos`, formData, true);
+        if (res.success) {
+          showToast('Documento anexado!', 'success');
+          const resDetails = await api.get(`/api/proprietarios/${propId}`);
+          if (resDetails.success && resDetails.data) {
+            renderPropWizardDocumentos(resDetails.data.documentos);
+          }
+        }
+      } catch (err) {
+        showToast('Erro ao anexar arquivo.', 'error');
+      } finally {
+        hideLoader();
+      }
+    } else {
+      tempPropDocs.push({ tipo: tipo, arquivo: file });
+      console.log('[Proprietários] Doc adicionado ao tempPropDocs. Tamanho:', tempPropDocs.length);
+      renderTempPropDocs();
+    }
+  }
+}
+
+// Seleção de documentos temporários do Locatário
+async function handleLocFilesSelected(files) {
+  const typeSelect = document.getElementById('loc-wizard-doc-tipo');
+  const tipo = typeSelect.value || 'Outros';
+  console.log('[Locatários] handleLocFilesSelected iniciada. Tipo:', tipo, 'Arquivos:', files.length);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    const isImage = /\.(jpg|jpeg|png|webp)$/.test(extension);
+    if (isImage && file.size > 10 * 1024 * 1024) {
+      showToast('Imagens devem possuir no máximo 10 MB.', 'error');
+      continue;
+    }
+    if (extension === '.pdf' && file.size > 20 * 1024 * 1024) {
+      showToast('PDFs devem possuir no máximo 20 MB.', 'error');
+      continue;
+    }
+    
+    const locId = document.getElementById('loc-id').value;
+    if (locId) {
+      // Upload direto
+      const formData = new FormData();
+      formData.append('arquivo', file);
+      formData.append('tipo_documento', tipo);
+      showLoader();
+      try {
+        const res = await api.post(`/api/locatarios/${locId}/documentos`, formData, true);
+        if (res.success) {
+          showToast('Documento anexado!', 'success');
+          const resDetails = await api.get(`/api/locatarios/${locId}`);
+          if (resDetails.success && resDetails.data) {
+            renderLocWizardDocumentos(resDetails.data.documentos);
+          }
+        }
+      } catch (err) {
+        showToast('Erro ao anexar arquivo.', 'error');
+      } finally {
+        hideLoader();
+      }
+    } else {
+      tempLocDocs.push({ tipo: tipo, arquivo: file });
+      console.log('[Locatários] Doc adicionado ao tempLocDocs. Tamanho:', tempLocDocs.length);
+      renderTempLocDocs();
+    }
+  }
+}
+
+// Renderizar documentos temporários locais (criação)
+function renderTempPropDocs() {
+  const container = document.getElementById('prop-wizard-documents-list');
+  console.log('[Proprietários Render] Renderizando. Container:', !!container, 'Tamanho tempPropDocs:', tempPropDocs.length);
+  if (!container) return;
+  if (tempPropDocs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-card" style="padding: 16px;">
+        <div class="empty-state-icon" style="font-size: 24px;">📄</div>
+        <h5 class="empty-state-title" style="font-size: 13px;">Nenhum documento anexado</h5>
+      </div>
+    `;
+    return;
+  }
+  container.innerHTML = tempPropDocs.map((doc, idx) => {
+    return `
+      <div class="document-item" style="padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: 6px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fi fi-rr-document" style="font-size: 16px; color: var(--color-info);"></i>
+          <div>
+            <strong style="font-size:12px; color:var(--color-text-main);">${doc.tipo}</strong>
+            <span style="font-size:10px; color:var(--color-text-muted); display:block;">${doc.arquivo.name}</span>
+          </div>
+        </div>
+        <button type="button" onclick="removeTempPropDoc(${idx})" style="background:none; border:none; color:var(--color-error); font-size:14px; cursor:pointer;" title="Remover Documento"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+  }).join('');
+}
+
+window.removeTempPropDoc = function(idx) {
+  tempPropDocs.splice(idx, 1);
+  renderTempPropDocs();
+};
+
+function renderTempLocDocs() {
+  const container = document.getElementById('loc-wizard-documents-list');
+  console.log('[Locatários Render] Renderizando. Container:', !!container, 'Tamanho tempLocDocs:', tempLocDocs.length);
+  if (!container) return;
+  if (tempLocDocs.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-card" style="padding: 16px;">
+        <div class="empty-state-icon" style="font-size: 24px;">📄</div>
+        <h5 class="empty-state-title" style="font-size: 13px;">Nenhum documento anexado</h5>
+      </div>
+    `;
+    return;
+  }
+  container.innerHTML = tempLocDocs.map((doc, idx) => {
+    return `
+      <div class="document-item" style="padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: 6px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fi fi-rr-document" style="font-size: 16px; color: var(--color-info);"></i>
+          <div>
+            <strong style="font-size:12px; color:var(--color-text-main);">${doc.tipo}</strong>
+            <span style="font-size:10px; color:var(--color-text-muted); display:block;">${doc.arquivo.name}</span>
+          </div>
+        </div>
+        <button type="button" onclick="removeTempLocDoc(${idx})" style="background:none; border:none; color:var(--color-error); font-size:14px; cursor:pointer;" title="Remover Documento"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+  }).join('');
+}
+
+window.removeTempLocDoc = function(idx) {
+  tempLocDocs.splice(idx, 1);
+  renderTempLocDocs();
+};

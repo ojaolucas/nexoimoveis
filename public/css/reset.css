@@ -20,6 +20,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);
+  overflow-x: hidden; /* Impede a rolagem horizontal na página inteira */
 }
 
 img, picture, video, canvas, svg {

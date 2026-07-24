@@ -2,14 +2,14 @@
 
 .app-layout {
   display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
   transition: grid-template-columns var(--transition-normal);
 }
 
 /* Sidebar collapsed state style */
 .app-layout.sidebar-collapsed {
-  grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+  grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
 }
 
 .app-sidebar {
@@ -36,6 +36,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0; /* Prevents grid/flex items from expanding beyond parent container */
 }
 
 .app-navbar {
@@ -59,6 +60,7 @@
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
+  min-width: 0; /* Ensures the main content area doesn't stretch and forces overflow-x when needed */
 }
 
 .view-header {

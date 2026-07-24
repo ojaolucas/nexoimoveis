@@ -10,6 +10,7 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 800px; /* Mantém as colunas legíveis e ativa a rolagem horizontal em telas estreitas */
 }
 
 .app-table th, .app-table td {
@@ -19,6 +20,7 @@
   color: var(--color-text-main);
   vertical-align: middle;
   height: 48px; /* Consistent compact height */
+  white-space: nowrap; /* Impede a quebra de linha de textos nas células */
 }
 
 .app-table th {

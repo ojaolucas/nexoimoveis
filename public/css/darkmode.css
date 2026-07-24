@@ -12,3 +12,53 @@
   background-color: var(--color-bg-card);
   color: var(--color-text-main);
 }
+
+/* Fix inline white cards in dark mode */
+[data-theme="dark"] div[style*="background-color: #ffffff"],
+[data-theme="dark"] div[style*="background-color: rgb(255, 255, 255)"],
+[data-theme="dark"] .wizard-card,
+[data-theme="dark"] .wizard-content {
+  background-color: var(--color-bg-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Fix inline white buttons (like Cancel/Clear) and text visibility in dark mode */
+[data-theme="dark"] button[style*="background: #ffffff"],
+[data-theme="dark"] button[style*="background-color: #ffffff"],
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] a.btn-secondary {
+  background-color: var(--color-bg-card) !important;
+  background: var(--color-bg-card) !important;
+  color: var(--color-text-main) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] button[style*="background: #ffffff"]:hover,
+[data-theme="dark"] button[style*="background-color: #ffffff"]:hover,
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] a.btn-secondary:hover {
+  background-color: var(--color-border) !important;
+  background: var(--color-border) !important;
+  color: var(--color-text-main) !important;
+}
+
+/* Fix bright borders and dividers inside cards in dark mode */
+[data-theme="dark"] div[style*="border-bottom: 1px solid #f1f5f9"],
+[data-theme="dark"] div[style*="border-bottom: 1px solid rgb(241, 245, 249)"] {
+  border-bottom-color: var(--color-border) !important;
+}
+
+/* Ensure map and file dropzones have proper colors in dark mode */
+[data-theme="dark"] .file-dropzone {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .file-dropzone:hover {
+  border-color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] #imovel-mapa-container {
+  background-color: var(--color-bg-base) !important;
+  border-color: var(--color-border) !important;
+}

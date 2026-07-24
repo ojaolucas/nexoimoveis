@@ -5,8 +5,8 @@ async function findById(id) {
     SELECT l.*, 
       (SELECT COUNT(id) FROM contratos WHERE locatario_id = l.id) AS qtd_contratos,
       (SELECT COUNT(DISTINCT imovel_id) FROM contratos WHERE locatario_id = l.id) AS qtd_imoveis
-    FROM locatarios l 
-    WHERE l.id = $1
+    FROM pessoas l 
+    WHERE l.id = $1 AND l.papel_locatario = TRUE
   `;
   const result = await db.query(query, [id]);
   return result.rows[0] || null;
@@ -14,14 +14,14 @@ async function findById(id) {
 
 async function findByCpfCnpj(cpfCnpj) {
   const cleanCpfCnpj = cpfCnpj.replace(/\D/g, '');
-  const query = "SELECT * FROM locatarios WHERE REGEXP_REPLACE(cpf_cnpj, '\\D', '', 'g') = $1";
+  const query = "SELECT * FROM pessoas WHERE REGEXP_REPLACE(cpf_cnpj, '\\D', '', 'g') = $1 AND papel_locatario = TRUE";
   const result = await db.query(query, [cleanCpfCnpj]);
   return result.rows[0] || null;
 }
 
 async function existsCpfCnpj(cpfCnpj, excludeId = null) {
   const cleanCpfCnpj = cpfCnpj.replace(/\D/g, '');
-  let query = "SELECT id FROM locatarios WHERE REGEXP_REPLACE(cpf_cnpj, '\\D', '', 'g') = $1";
+  let query = "SELECT id FROM pessoas WHERE REGEXP_REPLACE(cpf_cnpj, '\\D', '', 'g') = $1 AND papel_locatario = TRUE";
   const params = [cleanCpfCnpj];
 
   if (excludeId) {
@@ -35,11 +35,38 @@ async function existsCpfCnpj(cpfCnpj, excludeId = null) {
 
 async function create(loc) {
   const { codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao } = loc;
+  
+  // Utiliza UPSERT para marcar papel_locatario = TRUE caso a pessoa ja exista (ex: como proprietario)
   const query = `
-    INSERT INTO locatarios (codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+    INSERT INTO pessoas (
+      codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, 
+      telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, 
+      nacionalidade, estado_civil, profissao, papel_proprietario, papel_locatario
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, FALSE, TRUE)
+    ON CONFLICT (cpf_cnpj) DO UPDATE SET 
+      papel_locatario = TRUE,
+      nome_razao_social = EXCLUDED.nome_razao_social,
+      nome_fantasia = EXCLUDED.nome_fantasia,
+      telefone = EXCLUDED.telefone,
+      email = EXCLUDED.email,
+      endereco = EXCLUDED.endereco,
+      observacoes = EXCLUDED.observacoes,
+      status = EXCLUDED.status,
+      rg = EXCLUDED.rg,
+      rg_orgao = EXCLUDED.rg_orgao,
+      rg_uf = EXCLUDED.rg_uf,
+      inscricao_estadual = EXCLUDED.inscricao_estadual,
+      responsavel = EXCLUDED.responsavel,
+      data_nascimento = EXCLUDED.data_nascimento,
+      genero = EXCLUDED.genero,
+      nacionalidade = EXCLUDED.nacionalidade,
+      estado_civil = EXCLUDED.estado_civil,
+      profissao = EXCLUDED.profissao,
+      atualizado_em = CURRENT_TIMESTAMP
     RETURNING *
   `;
+  
   const result = await db.query(query, [
     codigo, tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status || 'ativo',
     data_nascimento || null, rg_orgao || null, rg_uf || null, genero || 'Não informado', nacionalidade || null, estado_civil || 'Não informado', profissao || null
@@ -50,10 +77,10 @@ async function create(loc) {
 async function update(id, loc) {
   const { tipo_pessoa, nome_razao_social, nome_fantasia, cpf_cnpj, rg, inscricao_estadual, responsavel, telefone, email, endereco, observacoes, status, data_nascimento, rg_orgao, rg_uf, genero, nacionalidade, estado_civil, profissao } = loc;
   const query = `
-    UPDATE locatarios
+    UPDATE pessoas
     SET tipo_pessoa = $1, nome_razao_social = $2, nome_fantasia = $3, cpf_cnpj = $4, rg = $5, inscricao_estadual = $6, responsavel = $7, telefone = $8, email = $9, endereco = $10, observacoes = $11, status = $12,
         data_nascimento = $13, rg_orgao = $14, rg_uf = $15, genero = $16, nacionalidade = $17, estado_civil = $18, profissao = $19, atualizado_em = CURRENT_TIMESTAMP
-    WHERE id = $20
+    WHERE id = $20 AND papel_locatario = TRUE
     RETURNING *
   `;
   const result = await db.query(query, [
@@ -65,16 +92,26 @@ async function update(id, loc) {
 }
 
 async function remove(id) {
-  const query = 'DELETE FROM locatarios WHERE id = $1 RETURNING *';
-  const result = await db.query(query, [id]);
-  return result.rows[0] || null;
+  // Se a pessoa tambem for proprietaria, apenas desativamos a flag de inquilino para manter a integridade dos imoveis
+  const checkQuery = 'SELECT papel_proprietario FROM pessoas WHERE id = $1';
+  const checkRes = await db.query(checkQuery, [id]);
+  
+  if (checkRes.rows[0] && checkRes.rows[0].papel_proprietario) {
+    const query = 'UPDATE pessoas SET papel_locatario = FALSE, atualizado_em = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *';
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+  } else {
+    const query = 'DELETE FROM pessoas WHERE id = $1 AND papel_locatario = TRUE RETURNING *';
+    const result = await db.query(query, [id]);
+    return result.rows[0] || null;
+  }
 }
 
 async function setStatus(id, status) {
   const query = `
-    UPDATE locatarios
+    UPDATE pessoas
     SET status = $1, atualizado_em = CURRENT_TIMESTAMP
-    WHERE id = $2
+    WHERE id = $2 AND papel_locatario = TRUE
     RETURNING *
   `;
   const result = await db.query(query, [status, id]);
@@ -86,8 +123,8 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
     SELECT l.*, 
       (SELECT COUNT(id) FROM contratos WHERE locatario_id = l.id) AS qtd_contratos,
       (SELECT COUNT(DISTINCT imovel_id) FROM contratos WHERE locatario_id = l.id) AS qtd_imoveis
-    FROM locatarios l 
-    WHERE 1=1
+    FROM pessoas l 
+    WHERE l.papel_locatario = TRUE
   `;
   const params = [];
   let paramCount = 1;
@@ -113,8 +150,8 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
   // Clone parameters for count query
   let countQuery = `
     SELECT COUNT(l.id) 
-    FROM locatarios l 
-    WHERE 1=1
+    FROM pessoas l 
+    WHERE l.papel_locatario = TRUE
   `;
   const countParams = [...params];
   
@@ -149,7 +186,7 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
 
 async function addDocument(locatarioId, tipoDocumento, nomeArquivo, caminhoArquivo) {
   const query = `
-    INSERT INTO locatarios_documentos (locatario_id, tipo_documento, nome_arquivo, caminho_arquivo)
+    INSERT INTO pessoas_documentos (pessoa_id, tipo_documento, nome_arquivo, caminho_arquivo)
     VALUES ($1, $2, $3, $4)
     RETURNING *
   `;
@@ -158,19 +195,19 @@ async function addDocument(locatarioId, tipoDocumento, nomeArquivo, caminhoArqui
 }
 
 async function removeDocument(documentId) {
-  const query = 'DELETE FROM locatarios_documentos WHERE id = $1 RETURNING *';
+  const query = 'DELETE FROM pessoas_documentos WHERE id = $1 RETURNING *';
   const result = await db.query(query, [documentId]);
   return result.rows[0] || null;
 }
 
 async function findDocumentById(documentId) {
-  const query = 'SELECT * FROM locatarios_documentos WHERE id = $1';
+  const query = 'SELECT * FROM pessoas_documentos WHERE id = $1';
   const result = await db.query(query, [documentId]);
   return result.rows[0] || null;
 }
 
 async function listDocuments(locatarioId) {
-  const query = 'SELECT * FROM locatarios_documentos WHERE locatario_id = $1 ORDER BY criado_em DESC';
+  const query = 'SELECT * FROM pessoas_documentos WHERE pessoa_id = $1 ORDER BY criado_em DESC';
   const result = await db.query(query, [locatarioId]);
   return result.rows;
 }
