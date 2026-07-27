@@ -60,6 +60,14 @@ function showToast(message, type = 'info') {
     container = document.createElement('div');
     container.className = 'toast-container';
     document.body.appendChild(container);
+  } else {
+    // Check if there is already an identical toast to avoid duplicates
+    const activeToasts = Array.from(container.querySelectorAll('.toast'));
+    const isDuplicate = activeToasts.some(t => {
+      const span = t.querySelector('span');
+      return span && span.textContent === message && t.classList.contains(`toast-${type}`);
+    });
+    if (isDuplicate) return;
   }
 
   // Create toast element

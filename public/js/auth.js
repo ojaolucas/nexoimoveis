@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 async function handleLoginSubmit(event) {
   event.preventDefault();
   
+  const loginForm = event.target;
+  const submitBtn = loginForm.querySelector('button[type="submit"]');
+  
   const loginInput = document.getElementById('login').value.trim();
   const senhaInput = document.getElementById('senha').value;
 
@@ -23,6 +26,7 @@ async function handleLoginSubmit(event) {
     return;
   }
 
+  if (submitBtn) submitBtn.disabled = true;
   showLoader();
 
   try {
@@ -42,6 +46,7 @@ async function handleLoginSubmit(event) {
   } catch (error) {
     showToast('Ocorreu um erro no servidor. Tente novamente.', 'error');
   } finally {
+    if (submitBtn) submitBtn.disabled = false;
     hideLoader();
   }
 }
