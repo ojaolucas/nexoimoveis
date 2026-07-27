@@ -1,6 +1,7 @@
 const despesasRepository = require('../repositories/despesas.repository');
 const imoveisRepository = require('../repositories/imoveis.repository');
 const auditoriaService = require('./auditoria.service');
+const db = require('../config/database');
 const path = require('path');
 const fs = require('fs');
 
@@ -37,7 +38,9 @@ async function cadastrar(despData, responsavelUser, ip) {
   const { 
     imovel_id, categoria, responsavel, competencia, vencimento, valor, 
     observacoes, status, recorrente, frequencia, dia_vencimento,
-    documento_emissao, documento_vencimento
+    documento_emissao, documento_vencimento,
+    responsavel_conta, numero_conta, codigo_barras, chave_pix, recorrencia, lembretes,
+    proprietario_id, locatario_id
   } = despData;
 
   // Validations
@@ -47,13 +50,13 @@ async function cadastrar(despData, responsavelUser, ip) {
     throw new Error('Imóvel associado não encontrado ou inativo.');
   }
 
-  const allowedCategorias = ['IPTU', 'Água', 'Energia', 'Condomínio', 'Seguro', 'Internet', 'Limpeza', 'Manutenção', 'Taxa de Localização', 'Outras'];
+  const allowedCategorias = ['IPTU', 'Água', 'Energia', 'Gás', 'Condomínio', 'Internet', 'Seguro', 'Taxa de Lixo', 'Taxa de Bombeiros', 'Manutenção', 'Outro', 'Outras', 'Limpeza', 'Taxa de Localização'];
   if (!allowedCategorias.includes(categoria)) {
     throw new Error('Categoria de despesa inválida.');
   }
 
-  if (responsavel !== 'Locador' && responsavel !== 'Locatário') {
-    throw new Error('Responsável inválido. Deve ser Locador ou Locatário.');
+  if (responsavel !== 'Proprietário' && responsavel !== 'Locatário' && responsavel !== 'Locador') {
+    throw new Error('Responsável inválido. Deve ser Proprietário ou Locatário.');
   }
 
   const numericValor = parseFloat(valor);
@@ -92,7 +95,14 @@ async function cadastrar(despData, responsavelUser, ip) {
       dia_vencimento: dueDay,
       valor: numericValor,
       frequencia,
-      observacoes: observacoes || `Recorrência ${frequencia} cadastrada.`
+      observacoes: observacoes || `Recorrência ${frequencia} cadastrada.`,
+      responsavel_conta,
+      numero_conta,
+      codigo_barras,
+      chave_pix,
+      lembretes,
+      proprietario_id,
+      locatario_id
     });
 
     // Generate initial installment
@@ -107,7 +117,15 @@ async function cadastrar(despData, responsavelUser, ip) {
       status: finalStatus,
       recorrente: true,
       documento_emissao,
-      documento_vencimento
+      documento_vencimento,
+      responsavel_conta,
+      numero_conta,
+      codigo_barras,
+      chave_pix,
+      recorrencia: frequencia,
+      lembretes,
+      proprietario_id,
+      locatario_id
     });
 
     // Update template's last generation column (store initial month)
@@ -127,7 +145,15 @@ async function cadastrar(despData, responsavelUser, ip) {
       status: finalStatus,
       recorrente: false,
       documento_emissao,
-      documento_vencimento
+      documento_vencimento,
+      responsavel_conta,
+      numero_conta,
+      codigo_barras,
+      chave_pix,
+      recorrencia: recorrencia || 'Única',
+      lembretes,
+      proprietario_id,
+      locatario_id
     });
   }
 
@@ -158,15 +184,18 @@ async function atualizar(id, despData, responsavelUser, ip) {
     }
     
     // Validate recurrence template fields
-    const { categoria, responsavel, dia_vencimento, valor, frequencia, observacoes, ativa } = despData;
+    const { 
+      categoria, responsavel, dia_vencimento, valor, frequencia, observacoes, ativa,
+      responsavel_conta, numero_conta, codigo_barras, chave_pix, lembretes, proprietario_id, locatario_id
+    } = despData;
     
-    const allowedCategorias = ['IPTU', 'Água', 'Energia', 'Condomínio', 'Seguro', 'Internet', 'Limpeza', 'Manutenção', 'Taxa de Localização', 'Outras'];
+    const allowedCategorias = ['IPTU', 'Água', 'Energia', 'Gás', 'Condomínio', 'Internet', 'Seguro', 'Taxa de Lixo', 'Taxa de Bombeiros', 'Manutenção', 'Outro', 'Outras', 'Limpeza', 'Taxa de Localização'];
     if (!allowedCategorias.includes(categoria)) {
       throw new Error('Categoria de despesa inválida.');
     }
 
-    if (responsavel !== 'Locador' && responsavel !== 'Locatário') {
-      throw new Error('Responsável inválido. Deve ser Locador ou Locatário.');
+    if (responsavel !== 'Proprietário' && responsavel !== 'Locatário' && responsavel !== 'Locador') {
+      throw new Error('Responsável inválido. Deve ser Proprietário ou Locatário.');
     }
 
     const numericValor = parseFloat(valor);
@@ -193,7 +222,14 @@ async function atualizar(id, despData, responsavelUser, ip) {
       valor: numericValor,
       frequencia,
       observacoes,
-      ativa: isAtiva
+      ativa: isAtiva,
+      responsavel_conta,
+      numero_conta,
+      codigo_barras,
+      chave_pix,
+      lembretes,
+      proprietario_id,
+      locatario_id
     });
 
     // Auditoria
@@ -209,15 +245,18 @@ async function atualizar(id, despData, responsavelUser, ip) {
     return updated;
   }
 
-  const { categoria, responsavel, competencia, vencimento, valor, data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento } = despData;
+  const { 
+    categoria, responsavel, competencia, vencimento, valor, data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento,
+    responsavel_conta, numero_conta, codigo_barras, chave_pix, recorrencia, lembretes, proprietario_id, locatario_id
+  } = despData;
 
-  const allowedCategorias = ['IPTU', 'Água', 'Energia', 'Condomínio', 'Seguro', 'Internet', 'Limpeza', 'Manutenção', 'Taxa de Localização', 'Outras'];
+  const allowedCategorias = ['IPTU', 'Água', 'Energia', 'Gás', 'Condomínio', 'Internet', 'Seguro', 'Taxa de Lixo', 'Taxa de Bombeiros', 'Manutenção', 'Outro', 'Outras', 'Limpeza', 'Taxa de Localização'];
   if (!allowedCategorias.includes(categoria)) {
     throw new Error('Categoria de despesa inválida.');
   }
 
-  if (responsavel !== 'Locador' && responsavel !== 'Locatário') {
-    throw new Error('Responsável inválido. Deve ser Locador ou Locatário.');
+  if (responsavel !== 'Proprietário' && responsavel !== 'Locatário' && responsavel !== 'Locador') {
+    throw new Error('Responsável inválido. Deve ser Proprietário ou Locatário.');
   }
 
   const numericValor = parseFloat(valor);
@@ -239,7 +278,15 @@ async function atualizar(id, despData, responsavelUser, ip) {
     status, 
     recorrente: !!recorrente,
     documento_emissao,
-    documento_vencimento
+    documento_vencimento,
+    responsavel_conta,
+    numero_conta,
+    codigo_barras,
+    chave_pix,
+    recorrencia: recorrencia || 'Única',
+    lembretes,
+    proprietario_id,
+    locatario_id
   });
 
   const timelineTxt = `Despesa editada por ${responsavelUser.nome}. Categoria: ${categoria}, Valor: R$ ${numericValor}, Status: ${status}.`;
@@ -275,19 +322,82 @@ async function registrarPagamento(id, payload, file, responsavelUser, ip) {
   }
 
   // Update despesa to Paid
+  // Update despesa to Paid preserving all custom fields
   const updatedDesp = await despesasRepository.update(id, {
     categoria: desp.categoria,
     responsavel: desp.responsavel,
-    competencia: desp.competencia.toISOString().split('T')[0],
-    vencimento: desp.vencimento.toISOString().split('T')[0],
-    valor: desp.valor, // keep nominal value
+    competencia: desp.competencia instanceof Date ? desp.competencia.toISOString().split('T')[0] : desp.competencia,
+    vencimento: desp.vencimento instanceof Date ? desp.vencimento.toISOString().split('T')[0] : desp.vencimento,
+    valor: desp.valor, 
     data_pagamento,
     observacoes: observacoes || desp.observacoes,
     status: 'Pago',
     recorrente: desp.recorrente,
-    documento_emissao: desp.documento_emissao ? desp.documento_emissao.toISOString().split('T')[0] : null,
-    documento_vencimento: desp.documento_vencimento ? desp.documento_vencimento.toISOString().split('T')[0] : null
+    documento_emissao: desp.documento_emissao ? (desp.documento_emissao instanceof Date ? desp.documento_emissao.toISOString().split('T')[0] : desp.documento_emissao) : null,
+    documento_vencimento: desp.documento_vencimento ? (desp.documento_vencimento instanceof Date ? desp.documento_vencimento.toISOString().split('T')[0] : desp.documento_vencimento) : null,
+    responsavel_conta: desp.responsavel_conta,
+    numero_conta: desp.numero_conta,
+    codigo_barras: desp.codigo_barras,
+    chave_pix: desp.chave_pix,
+    recorrencia: desp.recorrencia,
+    lembretes: desp.lembretes,
+    proprietario_id: desp.proprietario_id,
+    locatario_id: desp.locatario_id
   });
+
+  // Se a despesa for recorrente (ex: recorrencia !== 'Única'), gerar automaticamente o próximo lançamento
+  if (desp.recorrencia && desp.recorrencia !== 'Única') {
+    try {
+      const compDate = new Date(desp.competencia);
+      const nextComp = new Date(compDate.getFullYear(), compDate.getMonth(), 1);
+      
+      let monthsToAdd = 1;
+      if (desp.recorrencia === 'Bimestral') monthsToAdd = 2;
+      else if (desp.recorrencia === 'Trimestral') monthsToAdd = 3;
+      else if (desp.recorrencia === 'Semestral') monthsToAdd = 6;
+      else if (desp.recorrencia === 'Anual') monthsToAdd = 12;
+      
+      nextComp.setMonth(nextComp.getMonth() + monthsToAdd);
+      const nextCompStr = `${nextComp.getFullYear()}-${String(nextComp.getMonth() + 1).padStart(2, '0')}-01`;
+      
+      const existingQuery = `
+        SELECT id FROM despesas 
+        WHERE imovel_id = $1 
+          AND categoria = $2 
+          AND competencia = $3
+          AND status != 'Cancelado'
+      `;
+      const checkRes = await db.query(existingQuery, [desp.imovel_id, desp.categoria, nextCompStr]);
+      
+      if (checkRes.rows.length === 0) {
+        const vencDate = new Date(desp.vencimento);
+        const nextVenc = new Date(vencDate.getFullYear(), vencDate.getMonth(), vencDate.getDate());
+        nextVenc.setMonth(nextVenc.getMonth() + monthsToAdd);
+        const nextVencStr = `${nextVenc.getFullYear()}-${String(nextVenc.getMonth() + 1).padStart(2, '0')}-${String(nextVenc.getDate()).padStart(2, '0')}`;
+        
+        await despesasRepository.create({
+          imovel_id: desp.imovel_id,
+          categoria: desp.categoria,
+          responsavel: desp.responsavel,
+          competencia: nextCompStr,
+          vencimento: nextVencStr,
+          valor: desp.valor,
+          status: 'A Vencer',
+          recorrente: true,
+          responsavel_conta: desp.responsavel_conta,
+          numero_conta: desp.numero_conta,
+          codigo_barras: desp.codigo_barras,
+          chave_pix: desp.chave_pix,
+          recorrencia: desp.recorrencia,
+          lembretes: desp.lembretes,
+          proprietario_id: desp.proprietario_id,
+          locatario_id: desp.locatario_id
+        });
+      }
+    } catch (errRec) {
+      console.error('Erro ao gerar próxima despesa recorrente:', errRec);
+    }
+  }
 
   const promises = [];
 

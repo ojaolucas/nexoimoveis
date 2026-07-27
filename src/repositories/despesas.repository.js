@@ -4,9 +4,13 @@ async function findById(id) {
   const query = `
     SELECT d.*, 
            i.nome AS imovel_nome,
-           i.codigo AS imovel_codigo
+           i.codigo AS imovel_codigo,
+           p.nome_razao_social AS proprietario_nome,
+           l.nome_razao_social AS locatario_nome
     FROM despesas d
     JOIN imoveis i ON d.imovel_id = i.id
+    LEFT JOIN pessoas p ON d.proprietario_id = p.id
+    LEFT JOIN pessoas l ON d.locatario_id = l.id
     WHERE d.id = $1
   `;
   const result = await db.query(query, [id]);
@@ -14,13 +18,20 @@ async function findById(id) {
 }
 
 async function create(desp) {
-  const { imovel_id, categoria, responsavel, competencia, vencimento, valor, data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento } = desp;
+  const { 
+    imovel_id, categoria, responsavel, competencia, vencimento, valor, 
+    data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento,
+    responsavel_conta, numero_conta, codigo_barras, chave_pix, recorrencia, lembretes,
+    proprietario_id, locatario_id
+  } = desp;
   const query = `
     INSERT INTO despesas (
       imovel_id, categoria, responsavel, competencia, vencimento, valor, 
-      data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento
+      data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento,
+      responsavel_conta, numero_conta, codigo_barras, chave_pix, recorrencia, lembretes,
+      proprietario_id, locatario_id
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
     RETURNING *
   `;
   const result = await db.query(query, [
@@ -35,13 +46,25 @@ async function create(desp) {
     status || 'A Vencer', 
     recorrente || false,
     documento_emissao || null,
-    documento_vencimento || null
+    documento_vencimento || null,
+    responsavel_conta || null,
+    numero_conta || null,
+    codigo_barras || null,
+    chave_pix || null,
+    recorrencia || 'Única',
+    JSON.stringify(lembretes || []),
+    proprietario_id || null,
+    locatario_id || null
   ]);
   return result.rows[0];
 }
 
 async function update(id, desp) {
-  const { categoria, responsavel, competencia, vencimento, valor, data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento } = desp;
+  const { 
+    categoria, responsavel, competencia, vencimento, valor, data_pagamento, observacoes, status, recorrente, documento_emissao, documento_vencimento,
+    responsavel_conta, numero_conta, codigo_barras, chave_pix, recorrencia, lembretes,
+    proprietario_id, locatario_id
+  } = desp;
   const query = `
     UPDATE despesas
     SET categoria = $1, 
@@ -54,8 +77,16 @@ async function update(id, desp) {
         status = $8, 
         recorrente = $9,
         documento_emissao = $10,
-        documento_vencimento = $11
-    WHERE id = $12
+        documento_vencimento = $11,
+        responsavel_conta = $12,
+        numero_conta = $13,
+        codigo_barras = $14,
+        chave_pix = $15,
+        recorrencia = $16,
+        lembretes = $17,
+        proprietario_id = $18,
+        locatario_id = $19
+    WHERE id = $20
     RETURNING *
   `;
   const result = await db.query(query, [
@@ -70,6 +101,14 @@ async function update(id, desp) {
     recorrente,
     documento_emissao || null,
     documento_vencimento || null,
+    responsavel_conta || null,
+    numero_conta || null,
+    codigo_barras || null,
+    chave_pix || null,
+    recorrencia || 'Única',
+    JSON.stringify(lembretes || []),
+    proprietario_id || null,
+    locatario_id || null,
     id
   ]);
   return result.rows[0];
@@ -90,9 +129,13 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
   let query = `
     SELECT d.*, 
            i.nome AS imovel_nome,
-           i.codigo AS imovel_codigo
+           i.codigo AS imovel_codigo,
+           p.nome_razao_social AS proprietario_nome,
+           l.nome_razao_social AS locatario_nome
     FROM despesas d
     JOIN imoveis i ON d.imovel_id = i.id
+    LEFT JOIN pessoas p ON d.proprietario_id = p.id
+    LEFT JOIN pessoas l ON d.locatario_id = l.id
     WHERE 1 = 1
   `;
   const params = [];
@@ -140,6 +183,36 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
     paramCount++;
   }
 
+  if (filters.proprietario_id) {
+    query += ` AND d.proprietario_id = $${paramCount}`;
+    params.push(filters.proprietario_id);
+    paramCount++;
+  }
+
+  if (filters.locatario_id) {
+    query += ` AND d.locatario_id = $${paramCount}`;
+    params.push(filters.locatario_id);
+    paramCount++;
+  }
+
+  if (filters.cidade) {
+    query += ` AND i.endereco ILIKE $${paramCount}`;
+    params.push(`%${filters.cidade}%`);
+    paramCount++;
+  }
+
+  if (filters.ano) {
+    query += ` AND EXTRACT(YEAR FROM d.competencia) = $${paramCount}`;
+    params.push(parseInt(filters.ano, 10));
+    paramCount++;
+  }
+
+  if (filters.mes) {
+    query += ` AND EXTRACT(MONTH FROM d.competencia) = $${paramCount}`;
+    params.push(parseInt(filters.mes, 10));
+    paramCount++;
+  }
+
   let countQuery = `
     SELECT COUNT(d.id)
     FROM despesas d
@@ -183,6 +256,32 @@ async function listAll(limit = 10, offset = 0, filters = {}) {
   if (filters.data_final) {
     countQuery += ` AND d.vencimento <= $${countParamIndex}`;
     countParams.push(filters.data_final);
+    countParamIndex++;
+  }
+  if (filters.proprietario_id) {
+    countQuery += ` AND d.proprietario_id = $${countParamIndex}`;
+    countParams.push(filters.proprietario_id);
+    countParamIndex++;
+  }
+  if (filters.locatario_id) {
+    countQuery += ` AND d.locatario_id = $${countParamIndex}`;
+    countParams.push(filters.locatario_id);
+    countParamIndex++;
+  }
+  if (filters.cidade) {
+    countQuery += ` AND i.endereco ILIKE $${countParamIndex}`;
+    countParams.push(`%${filters.cidade}%`);
+    countParamIndex++;
+  }
+  if (filters.ano) {
+    countQuery += ` AND EXTRACT(YEAR FROM d.competencia) = $${countParamIndex}`;
+    countParams.push(parseInt(filters.ano, 10));
+    countParamIndex++;
+  }
+  if (filters.mes) {
+    countQuery += ` AND EXTRACT(MONTH FROM d.competencia) = $${countParamIndex}`;
+    countParams.push(parseInt(filters.mes, 10));
+    countParamIndex++;
   }
 
   query += ` ORDER BY d.vencimento ASC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
@@ -278,25 +377,79 @@ async function findRecorrenciaById(id) {
 }
 
 async function createRecorrencia(rec) {
-  const { imovel_id, categoria, responsavel, dia_vencimento, valor, frequencia, observacoes } = rec;
+  const { 
+    imovel_id, categoria, responsavel, dia_vencimento, valor, frequencia, observacoes,
+    responsavel_conta, numero_conta, codigo_barras, chave_pix, lembretes, proprietario_id, locatario_id
+  } = rec;
   const query = `
-    INSERT INTO despesas_recorrencias (imovel_id, categoria, responsavel, dia_vencimento, valor, frequencia, observacoes)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO despesas_recorrencias (
+      imovel_id, categoria, responsavel, dia_vencimento, valor, frequencia, observacoes,
+      responsavel_conta, numero_conta, codigo_barras, chave_pix, lembretes, proprietario_id, locatario_id
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
     RETURNING *
   `;
-  const result = await db.query(query, [imovel_id, categoria, responsavel, dia_vencimento, valor, frequencia, observacoes || null]);
+  const result = await db.query(query, [
+    imovel_id, 
+    categoria, 
+    responsavel, 
+    dia_vencimento, 
+    valor, 
+    frequencia, 
+    observacoes || null,
+    responsavel_conta || null,
+    numero_conta || null,
+    codigo_barras || null,
+    chave_pix || null,
+    JSON.stringify(lembretes || []),
+    proprietario_id || null,
+    locatario_id || null
+  ]);
   return result.rows[0];
 }
 
 async function updateRecorrencia(id, rec) {
-  const { categoria, responsavel, dia_vencimento, valor, frequencia, observacoes, ativa } = rec;
+  const { 
+    categoria, responsavel, dia_vencimento, valor, frequencia, observacoes, ativa,
+    responsavel_conta, numero_conta, codigo_barras, chave_pix, lembretes, proprietario_id, locatario_id
+  } = rec;
   const query = `
     UPDATE despesas_recorrencias
-    SET categoria = $1, responsavel = $2, dia_vencimento = $3, valor = $4, frequencia = $5, observacoes = $6, ativa = $7, atualizado_em = CURRENT_TIMESTAMP
-    WHERE id = $8
+    SET categoria = $1, 
+        responsavel = $2, 
+        dia_vencimento = $3, 
+        valor = $4, 
+        frequencia = $5, 
+        observacoes = $6, 
+        ativa = $7, 
+        responsavel_conta = $8,
+        numero_conta = $9,
+        codigo_barras = $10,
+        chave_pix = $11,
+        lembretes = $12,
+        proprietario_id = $13,
+        locatario_id = $14,
+        atualizado_em = CURRENT_TIMESTAMP
+    WHERE id = $15
     RETURNING *
   `;
-  const result = await db.query(query, [categoria, responsavel, dia_vencimento, valor, frequencia, observacoes, ativa, id]);
+  const result = await db.query(query, [
+    categoria, 
+    responsavel, 
+    dia_vencimento, 
+    valor, 
+    frequencia, 
+    observacoes, 
+    ativa, 
+    responsavel_conta || null,
+    numero_conta || null,
+    codigo_barras || null,
+    chave_pix || null,
+    JSON.stringify(lembretes || []),
+    proprietario_id || null,
+    locatario_id || null,
+    id
+  ]);
   return result.rows[0];
 }
 

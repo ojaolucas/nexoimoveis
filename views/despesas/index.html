@@ -583,7 +583,8 @@
           
           <!-- Filters Section -->
           <div class="card glass filter-card">
-            <div class="filter-row">
+            <!-- Linha 1 de filtros -->
+            <div class="filter-row" style="margin-bottom:16px;">
               <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label" for="filtro-imovel">Imóvel</label>
                 <select id="filtro-imovel" class="form-control">
@@ -593,27 +594,47 @@
               </div>
 
               <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="filtro-categoria">Categoria</label>
-                <select id="filtro-categoria" class="form-control">
-                  <option value="">Todas</option>
-                  <option value="IPTU">IPTU</option>
-                  <option value="Água">Água</option>
-                  <option value="Energia">Energia</option>
-                  <option value="Condomínio">Condomínio</option>
-                  <option value="Seguro">Seguro</option>
-                  <option value="Internet">Internet</option>
-                  <option value="Limpeza">Limpeza</option>
-                  <option value="Manutenção">Manutenção</option>
-                  <option value="Taxa de Localização">Taxa de Localização</option>
-                  <option value="Outras">Outras</option>
+                <label class="form-label" for="filtro-proprietario">Proprietário</label>
+                <select id="filtro-proprietario" class="form-control">
+                  <option value="">Todos os Proprietários</option>
+                  <!-- Dynamically populated -->
                 </select>
               </div>
 
               <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="filtro-responsavel">Responsável</label>
+                <label class="form-label" for="filtro-locatario">Locatário</label>
+                <select id="filtro-locatario" class="form-control">
+                  <option value="">Todos os Locatários</option>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-categoria">Categoria</label>
+                <select id="filtro-categoria" class="form-control">
+                  <option value="">Todas as Categorias</option>
+                  <option value="IPTU">IPTU</option>
+                  <option value="Água">Água</option>
+                  <option value="Energia">Energia</option>
+                  <option value="Gás">Gás</option>
+                  <option value="Condomínio">Condomínio</option>
+                  <option value="Internet">Internet</option>
+                  <option value="Seguro">Seguro</option>
+                  <option value="Taxa de Lixo">Taxa de Lixo</option>
+                  <option value="Taxa de Bombeiros">Taxa de Bombeiros</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Linha 2 de filtros -->
+            <div class="filter-row" style="margin-bottom:16px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-responsavel">Responsável Pagamento</label>
                 <select id="filtro-responsavel" class="form-control">
                   <option value="">Todos</option>
-                  <option value="Locador">Locador</option>
+                  <option value="Proprietário">Proprietário</option>
                   <option value="Locatário">Locatário</option>
                 </select>
               </div>
@@ -628,8 +649,45 @@
                   <option value="Cancelado">Cancelado</option>
                 </select>
               </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="filtro-cidade">Cidade (Imóvel)</label>
+                <input type="text" id="filtro-cidade" class="form-control" placeholder="Digite a cidade para buscar">
+              </div>
+
+              <div class="form-group" style="margin-bottom:0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <label class="form-label" for="filtro-mes">Mês</label>
+                  <select id="filtro-mes" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="1">Jan</option>
+                    <option value="2">Fev</option>
+                    <option value="3">Mar</option>
+                    <option value="4">Abr</option>
+                    <option value="5">Mai</option>
+                    <option value="6">Jun</option>
+                    <option value="7">Jul</option>
+                    <option value="8">Ago</option>
+                    <option value="9">Set</option>
+                    <option value="10">Out</option>
+                    <option value="11">Nov</option>
+                    <option value="12">Dez</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="filtro-ano">Ano</label>
+                  <select id="filtro-ano" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            
+
+            <!-- Linha 3 de filtros -->
             <div class="filter-row-2">
               <div class="form-group" style="margin-bottom:0;">
                 <label class="form-label" for="filtro-competencia">Competência</label>
@@ -695,6 +753,40 @@
 
         <!-- TAB CONTENT 2: GRÁFICOS & CUSTOS -->
         <div class="tab-pane" id="painel-graficos">
+          <!-- Central de Relatórios Consolidados -->
+          <div class="card glass animate-fade-in" style="margin-bottom: 24px; padding: 24px;">
+            <h3 style="font-size:15px; font-weight:700; color:var(--color-text-main); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-file-invoice-dollar" style="color:var(--color-primary);"></i>
+              Relatórios Consolidados de Custos e Despesas
+            </h3>
+            
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
+              <!-- Relatório: Proprietários -->
+              <div style="background:var(--color-bg-base); padding:16px; border-radius:8px; border:1px solid var(--color-border); display: flex; flex-direction: column;">
+                <span style="font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600; display:block; margin-bottom:8px; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;"><i class="fa-solid fa-user-tie"></i> Total por Proprietário</span>
+                <div style="max-height:160px; overflow-y:auto; font-size:12px; display:flex; flex-direction:column; gap:8px;" id="rel-total-proprietarios">
+                  <div style="text-align:center; color:var(--color-text-muted); padding:10px 0;">Carregando dados...</div>
+                </div>
+              </div>
+
+              <!-- Relatório: Locatários -->
+              <div style="background:var(--color-bg-base); padding:16px; border-radius:8px; border:1px solid var(--color-border); display: flex; flex-direction: column;">
+                <span style="font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600; display:block; margin-bottom:8px; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;"><i class="fa-solid fa-user-tag"></i> Total por Locatário</span>
+                <div style="max-height:160px; overflow-y:auto; font-size:12px; display:flex; flex-direction:column; gap:8px;" id="rel-total-locatarios">
+                  <div style="text-align:center; color:var(--color-text-muted); padding:10px 0;">Carregando dados...</div>
+                </div>
+              </div>
+
+              <!-- Relatório: Imóveis -->
+              <div style="background:var(--color-bg-base); padding:16px; border-radius:8px; border:1px solid var(--color-border); display: flex; flex-direction: column;">
+                <span style="font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600; display:block; margin-bottom:8px; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;"><i class="fa-solid fa-building"></i> Total por Imóvel</span>
+                <div style="max-height:160px; overflow-y:auto; font-size:12px; display:flex; flex-direction:column; gap:8px;" id="rel-total-imoveis">
+                  <div style="text-align:center; color:var(--color-text-muted); padding:10px 0;">Carregando dados...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="charts-grid">
             <!-- 1. Despesas por Categoria (Doughnut) -->
             <div class="chart-box">
@@ -788,19 +880,20 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="categoria">Categoria</label>
+            <label class="form-label" for="categoria">Categoria da Despesa</label>
             <select id="categoria" class="form-control" required>
               <option value="" disabled selected>Selecione a Categoria</option>
               <option value="IPTU">IPTU</option>
               <option value="Água">Água</option>
               <option value="Energia">Energia</option>
+              <option value="Gás">Gás</option>
               <option value="Condomínio">Condomínio</option>
-              <option value="Seguro">Seguro</option>
               <option value="Internet">Internet</option>
-              <option value="Limpeza">Limpeza</option>
+              <option value="Seguro">Seguro</option>
+              <option value="Taxa de Lixo">Taxa de Lixo</option>
+              <option value="Taxa de Bombeiros">Taxa de Bombeiros</option>
               <option value="Manutenção">Manutenção</option>
-              <option value="Taxa de Localização">Taxa de Localização</option>
-              <option value="Outras">Outras</option>
+              <option value="Outro">Outro</option>
             </select>
           </div>
         </div>
@@ -809,7 +902,7 @@
           <div class="form-group">
             <label class="form-label" for="responsavel">Responsável pelo Pagamento</label>
             <select id="responsavel" class="form-control" required>
-              <option value="Locador" selected>Locador</option>
+              <option value="Proprietário" selected>Proprietário</option>
               <option value="Locatário">Locatário</option>
             </select>
           </div>
@@ -817,6 +910,34 @@
           <div class="form-group">
             <label class="form-label" for="valor">Valor (R$)</label>
             <input type="number" id="valor" class="form-control" placeholder="0.00" step="0.01" min="0.01" required>
+          </div>
+        </div>
+
+        <!-- Dynamic linked person based on responsible type -->
+        <div class="form-row" id="grupo-vincular-pessoa" style="display: none; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px dashed var(--color-border); margin-bottom: 16px;">
+          <div class="form-group" id="grupo-proprietario" style="display: none;">
+            <label class="form-label" for="proprietario_id">Proprietário</label>
+            <select id="proprietario_id" class="form-control">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group" id="grupo-locatario" style="display: none;">
+            <label class="form-label" for="locatario_id">Locatário Vinculado</label>
+            <select id="locatario_id" class="form-control">
+              <!-- Populated dynamically -->
+            </select>
+            <span style="font-size: 10px; color: var(--color-text-muted); display: block; margin-top: 4px;" id="locatario-atual-info"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="responsavel_conta">Responsável pela Conta (Nome no boleto)</label>
+            <input type="text" id="responsavel_conta" class="form-control" placeholder="Ex: Proprietário João Silva" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="numero_conta">Número da Conta (Opcional)</label>
+            <input type="text" id="numero_conta" class="form-control" placeholder="Ex: 1234567-8">
           </div>
         </div>
 
@@ -832,8 +953,20 @@
           </div>
         </div>
 
-        <!-- Document issuance & expiration (Conditional Box for IPTU, Seguro, Taxa de Localização) -->
-        <div id="document-expiry-fields" class="info-box" style="display:none; border-left:4px solid var(--color-primary);">
+        <!-- Advanced Payment Details -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="chave_pix">Chave PIX (Opcional)</label>
+            <input type="text" id="chave_pix" class="form-control" placeholder="Celular, CPF, E-mail, etc.">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="codigo_barras">Código de Barras (Opcional)</label>
+            <input type="text" id="codigo_barras" class="form-control" placeholder="Linha digitável do boleto">
+          </div>
+        </div>
+
+        <!-- Document issuance & expiration (Conditional Box for IPTU, Seguro) -->
+        <div id="document-expiry-fields" class="info-box" style="display:none; border-left:4px solid var(--color-primary); margin-top: 16px;">
           <h4 style="font-size:12px; font-weight:700; color:var(--color-primary); margin-bottom:12px; text-transform:uppercase;">Informações de Validade do Documento</h4>
           <div class="form-row" style="margin-bottom:0;">
             <div class="form-group" style="margin-bottom:0;">
@@ -848,36 +981,69 @@
         </div>
 
         <!-- Recurrence configuration -->
-        <div class="form-group" id="recorrente-checkbox-group" style="margin-bottom: 12px;">
-          <label class="form-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="checkbox" id="recorrente" style="width:18px; height:18px;">
-            <span>Esta despesa é recorrente? (Gerar novos lançamentos automaticamente)</span>
-          </label>
-        </div>
-
-        <div id="recurrence-fields" class="info-box" style="display:none; border-left:4px solid var(--color-success);">
-          <h4 style="font-size:12px; font-weight:700; color:var(--color-success); margin-bottom:12px; text-transform:uppercase;">Configuração da Recorrência</h4>
-          <div class="form-row" style="margin-bottom:0;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="frequencia">Periodicidade</label>
-              <select id="frequencia" class="form-control">
-                <option value="Mensal" selected>Mensal</option>
-                <option value="Bimestral">Bimestral</option>
-                <option value="Trimestral">Trimestral</option>
-                <option value="Semestral">Semestral</option>
-                <option value="Anual">Anual</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="dia_vencimento">Dia Fixo do Vencimento</label>
-              <input type="number" id="dia_vencimento" class="form-control" placeholder="Ex: 15" min="1" max="31">
-            </div>
+        <div class="form-row" style="margin-top: 16px;">
+          <div class="form-group">
+            <label class="form-label" for="recorrencia">Recorrência da Despesa</label>
+            <select id="recorrencia" class="form-control" required>
+              <option value="Única" selected>Única</option>
+              <option value="Mensal">Mensal</option>
+              <option value="Bimestral">Bimestral</option>
+              <option value="Trimestral">Trimestral</option>
+              <option value="Semestral">Semestral</option>
+              <option value="Anual">Anual</option>
+            </select>
+          </div>
+          <div class="form-group" id="grupo-dia-vencimento" style="display: none;">
+            <label class="form-label" for="dia_vencimento">Dia Fixo do Vencimento</label>
+            <input type="number" id="dia_vencimento" class="form-control" placeholder="Ex: 10" min="1" max="31">
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="observacoes">Observações</label>
-          <textarea id="observacoes" class="form-control" style="height: 80px; resize: vertical;" placeholder="Notas explicativas, código de barras, etc..."></textarea>
+        <!-- Automatic reminders checkboxes -->
+        <div class="form-group" style="margin-top: 16px;">
+          <label class="form-label" style="font-weight: 700; display: block; margin-bottom: 8px;">Lembretes Automáticos de Vencimento</label>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: var(--color-bg-base); padding: 16px; border-radius: 8px; border: 1px solid var(--color-border);" id="lembretes-checkboxes">
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" name="lembretes" value="30_dias_antes"> Avisar 30 dias antes
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" name="lembretes" value="15_dias_antes"> Avisar 15 dias antes
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" name="lembretes" value="7_dias_antes"> Avisar 7 dias antes
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" name="lembretes" value="3_dias_antes"> Avisar 3 dias antes
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" name="lembretes" value="1_dia_antes"> Avisar 1 dia antes
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+              <input type="checkbox" name="lembretes" value="no_vencimento"> Avisar no vencimento
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; grid-column: span 3;">
+              <input type="checkbox" name="lembretes" value="apos_vencimento"> Avisar após vencimento (cobrança)
+            </label>
+          </div>
+        </div>
+
+        <!-- Files Attachments Dropzone during creation -->
+        <div class="form-group" style="margin-top: 16px;" id="grupo-anexos-cadastro">
+          <label class="form-label">Anexar Documento / Boleto / Foto</label>
+          <div class="file-dropzone" id="despesa-anexos-dropzone" style="min-height: 100px; padding: 16px;">
+            <input type="file" id="despesa_anexos" style="display: none;" accept="application/pdf,image/*" multiple>
+            <div class="dropzone-placeholder" id="despesa-anexos-placeholder">
+              <i class="fa-solid fa-arrow-up-from-bracket" style="font-size: 18px; color: var(--color-text-muted); margin-bottom: 6px;"></i>
+              <span style="font-size: 11px; font-weight: 600;">Selecione ou arraste Arquivos</span>
+              <span style="font-size: 9px; opacity: 0.6;">PDF, Imagens (múltiplos)</span>
+            </div>
+          </div>
+          <div id="despesa-anexos-file-list" style="margin-top: 8px;"></div>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label class="form-label" for="observacoes">Observações / Notas</label>
+          <textarea id="observacoes" class="form-control" style="height: 80px; resize: vertical;" placeholder="Notas explicativas adicionais..."></textarea>
         </div>
 
         <div class="form-row" id="edit-status-group" style="display:none;">
@@ -952,6 +1118,43 @@
           <div>
             <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Despesa Recorrente?</span>
             <span id="det-recorrente" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; border-top:1px solid var(--color-border); padding-top:16px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Titular da Conta</span>
+            <span id="det-responsavel-conta" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Número da Conta</span>
+            <span id="det-numero-conta" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Periodicidade</span>
+            <span id="det-recorrencia" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; border-top:1px solid var(--color-border); padding-top:16px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Proprietário Vinculado</span>
+            <span id="det-proprietario-nome" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Locatário Vinculado</span>
+            <span id="det-locatario-nome" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; border-top:1px solid var(--color-border); padding-top:16px;">
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Chave PIX</span>
+            <span id="det-chave-pix" style="font-size:13px; font-weight:600; color:var(--color-text-main);">-</span>
+          </div>
+          <div>
+            <span style="display:block; font-size:11px; text-transform:uppercase; color:var(--color-text-muted); font-weight:600;">Código de Barras</span>
+            <span id="det-codigo-barras" style="font-size:11px; font-weight:500; font-family: monospace; color:var(--color-text-main); word-break: break-all;">-</span>
           </div>
         </div>
 

@@ -2,7 +2,8 @@
 
 let currentPage = 1;
 const limit = 10;
-let currentFilters = { status: '', imovel: '', categoria: '', responsavel: '', competencia: '', data_inicial: '', data_final: '' };
+let tempAnexos = [];
+let currentFilters = { status: '', imovel: '', categoria: '', responsavel: '', competencia: '', data_inicial: '', data_final: '', proprietario_id: '', locatario_id: '', cidade: '', mes: '', ano: '' };
 let currentDespesaId = null;
 let currentNominalValor = 0;
 let userProfile = null;
@@ -74,13 +75,25 @@ async function initDespesas() {
 
   // 4. Register Event Listeners
   setupEventListeners();
+
+  // 5. Check if query parameter 'id' is present and open details modal
+  const urlParams = new URLSearchParams(window.location.search);
+  const despesaId = urlParams.get('id');
+  if (despesaId) {
+    verDetalhes(despesaId);
+  }
 }
 
 async function carregarOpcoes() {
   try {
-    const res = await api.get('/api/imoveis?limit=1000');
-    if (res.success && res.data) {
-      allImoveis = res.data;
+    const [resImoveis, resProprietarios, resLocatarios] = await Promise.all([
+      api.get('/api/imoveis?limit=1000'),
+      api.get('/api/proprietarios?limit=1000&status=ativo'),
+      api.get('/api/locatarios?limit=1000&status=ativo')
+    ]);
+    
+    if (resImoveis.success && resImoveis.data) {
+      allImoveis = resImoveis.data;
       
       // Populate filters select
       const filtroImovel = document.getElementById('filtro-imovel');
@@ -94,6 +107,36 @@ async function carregarOpcoes() {
       if (formImovel) {
         formImovel.innerHTML = '<option value="" disabled selected>Selecione um imóvel</option>' + 
           allImoveis.filter(i => i.status !== 'Inativo').map(i => `<option value="${i.id}">${i.nome} (${i.codigo})</option>`).join('');
+      }
+    }
+
+    // Popular select de Proprietários no formulário e filtros
+    if (resProprietarios.success && resProprietarios.data) {
+      const selectProp = document.getElementById('proprietario_id');
+      if (selectProp) {
+        selectProp.innerHTML = '<option value="" disabled selected>Selecione o Proprietário</option>' + 
+          resProprietarios.data.map(p => `<option value="${p.id}">${p.nome_razao_social}</option>`).join('');
+      }
+      
+      const filtroProp = document.getElementById('filtro-proprietario');
+      if (filtroProp) {
+        filtroProp.innerHTML = '<option value="">Todos os Proprietários</option>' + 
+          resProprietarios.data.map(p => `<option value="${p.id}">${p.nome_razao_social}</option>`).join('');
+      }
+    }
+
+    // Popular select de Locatários no formulário e filtros
+    if (resLocatarios.success && resLocatarios.data) {
+      const selectLoc = document.getElementById('locatario_id');
+      if (selectLoc) {
+        selectLoc.innerHTML = '<option value="" disabled selected>Selecione o Locatário</option>' + 
+          resLocatarios.data.map(l => `<option value="${l.id}">${l.nome_razao_social}</option>`).join('');
+      }
+      
+      const filtroLoc = document.getElementById('filtro-locatario');
+      if (filtroLoc) {
+        filtroLoc.innerHTML = '<option value="">Todos os Locatários</option>' + 
+          resLocatarios.data.map(l => `<option value="${l.id}">${l.nome_razao_social}</option>`).join('');
       }
     }
   } catch (err) {
@@ -238,22 +281,102 @@ async function carregarRecorrencias() {
 async function carregarGraficosDespesas() {
   showLoader();
   try {
-    const res = await api.get('/api/despesas/graficos');
-    if (!res.success || !res.data) {
-      showToast('Erro ao obter dados analíticos.', 'error');
-      return;
+    const [resCharts, resList] = await Promise.all([
+      api.get('/api/despesas/graficos'),
+      api.get('/api/despesas?limit=10000') // obter todas para os relatórios consolidados
+    ]);
+    
+    if (resCharts.success && resCharts.data) {
+      const { categorias, meses, status } = resCharts.data;
+      renderCategoriasChart(categorias);
+      renderMesesChart(meses);
+      renderStatusChart(status);
     }
 
-    const { categorias, meses, status } = res.data;
-
-    renderCategoriasChart(categorias);
-    renderMesesChart(meses);
-    renderStatusChart(status);
+    if (resList.success && resList.data) {
+      calcularRelatoriosConsolidados(resList.data);
+    }
   } catch (err) {
     console.error('Error rendering graphs:', err);
-    showToast('Erro ao obter dados para gráficos.', 'error');
+    showToast('Erro ao obter dados analíticos.', 'error');
   } finally {
     hideLoader();
+  }
+}
+
+function calcularRelatoriosConsolidados(despesas) {
+  const propMap = {};
+  const locMap = {};
+  const imovelMap = {};
+
+  despesas.forEach(d => {
+    const val = parseFloat(d.valor || 0);
+
+    // Total por Proprietário (somente se pago)
+    if (d.responsavel === 'Proprietário' && d.status === 'Pago') {
+      const propNome = d.proprietario_nome || 'Desconhecido';
+      propMap[propNome] = (propMap[propNome] || 0) + val;
+    }
+
+    // Total por Locatário (somente se pago)
+    if (d.responsavel === 'Locatário' && d.status === 'Pago') {
+      const locNome = d.locatario_nome || 'Desconhecido';
+      locMap[locNome] = (locMap[locNome] || 0) + val;
+    }
+
+    // Total de Custos por Imóvel (independente de status, exceto cancelados)
+    if (d.status !== 'Cancelado') {
+      const imovelNome = d.imovel_nome || 'Desconhecido';
+      imovelMap[imovelNome] = (imovelMap[imovelNome] || 0) + val;
+    }
+  });
+
+  // Renderizar Proprietários
+  const propList = Object.entries(propMap).sort((a, b) => b[1] - a[1]);
+  const propContainer = document.getElementById('rel-total-proprietarios');
+  if (propContainer) {
+    if (propList.length === 0) {
+      propContainer.innerHTML = `<div style="color:var(--color-text-muted); text-align:center; padding:10px 0;">Nenhum pagamento registrado.</div>`;
+    } else {
+      propContainer.innerHTML = propList.map(([nome, total]) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-border); padding-bottom:6px;">
+          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${nome}">${nome}</span>
+          <strong style="color:var(--color-success); font-weight:700;">${formatCurrency(total)}</strong>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Renderizar Locatários
+  const locList = Object.entries(locMap).sort((a, b) => b[1] - a[1]);
+  const locContainer = document.getElementById('rel-total-locatarios');
+  if (locContainer) {
+    if (locList.length === 0) {
+      locContainer.innerHTML = `<div style="color:var(--color-text-muted); text-align:center; padding:10px 0;">Nenhum pagamento registrado.</div>`;
+    } else {
+      locContainer.innerHTML = locList.map(([nome, total]) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-border); padding-bottom:6px;">
+          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${nome}">${nome}</span>
+          <strong style="color:var(--color-success); font-weight:700;">${formatCurrency(total)}</strong>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Renderizar Imóveis
+  const imovelList = Object.entries(imovelMap).sort((a, b) => b[1] - a[1]);
+  const imovelContainer = document.getElementById('rel-total-imoveis');
+  if (imovelContainer) {
+    if (imovelList.length === 0) {
+      imovelContainer.innerHTML = `<div style="color:var(--color-text-muted); text-align:center; padding:10px 0;">Nenhuma despesa registrada.</div>`;
+    } else {
+      imovelContainer.innerHTML = imovelList.map(([nome, total]) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-border); padding-bottom:6px;">
+          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;" title="${nome}">${nome}</span>
+          <strong style="color:var(--color-primary); font-weight:700;">${formatCurrency(total)}</strong>
+        </div>
+      `).join('');
+    }
   }
 }
 
@@ -414,6 +537,11 @@ function setupEventListeners() {
     currentFilters.competencia = document.getElementById('filtro-competencia').value;
     currentFilters.data_inicial = document.getElementById('filtro-data-inicio').value;
     currentFilters.data_final = document.getElementById('filtro-data-fim').value;
+    currentFilters.proprietario_id = document.getElementById('filtro-proprietario').value;
+    currentFilters.locatario_id = document.getElementById('filtro-locatario').value;
+    currentFilters.cidade = document.getElementById('filtro-cidade').value.trim();
+    currentFilters.mes = document.getElementById('filtro-mes').value;
+    currentFilters.ano = document.getElementById('filtro-ano').value;
     currentPage = 1;
     carregarDespesas(currentPage);
   });
@@ -426,7 +554,12 @@ function setupEventListeners() {
     document.getElementById('filtro-competencia').value = '';
     document.getElementById('filtro-data-inicio').value = '';
     document.getElementById('filtro-data-fim').value = '';
-    currentFilters = { status: '', imovel: '', categoria: '', responsavel: '', competencia: '', data_inicial: '', data_final: '' };
+    document.getElementById('filtro-proprietario').value = '';
+    document.getElementById('filtro-locatario').value = '';
+    document.getElementById('filtro-cidade').value = '';
+    document.getElementById('filtro-mes').value = '';
+    document.getElementById('filtro-ano').value = '';
+    currentFilters = { status: '', imovel: '', categoria: '', responsavel: '', competencia: '', data_inicial: '', data_final: '', proprietario_id: '', locatario_id: '', cidade: '', mes: '', ano: '' };
     currentPage = 1;
     carregarDespesas(currentPage);
   });
@@ -492,12 +625,30 @@ function setupEventListeners() {
       document.getElementById('modal-title').textContent = 'Nova Despesa';
       document.getElementById('btn-salvar-despesa').textContent = 'Cadastrar';
       
-      // Defaults and hide/show blocks
-      document.getElementById('recorrente-checkbox-group').style.display = 'block';
-      document.getElementById('recurrence-fields').style.display = 'none';
+      // Defaults and hide/show blocks for new fields
+      document.getElementById('grupo-vincular-pessoa').style.display = 'none';
+      document.getElementById('grupo-proprietario').style.display = 'none';
+      document.getElementById('grupo-locatario').style.display = 'none';
+      document.getElementById('responsavel_conta').value = '';
+      document.getElementById('numero_conta').value = '';
+      document.getElementById('chave_pix').value = '';
+      document.getElementById('codigo_barras').value = '';
+      document.getElementById('recorrencia').value = 'Única';
+      document.getElementById('grupo-dia-vencimento').style.display = 'none';
+      document.getElementById('dia_vencimento').required = false;
+      document.getElementById('dia_vencimento').value = '';
       document.getElementById('document-expiry-fields').style.display = 'none';
       document.getElementById('edit-status-group').style.display = 'none';
+      document.getElementById('observacoes').value = '';
       
+      // Uncheck all reminders
+      document.querySelectorAll('#lembretes-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
+      
+      // Reset attachments
+      tempAnexos = [];
+      renderTempAnexos();
+      document.getElementById('grupo-anexos-cadastro').style.display = 'block';
+
       modalDesp.classList.add('active');
     });
   }
@@ -512,21 +663,154 @@ function setupEventListeners() {
   // Form submit for create/edit despesa
   document.getElementById('form-despesa').addEventListener('submit', handleSaveDespesa);
 
-  // Recurrente checkbox toggle configuration box
-  document.getElementById('recorrente').addEventListener('change', (e) => {
-    const fields = document.getElementById('recurrence-fields');
-    fields.style.display = e.target.checked ? 'block' : 'none';
-    
-    // Set validation required fields on toggle
-    document.getElementById('dia_vencimento').required = e.target.checked;
+  // Recurrencia select change event listener
+  document.getElementById('recorrencia').addEventListener('change', (e) => {
+    const isRecorrente = e.target.value !== 'Única';
+    document.getElementById('grupo-dia-vencimento').style.display = isRecorrente ? 'block' : 'none';
+    document.getElementById('dia_vencimento').required = isRecorrente;
   });
+
+  // Imovel Vinculado change event listener to load owner/tenant details
+  document.getElementById('imovel_id').addEventListener('change', async (e) => {
+    const imovelId = e.target.value;
+    if (!imovelId) return;
+
+    try {
+      const res = await api.get('/api/imoveis/' + imovelId);
+      if (res.success && res.data) {
+        const i = res.data;
+        
+        // 1. Pré-selecionar o proprietário
+        if (i.proprietario_id) {
+          const selectProp = document.getElementById('proprietario_id');
+          if (selectProp) selectProp.value = i.proprietario_id;
+        }
+        
+        // 2. Preencher locatário atual
+        const activeContract = (i.contratos || []).find(c => c.status === 'Ativo');
+        const locatarioAtualInfo = document.getElementById('locatario-atual-info');
+        const selectLoc = document.getElementById('locatario_id');
+        
+        if (activeContract) {
+          if (selectLoc) selectLoc.value = activeContract.locatario_id;
+          if (locatarioAtualInfo) {
+            locatarioAtualInfo.innerHTML = `<strong>Locatário Atual:</strong> ${activeContract.locatario_nome}`;
+          }
+        } else {
+          if (selectLoc) selectLoc.selectedIndex = 0;
+          if (locatarioAtualInfo) {
+            locatarioAtualInfo.innerHTML = `<em>Nenhum locatário ativo.</em>`;
+          }
+        }
+
+        // 3. Atualizar sugestão do responsável pela conta
+        atualizarSugestaoTitular(i, activeContract);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar locatário do imóvel:', err);
+    }
+  });
+
+  // Responsavel select change event listener
+  document.getElementById('responsavel').addEventListener('change', () => {
+    const val = document.getElementById('responsavel').value;
+    const groupVinc = document.getElementById('grupo-vincular-pessoa');
+    const groupProp = document.getElementById('grupo-proprietario');
+    const groupLoc = document.getElementById('grupo-locatario');
+
+    if (val === 'Proprietário') {
+      groupVinc.style.display = 'block';
+      groupProp.style.display = 'block';
+      groupLoc.style.display = 'none';
+      
+      // Sugerir titular
+      const propSelect = document.getElementById('proprietario_id');
+      if (propSelect.selectedIndex > 0) {
+        document.getElementById('responsavel_conta').value = propSelect.options[propSelect.selectedIndex].text;
+      }
+    } else if (val === 'Locatário') {
+      groupVinc.style.display = 'block';
+      groupProp.style.display = 'none';
+      groupLoc.style.display = 'block';
+
+      // Sugerir titular
+      const locSelect = document.getElementById('locatario_id');
+      if (locSelect.selectedIndex > 0) {
+        document.getElementById('responsavel_conta').value = locSelect.options[locSelect.selectedIndex].text;
+      }
+    } else {
+      groupVinc.style.display = 'none';
+    }
+  });
+
+  // Atualizar Titular da Conta ao selecionar uma pessoa manualmente
+  document.getElementById('proprietario_id').addEventListener('change', (e) => {
+    if (document.getElementById('responsavel').value === 'Proprietário' && e.target.selectedIndex > 0) {
+      document.getElementById('responsavel_conta').value = e.target.options[e.target.selectedIndex].text;
+    }
+  });
+
+  document.getElementById('locatario_id').addEventListener('change', (e) => {
+    if (document.getElementById('responsavel').value === 'Locatário' && e.target.selectedIndex > 0) {
+      document.getElementById('responsavel_conta').value = e.target.options[e.target.selectedIndex].text;
+    }
+  });
+
+  // Setup Despesa Anexos Dropzone (Cadastro)
+  const dropzoneAnexos = document.getElementById('despesa-anexos-dropzone');
+  const inputAnexos = document.getElementById('despesa_anexos');
+  if (dropzoneAnexos && inputAnexos) {
+    dropzoneAnexos.addEventListener('click', () => {
+      inputAnexos.click();
+    });
+    inputAnexos.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzoneAnexos.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzoneAnexos.style.borderColor = 'var(--color-primary)';
+        dropzoneAnexos.style.backgroundColor = 'var(--color-primary-light)';
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzoneAnexos.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzoneAnexos.style.borderColor = 'var(--color-border)';
+        dropzoneAnexos.style.backgroundColor = 'var(--color-bg-base)';
+      }, false);
+    });
+
+    dropzoneAnexos.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length > 0) {
+        for (const file of files) {
+          adicionarArquivoAnexo(file);
+        }
+      }
+    }, false);
+
+    inputAnexos.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        for (const file of e.target.files) {
+          adicionarArquivoAnexo(file);
+        }
+        inputAnexos.value = ''; // clear input for next clicks
+      }
+    });
+  }
 
   // Categoria selection toggle document box
   document.getElementById('categoria').addEventListener('change', (e) => {
     const cat = e.target.value;
     const documentBox = document.getElementById('document-expiry-fields');
     
-    if (cat === 'IPTU' || cat === 'Seguro' || cat === 'Taxa de Localização') {
+    if (cat === 'IPTU' || cat === 'Seguro') {
       documentBox.style.display = 'block';
     } else {
       documentBox.style.display = 'none';
@@ -611,20 +895,43 @@ async function handleSaveDespesa(e) {
   e.preventDefault();
   const id = document.getElementById('despesa-id').value;
   
+  const recVal = document.getElementById('recorrencia').value;
+  const respVal = document.getElementById('responsavel').value;
+
+  // Gather reminders checked
+  const lembretes = [];
+  document.querySelectorAll('#lembretes-checkboxes input[type="checkbox"]:checked').forEach(cb => {
+    lembretes.push(cb.value);
+  });
+
   const payload = {
     imovel_id: document.getElementById('imovel_id').value,
     categoria: document.getElementById('categoria').value,
-    responsavel: document.getElementById('responsavel').value,
+    responsavel: respVal,
     valor: document.getElementById('valor').value,
     competencia: document.getElementById('competencia').value,
     vencimento: document.getElementById('vencimento').value,
     observacoes: document.getElementById('observacoes').value.trim(),
     
-    // Recurrence
-    recorrente: document.getElementById('recorrente').checked,
-    frequencia: document.getElementById('frequencia').value,
-    dia_vencimento: document.getElementById('dia_vencimento').value,
+    // Titular and Account details
+    responsavel_conta: document.getElementById('responsavel_conta').value.trim(),
+    numero_conta: document.getElementById('numero_conta').value.trim() || null,
+    codigo_barras: document.getElementById('codigo_barras').value.trim() || null,
+    chave_pix: document.getElementById('chave_pix').value.trim() || null,
     
+    // Recurrence
+    recorrencia: recVal,
+    recorrente: recVal !== 'Única',
+    frequencia: recVal !== 'Única' ? recVal : 'Mensal',
+    dia_vencimento: recVal !== 'Única' ? document.getElementById('dia_vencimento').value : null,
+    
+    // People links
+    proprietario_id: respVal === 'Proprietário' ? document.getElementById('proprietario_id').value : null,
+    locatario_id: respVal === 'Locatário' ? document.getElementById('locatario_id').value : null,
+    
+    // Reminders
+    lembretes: lembretes,
+
     // Document
     documento_emissao: document.getElementById('documento_emissao').value || null,
     documento_vencimento: document.getElementById('documento_vencimento').value || null
@@ -646,8 +953,24 @@ async function handleSaveDespesa(e) {
     }
 
     if (res.success) {
+      const newDespId = id || res.data.id;
+      
+      // Upload temp attachments if any (only on create or if new files added)
+      if (!id && tempAnexos.length > 0) {
+        for (const file of tempAnexos) {
+          const formData = new FormData();
+          formData.append('arquivo', file);
+          try {
+            await api.post(`/api/despesas/${newDespId}/comprovantes`, formData, true);
+          } catch (uploadErr) {
+            console.error('Erro ao subir anexo:', file.name, uploadErr);
+          }
+        }
+      }
+
       showToast(res.message, 'success');
       document.getElementById('modal-despesa').classList.remove('active');
+      tempAnexos = [];
       
       // Reload stats & table
       await carregarCardsStats();
@@ -680,9 +1003,54 @@ window.editarDespesa = async function(id) {
       document.getElementById('vencimento').value = d.vencimento ? d.vencimento.split('T')[0] : '';
       document.getElementById('observacoes').value = d.observacoes || '';
 
+      // Set new finance and accounts fields
+      document.getElementById('responsavel_conta').value = d.responsavel_conta || '';
+      document.getElementById('numero_conta').value = d.numero_conta || '';
+      document.getElementById('chave_pix').value = d.chave_pix || '';
+      document.getElementById('codigo_barras').value = d.codigo_barras || '';
+
+      // Set Recurrence select
+      const recSelect = document.getElementById('recorrencia');
+      recSelect.value = d.recorrencia || 'Única';
+      
+      const isRecorrente = recSelect.value !== 'Única';
+      document.getElementById('grupo-dia-vencimento').style.display = isRecorrente ? 'block' : 'none';
+      document.getElementById('dia_vencimento').required = isRecorrente;
+      document.getElementById('dia_vencimento').value = d.dia_vencimento || '';
+
+      // Set linked people groups
+      const groupVinc = document.getElementById('grupo-vincular-pessoa');
+      const groupProp = document.getElementById('grupo-proprietario');
+      const groupLoc = document.getElementById('grupo-locatario');
+      
+      if (d.responsavel === 'Proprietário') {
+        groupVinc.style.display = 'block';
+        groupProp.style.display = 'block';
+        groupLoc.style.display = 'none';
+        if (d.proprietario_id) {
+          document.getElementById('proprietario_id').value = d.proprietario_id;
+        }
+      } else if (d.responsavel === 'Locatário') {
+        groupVinc.style.display = 'block';
+        groupProp.style.display = 'none';
+        groupLoc.style.display = 'block';
+        if (d.locatario_id) {
+          document.getElementById('locatario_id').value = d.locatario_id;
+        }
+        document.getElementById('locatario-atual-info').innerHTML = ''; // Hide template info on edit
+      } else {
+        groupVinc.style.display = 'none';
+      }
+
+      // Check reminders checkboxes
+      const activeReminders = d.lembretes || [];
+      document.querySelectorAll('#lembretes-checkboxes input[type="checkbox"]').forEach(cb => {
+        cb.checked = activeReminders.includes(cb.value);
+      });
+
       // Set document fields
       const documentBox = document.getElementById('document-expiry-fields');
-      if (d.categoria === 'IPTU' || d.categoria === 'Seguro' || d.categoria === 'Taxa de Localização') {
+      if (d.categoria === 'IPTU' || d.categoria === 'Seguro') {
         documentBox.style.display = 'block';
         document.getElementById('documento_emissao').value = d.documento_emissao ? d.documento_emissao.split('T')[0] : '';
         document.getElementById('documento_vencimento').value = d.documento_vencimento ? d.documento_vencimento.split('T')[0] : '';
@@ -692,9 +1060,8 @@ window.editarDespesa = async function(id) {
         document.getElementById('documento_vencimento').value = '';
       }
 
-      // Hide recurrence template controls on edit (templates are managed via recurrences tab)
-      document.getElementById('recorrente-checkbox-group').style.display = 'none';
-      document.getElementById('recurrence-fields').style.display = 'none';
+      // Hide recurrence template checkbox block (managed separately in its tab)
+      document.getElementById('grupo-anexos-cadastro').style.display = 'none'; // hide on edit
       
       // Show edit status group
       document.getElementById('edit-status-group').style.display = 'grid';
@@ -707,6 +1074,7 @@ window.editarDespesa = async function(id) {
       document.getElementById('modal-despesa').classList.add('active');
     }
   } catch (err) {
+    console.error(err);
     showToast('Erro ao buscar dados da despesa.', 'error');
   }
 };
@@ -735,9 +1103,18 @@ window.verDetalhes = async function(id) {
       document.getElementById('det-data-pagamento').textContent = d.data_pagamento ? `Paga em ${formatDate(d.data_pagamento)}` : 'Não paga';
       document.getElementById('det-observacoes').textContent = d.observacoes || 'Nenhuma observação informada.';
 
+      // New finance and accounts fields
+      document.getElementById('det-responsavel-conta').textContent = d.responsavel_conta || '-';
+      document.getElementById('det-numero-conta').textContent = d.numero_conta || '-';
+      document.getElementById('det-recorrencia').textContent = d.recorrencia || 'Única';
+      document.getElementById('det-proprietario-nome').textContent = d.proprietario_nome || '-';
+      document.getElementById('det-locatario-nome').textContent = d.locatario_nome || '-';
+      document.getElementById('det-chave-pix').textContent = d.chave_pix || '-';
+      document.getElementById('det-codigo-barras').textContent = d.codigo_barras || '-';
+
       // Document Expiration details
       const docBox = document.getElementById('det-document-box');
-      if (d.categoria === 'IPTU' || d.categoria === 'Seguro' || d.categoria === 'Taxa de Localização') {
+      if (d.categoria === 'IPTU' || d.categoria === 'Seguro') {
         document.getElementById('det-doc-emissao').textContent = d.documento_emissao ? formatDate(d.documento_emissao) : 'Não informada';
         document.getElementById('det-doc-vencimento').textContent = d.documento_vencimento ? formatDate(d.documento_vencimento) : 'Não informada';
         docBox.style.display = 'block';
@@ -748,7 +1125,10 @@ window.verDetalhes = async function(id) {
       // Imóvel Data
       document.getElementById('det-imovel-codigo').textContent = d.imovel_codigo || '-';
       document.getElementById('det-imovel-nome').textContent = d.imovel_nome || '-';
-      document.getElementById('det-imovel-endereco').textContent = d.imovel_endereco || '-';
+      
+      // Check if address element exists
+      const addressEl = document.getElementById('det-imovel-endereco');
+      if (addressEl) addressEl.textContent = d.imovel_endereco || '-';
 
       // Attachments counter and list
       document.getElementById('det-comprovante-count').textContent = d.comprovantes ? d.comprovantes.length : 0;
@@ -1067,3 +1447,60 @@ window.inativarRecorrencia = async function(id) {
     }
   }
 };
+
+function adicionarArquivoAnexo(file) {
+  const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+  const isImage = /jpeg|jpg|png/.test(extension);
+  if (!isImage && extension !== '.pdf') {
+    showToast('Apenas arquivos de imagem (PNG, JPG, JPEG) e PDF são permitidos.', 'error');
+    return;
+  }
+  if (isImage && file.size > 10 * 1024 * 1024) {
+    showToast('Imagens devem ter no máximo 10MB.', 'error');
+    return;
+  }
+  if (extension === '.pdf' && file.size > 20 * 1024 * 1024) {
+    showToast('PDFs devem ter no máximo 20MB.', 'error');
+    return;
+  }
+
+  tempAnexos.push(file);
+  renderTempAnexos();
+}
+
+window.removerArquivoAnexo = function(idx) {
+  tempAnexos.splice(idx, 1);
+  renderTempAnexos();
+};
+
+function renderTempAnexos() {
+  const list = document.getElementById('despesa-anexos-file-list');
+  if (!list) return;
+
+  if (tempAnexos.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = tempAnexos.map((file, idx) => `
+    <div class="document-item animate-fade-in" style="padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--color-border); border-radius: 6px; display:flex; justify-content:space-between; align-items:center; background:#ffffff;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <i class="fi fi-rr-document" style="font-size: 16px; color: var(--color-info);"></i>
+        <div>
+          <strong style="font-size:12px; color:var(--color-text-main);">${file.name}</strong>
+          <span style="font-size:10px; color:var(--color-text-muted); display:block;">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+        </div>
+      </div>
+      <button type="button" onclick="removerArquivoAnexo(${idx})" style="background:none; border:none; color:var(--color-error); font-size:14px; cursor:pointer;" title="Remover"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+function atualizarSugestaoTitular(imovel, activeContract) {
+  const respType = document.getElementById('responsavel').value;
+  if (respType === 'Proprietário' && imovel) {
+    document.getElementById('responsavel_conta').value = imovel.proprietario_nome || '';
+  } else if (respType === 'Locatário' && activeContract) {
+    document.getElementById('responsavel_conta').value = activeContract.locatario_nome || '';
+  }
+}

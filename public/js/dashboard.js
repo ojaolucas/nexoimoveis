@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let charts = {};
+let despesasPendentes = [];
 
 async function initDashboard() {
   showLoader();
@@ -15,7 +16,8 @@ async function initDashboard() {
       loadResumoCards(),
       loadAlertasPanel(),
       loadMovimentacoesList(),
-      loadDashboardCharts()
+      loadDashboardCharts(),
+      loadCentralPendencias()
     ]);
   } catch (err) {
     console.error('Error loading dashboard data:', err);
@@ -313,3 +315,115 @@ const observer = new MutationObserver(() => {
   }
 });
 observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+async function loadCentralPendencias() {
+  try {
+    const res = await api.get('/api/despesas?limit=1000');
+    if (res.success && res.data) {
+      // Filtrar apenas despesas não pagas (A Vencer ou Vencida) e não canceladas
+      despesasPendentes = res.data.filter(d => d.status === 'A Vencer' || d.status === 'Vencido');
+      
+      const hoje = new Date();
+      hoje.setHours(0,0,0,0);
+      
+      const umaSemana = new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const umMes = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      let vencidas = 0;
+      let semana = 0;
+      let mes = 0;
+
+      despesasPendentes.forEach(d => {
+        const venc = new Date(d.vencimento);
+        venc.setHours(0,0,0,0);
+
+        if (d.status === 'Vencido' || venc < hoje) {
+          vencidas++;
+        } else if (venc >= hoje && venc <= umaSemana) {
+          semana++;
+        } else if (venc >= hoje && venc <= umMes) {
+          mes++;
+        }
+      });
+
+      document.getElementById('pendencias-vencidas').textContent = vencidas;
+      document.getElementById('pendencias-semana').textContent = semana;
+      document.getElementById('pendencias-mes').textContent = mes;
+    }
+  } catch (err) {
+    console.error('Erro ao carregar Central de Pendências de despesas:', err);
+  }
+}
+
+window.abrirModalPendencias = function(tipo) {
+  const modal = document.getElementById('modal-pendencias');
+  if (!modal) return;
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+  const umaSemana = new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const umMes = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  let titulo = 'Pendências Financeiras';
+  let filtradas = [];
+
+  if (tipo === 'vencidas') {
+    titulo = 'Despesas Vencidas';
+    filtradas = despesasPendentes.filter(d => d.status === 'Vencido' || new Date(d.vencimento) < hoje);
+  } else if (tipo === 'semana') {
+    titulo = 'Despesas que Vencem na Semana';
+    filtradas = despesasPendentes.filter(d => {
+      const venc = new Date(d.vencimento);
+      venc.setHours(0,0,0,0);
+      return d.status === 'A Vencer' && venc >= hoje && venc <= umaSemana;
+    });
+  } else if (tipo === 'mes') {
+    titulo = 'Despesas que Vencem no Mês';
+    filtradas = despesasPendentes.filter(d => {
+      const venc = new Date(d.vencimento);
+      venc.setHours(0,0,0,0);
+      return d.status === 'A Vencer' && venc >= hoje && venc <= umMes;
+    });
+  } else {
+    titulo = 'Todas as Pendências';
+    filtradas = despesasPendentes;
+  }
+
+  document.getElementById('modal-pendencias-title').textContent = titulo;
+  document.getElementById('modal-pendencias-count').textContent = filtradas.length;
+
+  const tbody = document.getElementById('pendencias-list-body');
+  if (filtradas.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--color-text-muted);">Nenhuma pendência financeira encontrada.</td></tr>`;
+  } else {
+    tbody.innerHTML = filtradas.map(d => {
+      const valor = formatCurrency(d.valor);
+      const venc = new Date(d.vencimento).toLocaleDateString('pt-BR');
+      
+      return `
+        <tr>
+          <td><strong>${d.imovel_nome || 'Sem imóvel'}</strong></td>
+          <td><span style="font-weight:600;">${d.categoria}</span></td>
+          <td><span style="color:var(--color-primary); font-weight:700;">${valor}</span></td>
+          <td>${venc}</td>
+          <td>${d.responsavel}</td>
+          <td style="text-align:center;">
+            <a href="/despesas?id=${d.id}" class="btn btn-secondary btn-icon" style="height:28px; width:28px; font-size:12px; display:inline-flex; align-items:center; justify-content:center;" title="Visualizar no Financeiro"><i class="fa-solid fa-eye"></i></a>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  modal.classList.add('active');
+};
+
+// Configuração de fechar a modal de pendências
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('modal-pendencias');
+  const btnClose = document.getElementById('btn-close-pendencias');
+  const btnFechar = document.getElementById('btn-fechar-pendencias');
+
+  if (btnClose) btnClose.addEventListener('click', () => modal.classList.remove('active'));
+  if (btnFechar) btnFechar.addEventListener('click', () => modal.classList.remove('active'));
+});

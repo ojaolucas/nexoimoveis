@@ -1188,6 +1188,7 @@ window.verDetalhes = async function(id) {
       renderDetalheContratos(i.contratos);
       renderDetalheRecebimentos(i.recebimentos);
       renderDetalheDespesas(i.despesas);
+      renderProximosVencimentos(i.despesas);
       renderDetalheManutencoes(i.manutencoes);
       renderDetalheTimeline(i.timeline);
 
@@ -1397,28 +1398,143 @@ function renderDetalheRecebimentos(recebimentos) {
 
 function renderDetalheDespesas(despesas) {
   const tbody = document.getElementById('det-despesas-list-body');
-  if (!despesas || despesas.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhuma despesa cadastrada.</td></tr>`;
+  if (tbody) {
+    if (!despesas || despesas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">Nenhuma despesa cadastrada.</td></tr>`;
+    } else {
+      tbody.innerHTML = despesas.map(d => {
+        const val = formatCurrency(d.valor);
+        const venc = formatDate(d.vencimento);
+        
+        let badgeClass = 'badge-disponivel';
+        if (d.status === 'Pago') badgeClass = 'badge-disponivel';
+        if (d.status === 'Vencido') badgeClass = 'badge-manutencao';
+        if (d.status === 'A Vencer') badgeClass = 'badge-reservado';
+        if (d.status === 'Cancelado') badgeClass = 'badge-inativo';
+
+        return `
+          <tr>
+            <td><strong>${d.categoria}</strong></td>
+            <td>${d.responsavel}</td>
+            <td>${val}</td>
+            <td>${venc}</td>
+            <td><span class="badge ${badgeClass}">${d.status}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Populate new dedicated tab and update badge count
+  const newTbody = document.getElementById('det-tab-despesas-list-body');
+  const badgeDetDespesas = document.getElementById('badge-det-despesas');
+  
+  if (badgeDetDespesas) {
+    badgeDetDespesas.textContent = despesas ? despesas.length : 0;
+  }
+
+  if (newTbody) {
+    if (!despesas || despesas.length === 0) {
+      newTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma despesa ou obrigação cadastrada para este imóvel.</td></tr>`;
+    } else {
+      newTbody.innerHTML = despesas.map(d => {
+        const val = formatCurrency(d.valor);
+        const venc = formatDate(d.vencimento);
+        const comp = d.competencia ? formatDate(d.competencia).substring(3) : '-';
+        
+        let badgeClass = 'badge-disponivel';
+        if (d.status === 'Pago') badgeClass = 'badge-disponivel';
+        if (d.status === 'Vencido') badgeClass = 'badge-manutencao';
+        if (d.status === 'A Vencer') badgeClass = 'badge-reservado';
+        if (d.status === 'Cancelado') badgeClass = 'badge-inativo';
+
+        // Redirect action to despesas module passing ID to open details
+        const acoesHtml = `
+          <a href="/despesas?id=${d.id}" class="btn btn-secondary btn-icon" style="height:28px; width:28px; font-size:12px; display:inline-flex; align-items:center; justify-content:center;" title="Visualizar Detalhes"><i class="fa-solid fa-eye"></i></a>
+        `;
+
+        return `
+          <tr>
+            <td><strong>${d.categoria}</strong></td>
+            <td>${d.responsavel}</td>
+            <td>${val}</td>
+            <td>${venc}</td>
+            <td>${comp}</td>
+            <td><span class="badge ${badgeClass}">${d.status}</span></td>
+            <td style="text-align:center;">${acoesHtml}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function renderProximosVencimentos(despesas) {
+  const container = document.getElementById('det-vencimentos-grid');
+  const countBadge = document.getElementById('det-vencimentos-count-badge');
+  if (!container) return;
+
+  // Filtrar apenas despesas a vencer ou vencidas, ordenar por vencimento crescente
+  const proximas = (despesas || [])
+    .filter(d => d.status === 'A Vencer' || d.status === 'Vencido')
+    .sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento))
+    .slice(0, 3); // exibir os próximos 3 vencimentos apenas para não poluir visualmente
+
+  if (countBadge) {
+    const pendentesCount = (despesas || []).filter(d => d.status === 'A Vencer' || d.status === 'Vencido').length;
+    countBadge.textContent = `${pendentesCount} despesa${pendentesCount !== 1 ? 's' : ''} pendente${pendentesCount !== 1 ? 's' : ''}`;
+    countBadge.className = `badge ${pendentesCount > 0 ? 'badge-manutencao' : 'badge-disponivel'}`;
+  }
+
+  if (proximas.length === 0) {
+    container.parentNode.innerHTML = `
+      <div style="text-align:center; padding: 24px; color: var(--color-text-muted); background: var(--color-bg-base); border-radius: 8px; border: 1px solid var(--color-border); font-size: 13px;" id="det-vencimentos-grid">
+        <i class="fa-regular fa-circle-check" style="font-size: 24px; color: var(--color-success); margin-bottom: 8px; display: block;"></i>
+        Parabéns! Nenhuma despesa pendente ou vencendo para este imóvel.
+      </div>
+    `;
     return;
   }
 
-  tbody.innerHTML = despesas.map(d => {
-    const val = formatCurrency(d.valor);
+  // Se o container pai tinha a mensagem de sucesso acima, precisamos restaurar a div de grid
+  const parent = container.parentNode;
+  if (!parent.querySelector('#det-vencimentos-grid')) {
+    parent.innerHTML = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;" id="det-vencimentos-grid"></div>`;
+  }
+  const grid = document.getElementById('det-vencimentos-grid');
+
+  grid.innerHTML = proximas.map(d => {
+    const valor = formatCurrency(d.valor);
     const venc = formatDate(d.vencimento);
+    const diasRestantes = Math.ceil((new Date(d.vencimento) - new Date()) / (1000 * 60 * 60 * 24));
     
-    let badgeClass = 'badge-disponivel';
-    if (d.status === 'Pago') badgeClass = 'badge-disponivel';
-    if (d.status === 'Vencido') badgeClass = 'badge-manutencao';
-    if (d.status === 'A Vencer') badgeClass = 'badge-reservado';
+    let urgenciaStyle = 'border-left: 4px solid var(--color-success);';
+    let labelRestantes = `${diasRestantes} dias restantes`;
+    if (d.status === 'Vencido') {
+      urgenciaStyle = 'border-left: 4px solid var(--color-error); background: #fef2f2;';
+      labelRestantes = 'Vencido!';
+    } else if (diasRestantes <= 3) {
+      urgenciaStyle = 'border-left: 4px solid var(--color-warning); background: #fffbeb;';
+      labelRestantes = diasRestantes === 0 ? 'Vence hoje!' : `Vence em ${diasRestantes} dias!`;
+    }
 
     return `
-      <tr>
-        <td><strong>${d.categoria}</strong></td>
-        <td>${d.responsavel}</td>
-        <td>${val}</td>
-        <td>${venc}</td>
-        <td><span class="badge ${badgeClass}">${d.status}</span></td>
-      </tr>
+      <div class="animate-fade-in" style="padding: 12px 16px; border-radius: 8px; border: 1px solid var(--color-border); display: flex; flex-direction: column; justify-content: space-between; gap: 8px; ${urgenciaStyle}">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <strong style="font-size:13px; color:var(--color-text-main); display:block;">${d.categoria}</strong>
+            <span style="font-size:10px; color:var(--color-text-muted);">Para: ${d.responsavel}</span>
+          </div>
+          <span class="badge badge-${d.status.toLowerCase().replace(' ', '-')}" style="font-size:9px; padding:2px 6px;">${d.status}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:4px;">
+          <div>
+            <span style="font-size:10px; color:var(--color-text-muted); display:block;">Vencimento: ${venc}</span>
+            <span style="font-size:11px; font-weight:700; color:${d.status === 'Vencido' ? 'var(--color-error)' : 'var(--color-text-main)'};">${labelRestantes}</span>
+          </div>
+          <strong style="font-size:14px; color:var(--color-primary);">${valor}</strong>
+        </div>
+      </div>
     `;
   }).join('');
 }

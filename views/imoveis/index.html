@@ -1883,6 +1883,7 @@
               <button class="exec-tab-btn" data-tab="det-locatarios"><i class="fi fi-rr-users"></i> Locatários <span class="exec-tab-badge" id="badge-det-locatarios">0</span></button>
               <button class="exec-tab-btn" data-tab="det-contratos"><i class="fi fi-rr-document-signed"></i> Contratos <span class="exec-tab-badge" id="badge-det-contratos">0</span></button>
               <button class="exec-tab-btn" data-tab="det-financeiro"><i class="fi fi-rr-money-bill-wave"></i> Financeiro</button>
+              <button class="exec-tab-btn" data-tab="det-despesas"><i class="fi fi-rr-document-signed"></i> Despesas e Obrigações <span class="exec-tab-badge" id="badge-det-despesas">0</span></button>
               <button class="exec-tab-btn" data-tab="det-documentos"><i class="fi fi-rr-document"></i> Documentos <span class="exec-tab-badge" id="badge-det-documentos">0</span></button>
               <button class="exec-tab-btn" data-tab="det-fotos"><i class="fi fi-rr-picture"></i> Fotos <span class="exec-tab-badge" id="badge-det-fotos">0</span></button>
               <button class="exec-tab-btn" data-tab="det-manutencoes"><i class="fi fi-rr-tool"></i> Manutenções <span class="exec-tab-badge" id="badge-det-manutencoes">0</span></button>
@@ -1937,6 +1938,19 @@
                       <span class="exec-kv-label">Aceita Pet</span>
                       <span class="exec-kv-value" id="det-pet">-</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card: Próximos Vencimentos de Despesas -->
+              <div class="exec-content-card" style="margin-top: 24px;">
+                <div class="exec-content-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                  <span><i class="fi fi-rr-clock" style="color: var(--color-warning);"></i> Próximos Vencimentos de Despesas</span>
+                  <span class="badge badge-reservado" id="det-vencimentos-count-badge" style="font-size:10px; padding: 4px 8px;">0 a vencer</span>
+                </div>
+                <div id="det-vencimentos-container">
+                  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;" id="det-vencimentos-grid">
+                    <!-- Populated dynamically -->
                   </div>
                 </div>
               </div>
@@ -2109,6 +2123,34 @@
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.9 Tab Pane: Despesas e Obrigações -->
+            <div class="tab-pane" id="tab-det-despesas">
+              <div class="exec-content-card animate-fade-in">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                  <div class="exec-content-title" style="margin-bottom:0;"><i class="fi fi-rr-document-signed" style="color: var(--color-primary);"></i> Despesas e Obrigações do Imóvel</div>
+                  <a href="/despesas" class="btn btn-primary btn-icon" style="height:36px; font-size:11px; display:inline-flex; align-items:center; gap:6px;"><i class="fi fi-rr-edit"></i> Gerenciar Despesas</a>
+                </div>
+                <div class="table-container">
+                  <table class="table" style="width:100%;">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Responsável</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Competência</th>
+                        <th>Situação</th>
+                        <th style="text-align: center;">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody id="det-tab-despesas-list-body">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

@@ -156,6 +156,50 @@
           </div>
         </div>
 
+        <!-- CENTRAL DE PENDÊNCIAS: DESPESAS -->
+        <section class="dashboard-grid grid-3" style="margin-bottom: 24px; background: rgba(254, 243, 199, 0.35); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px;" id="central-pendencias-container">
+          <div style="grid-column: span 3; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #d97706; font-size: 16px;"></i>
+              <h3 style="font-size:12px; font-weight:700; color: #78350f; margin:0; text-transform:uppercase; letter-spacing:0.5px;">Central de Pendências Financeiras (Despesas)</h3>
+            </div>
+            <span style="font-size:11px; color:#92400e; font-weight:600; cursor:pointer; text-decoration:underline;" onclick="abrirModalPendencias('todas')">Visualizar Todas</span>
+          </div>
+
+          <!-- Card: Vencidas -->
+          <div class="card glass card-indicator" style="background:#fef2f2; border: 1px solid #fca5a5; cursor:pointer; min-height: 80px;" onclick="abrirModalPendencias('vencidas')">
+            <div class="card-icon" style="background:#fee2e2; border-radius: 8px; width: 40px; height: 40px; display:flex; align-items:center; justify-content:center;">
+              <i class="fa-solid fa-circle-exclamation" style="color:#ef4444; font-size: 16px;"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label" style="color:#991b1b; font-weight:600; font-size: 11px;">Despesas Vencidas</span>
+              <h3 class="card-value font-numeric" id="pendencias-vencidas" style="color:#991b1b; font-size: 22px; margin: 4px 0 0 0;">0</h3>
+            </div>
+          </div>
+
+          <!-- Card: Vencem na Semana -->
+          <div class="card glass card-indicator" style="background:#fffbeb; border: 1px solid #fde68a; cursor:pointer; min-height: 80px;" onclick="abrirModalPendencias('semana')">
+            <div class="card-icon" style="background:#fef3c7; border-radius: 8px; width: 40px; height: 40px; display:flex; align-items:center; justify-content:center;">
+              <i class="fa-solid fa-calendar-day" style="color:#f59e0b; font-size: 16px;"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label" style="color:#92400e; font-weight:600; font-size: 11px;">Vencem na Semana</span>
+              <h3 class="card-value font-numeric" id="pendencias-semana" style="color:#92400e; font-size: 22px; margin: 4px 0 0 0;">0</h3>
+            </div>
+          </div>
+
+          <!-- Card: Vencem no Mês -->
+          <div class="card glass card-indicator" style="background:#eff6ff; border: 1px solid #bfdbfe; cursor:pointer; min-height: 80px;" onclick="abrirModalPendencias('mes')">
+            <div class="card-icon" style="background:#dbeafe; border-radius: 8px; width: 40px; height: 40px; display:flex; align-items:center; justify-content:center;">
+              <i class="fa-solid fa-calendar-days" style="color:#3b82f6; font-size: 16px;"></i>
+            </div>
+            <div class="card-details">
+              <span class="card-label" style="color:#1e40af; font-weight:600; font-size: 11px;">Vencem no Mês</span>
+              <h3 class="card-value font-numeric" id="pendencias-mes" style="color:#1e40af; font-size: 22px; margin: 4px 0 0 0;">0</h3>
+            </div>
+          </div>
+        </section>
+
         <!-- FIRST SECTION: CARDS RESUMO (General) -->
         <section class="dashboard-grid grid-4">
           <div class="card glass card-indicator">
@@ -302,6 +346,41 @@
         </section>
 
       </main>
+    </div>
+  </div>
+
+  <!-- MODAL: LISTAGEM DE PENDÊNCIAS FINANCEIRAS -->
+  <div class="modal" id="modal-pendencias">
+    <div class="modal-content glass" style="max-width: 780px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h3 id="modal-pendencias-title" style="margin:0;">Pendências Financeiras</h3>
+          <span class="badge badge-manutencao" id="modal-pendencias-count">0</span>
+        </div>
+        <span class="modal-close" id="btn-close-pendencias">&times;</span>
+      </div>
+      <div class="modal-body" style="padding-top:16px;">
+        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+          <table class="table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Imóvel</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+                <th>Responsável</th>
+                <th style="text-align: center;">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="pendencias-list-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--color-border); padding-top: 16px;">
+        <button type="button" class="btn btn-secondary" id="btn-fechar-pendencias" style="background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main);">Fechar</button>
+      </div>
     </div>
   </div>
 
