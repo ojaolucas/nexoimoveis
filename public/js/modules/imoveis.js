@@ -248,11 +248,11 @@ function setupEventListeners() {
 
   // Interative Dropzone Click & Drag Event Listeners
   if (dropzoneEl && fileInputEl) {
-    dropzoneEl.addEventListener('click', (e) => {
-      // Avoid triggering multiple click events if user clicks directly on hidden input
-      if (e.target !== fileInputEl) {
-        fileInputEl.click();
-      }
+    dropzoneEl.addEventListener('click', () => {
+      fileInputEl.click();
+    });
+    fileInputEl.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
 
     // Drag events
@@ -506,10 +506,11 @@ function setupEventListeners() {
   const contratoInput = document.getElementById('contrato_pdf');
   const contratoDropzone = document.getElementById('contrato-pdf-dropzone');
   if (contratoInput && contratoDropzone) {
-    contratoDropzone.addEventListener('click', (e) => {
-      if (e.target !== contratoInput) {
-        contratoInput.click();
-      }
+    contratoDropzone.addEventListener('click', () => {
+      contratoInput.click();
+    });
+    contratoInput.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
 
     ['dragenter', 'dragover'].forEach(eventName => {
