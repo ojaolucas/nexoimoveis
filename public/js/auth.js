@@ -5,6 +5,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginForm) {
     loginForm.addEventListener('submit', handleLoginSubmit);
   }
+
+  const btnToggle = document.getElementById('btn-toggle-password');
+  const inputSenha = document.getElementById('senha');
+  const iconToggle = document.getElementById('password-toggle-icon');
+
+  if (btnToggle && inputSenha && iconToggle) {
+    btnToggle.addEventListener('click', () => {
+      const type = inputSenha.getAttribute('type') === 'password' ? 'text' : 'password';
+      inputSenha.setAttribute('type', type);
+      
+      // Alternar classe do ícone
+      if (type === 'text') {
+        iconToggle.className = 'fi fi-rr-eye-crossed';
+      } else {
+        iconToggle.className = 'fi fi-rr-eye';
+      }
+    });
+  }
 });
 
 async function handleLoginSubmit(event) {

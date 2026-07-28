@@ -167,15 +167,26 @@
 
         <div class="form-group" style="text-align: left;">
           <label class="form-label" for="senha">Senha</label>
-          <input 
-            type="password" 
-            id="senha" 
-            name="senha" 
-            class="form-control" 
-            placeholder="Digite sua senha" 
-            required
-            autocomplete="current-password"
-          >
+          <div style="position: relative; display: flex; align-items: center;">
+            <input 
+              type="password" 
+              id="senha" 
+              name="senha" 
+              class="form-control" 
+              placeholder="Digite sua senha" 
+              required
+              autocomplete="current-password"
+              style="padding-right: 40px; width: 100%;"
+            >
+            <button 
+              type="button" 
+              id="btn-toggle-password" 
+              style="position: absolute; right: 12px; background: transparent; border: none; padding: 6px; cursor: pointer; color: var(--color-text-muted); display: flex; align-items: center; justify-content: center;"
+              title="Mostrar/Ocultar Senha"
+            >
+              <i class="fi fi-rr-eye" id="password-toggle-icon" style="font-size: 16px;"></i>
+            </button>
+          </div>
         </div>
 
         <div class="form-options">
