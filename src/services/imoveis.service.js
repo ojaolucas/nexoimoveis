@@ -302,11 +302,14 @@ async function adicionarDocumento(imovelId, documentData, file, responsavelUser,
     throw new Error('Limite total de armazenamento excedido. O limite acumulado por imóvel é de 500 MB.');
   }
 
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'imoveis');
+
   const doc = await imoveisRepository.addDocument(
     imovelId,
     tipo_documento,
     file.originalname,
-    `/uploads/imoveis/${file.filename}`,
+    storageUrl,
     data_emissao,
     data_vencimento
   );
@@ -372,7 +375,10 @@ async function adicionarFoto(imovelId, file, responsavelUser, ip) {
     throw new Error('Limite total de armazenamento excedido. O limite acumulado por imóvel é de 500 MB.');
   }
 
-  const foto = await imoveisRepository.addPhoto(imovelId, `/uploads/imoveis/${file.filename}`);
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'imoveis');
+
+  const foto = await imoveisRepository.addPhoto(imovelId, storageUrl);
 
   await Promise.all([
     auditoriaService.registrarLog({

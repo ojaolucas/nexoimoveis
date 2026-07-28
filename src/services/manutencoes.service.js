@@ -317,15 +317,16 @@ async function adicionarAnexo(manutencaoId, payload, file, responsavelUser, ip) 
   const size = file.size;
 
   if (isImage && size > 10 * 1024 * 1024) {
-    fs.unlinkSync(file.path);
     throw new Error('Imagens de anexo não podem exceder 10 MB.');
   }
   if (extension === '.pdf' && size > 20 * 1024 * 1024) {
-    fs.unlinkSync(file.path);
     throw new Error('Documentos em formato PDF não podem exceder 20 MB.');
   }
 
-  const doc = await manutencoesRepository.addAnexo(manutencaoId, tipo_anexo, file.originalname, `/uploads/manutencoes/${file.filename}`);
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'manutencoes');
+
+  const doc = await manutencoesRepository.addAnexo(manutencaoId, tipo_anexo, file.originalname, storageUrl);
 
   await Promise.all([
     manutencoesRepository.addTimeline(

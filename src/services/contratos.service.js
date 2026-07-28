@@ -508,11 +508,14 @@ async function adicionarDocumento(contratoId, documentData, file, responsavelUse
   const { tipo_documento } = documentData;
   if (!tipo_documento) throw new Error('Tipo de documento é obrigatório.');
 
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'contratos');
+
   const doc = await contratosRepository.addDocument(
     contratoId,
     tipo_documento,
     file.originalname,
-    `/uploads/contratos/${file.filename}`
+    storageUrl
   );
 
   await Promise.all([

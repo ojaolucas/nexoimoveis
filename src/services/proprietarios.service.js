@@ -286,11 +286,14 @@ async function adicionarDocumento(proprietarioId, tipoDocumento, file, responsav
   const prop = await proprietariosRepository.findById(proprietarioId);
   if (!prop) throw new Error('Proprietário não encontrado.');
 
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'proprietarios');
+
   const doc = await proprietariosRepository.addDocument(
     proprietarioId,
     tipoDocumento,
     file.originalname,
-    `/uploads/proprietarios/${file.filename}`
+    storageUrl
   );
 
   // Audit upload

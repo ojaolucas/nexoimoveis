@@ -409,15 +409,16 @@ async function registrarPagamento(id, payload, file, responsavelUser, ip) {
     const size = file.size;
 
     if (isImage && size > 10 * 1024 * 1024) {
-      fs.unlinkSync(file.path);
       throw new Error('Imagens de comprovante não podem exceder 10 MB.');
     }
     if (extension === '.pdf' && size > 20 * 1024 * 1024) {
-      fs.unlinkSync(file.path);
       throw new Error('Comprovantes em formato PDF não podem exceder 20 MB.');
     }
 
-    const doc = await despesasRepository.addComprovante(id, file.originalname, `/uploads/despesas/${file.filename}`);
+    const { salvarArquivo } = require('../config/storage');
+    const storageUrl = await salvarArquivo(file, 'despesas');
+
+    const doc = await despesasRepository.addComprovante(id, file.originalname, storageUrl);
     promises.push(
       despesasRepository.addTimeline(
         id,
@@ -483,15 +484,16 @@ async function adicionarComprovante(despesaId, file, responsavelUser, ip) {
   const size = file.size;
 
   if (isImage && size > 10 * 1024 * 1024) {
-    fs.unlinkSync(file.path);
     throw new Error('Imagens de comprovante não podem exceder 10 MB.');
   }
   if (extension === '.pdf' && size > 20 * 1024 * 1024) {
-    fs.unlinkSync(file.path);
     throw new Error('Comprovantes em formato PDF não podem exceder 20 MB.');
   }
 
-  const doc = await despesasRepository.addComprovante(despesaId, file.originalname, `/uploads/despesas/${file.filename}`);
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'despesas');
+
+  const doc = await despesasRepository.addComprovante(despesaId, file.originalname, storageUrl);
 
   await Promise.all([
     despesasRepository.addTimeline(

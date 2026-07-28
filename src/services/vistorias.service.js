@@ -289,19 +289,20 @@ async function adicionarFoto(vistoriaId, payload, file, responsavelUser, ip) {
   const size = file.size;
 
   if (!isImage) {
-    fs.unlinkSync(file.path);
     throw new Error('Apenas formatos de imagem JPG, JPEG e PNG são aceitos.');
   }
   if (size > 10 * 1024 * 1024) {
-    fs.unlinkSync(file.path);
     throw new Error('A imagem de vistoria não pode exceder 10 MB.');
   }
+
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'vistorias');
 
   const doc = await vistoriasRepository.addFoto(
     vistoriaId, 
     item_id || null, 
     tipo_foto, 
-    `/uploads/vistorias/${file.filename}`
+    storageUrl
   );
 
   await Promise.all([

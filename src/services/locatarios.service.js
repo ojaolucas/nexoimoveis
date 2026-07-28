@@ -285,11 +285,14 @@ async function adicionarDocumento(locatarioId, tipoDocumento, file, responsavelU
   const loc = await locatariosRepository.findById(locatarioId);
   if (!loc) throw new Error('Locatário não encontrado.');
 
+  const { salvarArquivo } = require('../config/storage');
+  const storageUrl = await salvarArquivo(file, 'locatarios');
+
   const doc = await locatariosRepository.addDocument(
     locatarioId,
     tipoDocumento,
     file.originalname,
-    `/uploads/locatarios/${file.filename}`
+    storageUrl
   );
 
   // Audit

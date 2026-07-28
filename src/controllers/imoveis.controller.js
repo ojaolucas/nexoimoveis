@@ -69,15 +69,13 @@ async function cadastrar(req, res, next) {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     if (req.file) {
-      req.body.foto_principal = `/uploads/imoveis/${req.file.filename}`;
+      const { salvarArquivo } = require('../config/storage');
+      req.body.foto_principal = await salvarArquivo(req.file, 'imoveis');
     }
 
     const imovel = await imoveisService.cadastrar(req.body, responsavelUser, ip);
     res.status(201).json({ success: true, message: 'Imóvel cadastrado com sucesso.', data: imovel });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     res.status(400).json({ success: false, message: error.message });
   }
 }
@@ -89,15 +87,13 @@ async function atualizar(req, res, next) {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     if (req.file) {
-      req.body.foto_principal = `/uploads/imoveis/${req.file.filename}`;
+      const { salvarArquivo } = require('../config/storage');
+      req.body.foto_principal = await salvarArquivo(req.file, 'imoveis');
     }
 
     const imovel = await imoveisService.atualizar(id, req.body, responsavelUser, ip);
     res.status(200).json({ success: true, message: 'Imóvel atualizado com sucesso.', data: imovel });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     res.status(400).json({ success: false, message: error.message });
   }
 }
