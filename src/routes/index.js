@@ -26,11 +26,10 @@ router.get('/proprietarios', requireAuth, (req, res) => res.redirect('/pessoas')
 router.get('/locatarios', requireAuth, (req, res) => res.redirect('/pessoas'));
 router.get('/contratos', requireAuth, (req, res) => res.redirect('/imoveis'));
 router.get('/recebimentos', requireAuth, (req, res) => res.redirect('/imoveis'));
-router.get('/manutencoes', requireAuth, (req, res) => res.redirect('/imoveis'));
 router.get('/vistorias', requireAuth, (req, res) => res.redirect('/imoveis'));
 
 // Active modules views
-const modules = ['usuarios', 'imoveis', 'pessoas', 'relatorios', 'auditoria', 'calendario', 'notificacoes', 'despesas'];
+const modules = ['usuarios', 'imoveis', 'pessoas', 'relatorios', 'auditoria', 'calendario', 'notificacoes', 'despesas', 'manutencoes'];
 
 modules.forEach(mod => {
   router.get(`/${mod}`, requireAuth, (req, res) => {
