@@ -74,18 +74,74 @@ function updateSidebarUserInfo(user) {
 function initGlobalEvents() {
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
+    logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      if (confirm('Deseja realmente sair do sistema?')) {
-        try {
-          const res = await api.post('/api/auth/logout');
-          if (res.success) {
-            window.location.href = '/login';
-          }
-        } catch (err) {
-          console.error('Erro ao fazer logout:', err);
-        }
-      }
+      exibirModalConfirmacaoLogout();
     });
   }
+}
+
+function exibirModalConfirmacaoLogout() {
+  // Evitar duplicações
+  if (document.getElementById('modal-confirm-logout')) return;
+
+  const modalHtml = `
+    <div id="modal-confirm-logout" class="modal active" style="z-index: 9999;">
+      <div class="modal-content glass" style="max-width: 400px; padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-lg); background-color: var(--color-bg-card);">
+        <div style="background-color: var(--color-error-light); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <i class="fi fi-rr-sign-out-alt" style="font-size: 26px; color: var(--color-error);"></i>
+        </div>
+        <div>
+          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--color-text-main);">Confirmar Saída</h3>
+          <p style="margin: 8px 0 0 0; font-size: 13px; color: var(--color-text-muted); line-height: 1.5;">Deseja realmente encerrar a sua sessão e sair do sistema?</p>
+        </div>
+        <div style="display: flex; width: 100%; gap: 12px; margin-top: 8px;">
+          <button id="btn-logout-cancel" class="btn btn-secondary" style="flex: 1; height: 40px; background-color: transparent; border: 1px solid var(--color-border); color: var(--color-text-main); font-weight: 600;">
+            Cancelar
+          </button>
+          <button id="btn-logout-confirm" class="btn" style="flex: 1; height: 40px; background-color: var(--color-error); border: none; color: #ffffff; font-weight: 600; cursor: pointer; border-radius: var(--border-radius-md); transition: opacity var(--transition-fast);">
+            Sair
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  const modal = document.getElementById('modal-confirm-logout');
+  const btnCancel = document.getElementById('btn-logout-cancel');
+  const btnConfirm = document.getElementById('btn-logout-confirm');
+
+  // Adicionar efeito de hover suave no botão de sair
+  btnConfirm.addEventListener('mouseenter', () => btnConfirm.style.opacity = '0.9');
+  btnConfirm.addEventListener('mouseleave', () => btnConfirm.style.opacity = '1');
+
+  const fecharModal = () => {
+    modal.classList.remove('active');
+    setTimeout(() => modal.remove(), 200); // tempo de transição
+  };
+
+  btnCancel.addEventListener('click', fecharModal);
+
+  // Fechar também se clicar fora da modal
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) fecharModal();
+  });
+
+  btnConfirm.addEventListener('click', async () => {
+    btnConfirm.disabled = true;
+    btnConfirm.textContent = 'Saindo...';
+    try {
+      const res = await api.post('/api/auth/logout');
+      if (res.success) {
+        window.location.href = '/login';
+      } else {
+        window.location.href = '/login';
+      }
+    } catch (err) {
+      console.error('Erro ao fazer logout:', err);
+      window.location.href = '/login';
+    }
+  });
 }
