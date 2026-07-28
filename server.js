@@ -9,13 +9,17 @@ const PORT = process.env.PORT || 3000;
 // Start the server
 async function startServer() {
   try {
-    // 1. Test database connection
+    // 1. Test database connection resiliently
     logger.info('Testing database connection...');
-    const dbTest = await db.query('SELECT NOW()');
-    if (dbTest && dbTest.rows.length > 0) {
-      logger.info('Database connection verified successfully.', { time: dbTest.rows[0].now });
-    } else {
-      throw new Error('Database test query returned empty results.');
+    try {
+      const dbTest = await db.query('SELECT NOW()');
+      if (dbTest && dbTest.rows.length > 0) {
+        logger.info('Database connection verified successfully.', { time: dbTest.rows[0].now });
+      } else {
+        logger.warn('Database connection test returned empty rows, but proceeding...');
+      }
+    } catch (dbErr) {
+      logger.warn(`Database connection test failed: ${dbErr.message}. Server is starting but database queries may fail until network is stable.`);
     }
 
     // 2. Initialize scheduled cron jobs
@@ -29,6 +33,13 @@ async function startServer() {
     // Clean shutdown handlers
     const shutdown = async (signal) => {
       logger.info(`Received ${signal}. Shutting down server gracefully...`);
+      
+      // Force exit after 1 second if graceful shutdown hangs (common in dev watch mode)
+      setTimeout(() => {
+        logger.warn('Graceful shutdown timed out. Forcing process exit.');
+        process.exit(0);
+      }, 1000);
+
       server.close(() => {
         logger.info('HTTP server closed.');
         db.pool.end(() => {
