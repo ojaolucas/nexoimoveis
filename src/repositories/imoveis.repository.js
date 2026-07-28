@@ -288,7 +288,7 @@ async function getCardsStats() {
       SUM(CASE WHEN status = 'Disponível' THEN 1 ELSE 0 END) AS disponiveis,
       SUM(CASE WHEN status = 'Alugado' THEN 1 ELSE 0 END) AS alugados,
       SUM(CASE WHEN status = 'Reservado' THEN 1 ELSE 0 END) AS reservados,
-      SUM(CASE WHEN status = 'Manutenção' THEN 1 ELSE 0 END) AS manutencao
+      SUM(CASE WHEN status = 'Em Manutenção' THEN 1 ELSE 0 END) AS manutencao
     FROM imoveis
     WHERE status != 'Inativo'
   `;
