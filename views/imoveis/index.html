@@ -580,7 +580,7 @@
       padding: 30px 40px;
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1280px) {
       .exec-layout-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -735,11 +735,12 @@
     }
 
     /* Sticky Tab Navigation */
+    /* Sticky Tab Navigation with smooth horizontal scrolling */
     .exec-sticky-tabs {
       position: sticky;
       top: 0;
       z-index: 90;
-      background-color: rgba(255, 255, 255, 0.85);
+      background-color: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--color-border);
@@ -747,10 +748,20 @@
       gap: 8px;
       padding: 0 8px;
       margin-top: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    .exec-sticky-tabs::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
     }
 
     [data-theme="dark"] .exec-sticky-tabs {
-      background-color: rgba(30, 41, 59, 0.85);
+      background-color: rgba(30, 41, 59, 0.95);
     }
 
     .exec-tab-btn {
@@ -767,6 +778,8 @@
       align-items: center;
       gap: 6px;
       transition: all var(--transition-fast);
+      white-space: nowrap; /* Prevent button text wrap */
+      flex-shrink: 0; /* Prevent button from squeezing */
     }
 
     .exec-tab-btn:hover {
